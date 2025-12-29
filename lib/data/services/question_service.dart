@@ -52,6 +52,59 @@ class QuestionService {
     }
   }
 
+  /// Fetches questions by category
+  Future<List<QuestionModel>> getQuestionsByCategory(
+    QuestionCategory category, {
+    bool activeOnly = true,
+  }) async {
+    try {
+      Query<Map<String, dynamic>> query = _questionsRef
+          .where('category', isEqualTo: category.name);
+      
+      if (activeOnly) {
+        query = query.where('isActive', isEqualTo: true);
+      }
+      
+      final snapshot = await query.get();
+      return snapshot.docs
+          .map((doc) => QuestionModel.fromJson(doc.data(), docId: doc.id))
+          .toList();
+    } catch (e) {
+      return _getLocalQuestions()
+          .where((q) => q.category == category && (!activeOnly || q.isActive))
+          .toList();
+    }
+  }
+
+  /// Fetches questions by difficulty and category
+  Future<List<QuestionModel>> getQuestionsByDifficultyAndCategory(
+    QuestionDifficulty difficulty,
+    QuestionCategory category, {
+    bool activeOnly = true,
+  }) async {
+    try {
+      Query<Map<String, dynamic>> query = _questionsRef
+          .where('difficulty', isEqualTo: difficulty.name)
+          .where('category', isEqualTo: category.name);
+      
+      if (activeOnly) {
+        query = query.where('isActive', isEqualTo: true);
+      }
+      
+      final snapshot = await query.get();
+      return snapshot.docs
+          .map((doc) => QuestionModel.fromJson(doc.data(), docId: doc.id))
+          .toList();
+    } catch (e) {
+      return _getLocalQuestions()
+          .where((q) => 
+              q.difficulty == difficulty && 
+              q.category == category && 
+              (!activeOnly || q.isActive))
+          .toList();
+    }
+  }
+
   /// Fetches all questions (for admin panel)
   Future<List<QuestionModel>> getAllQuestions() async {
     final snapshot = await _questionsRef.get();
