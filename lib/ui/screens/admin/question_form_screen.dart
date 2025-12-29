@@ -293,8 +293,6 @@ class _QuestionFormScreenState extends ConsumerState<QuestionFormScreen> {
               DropdownMenuItem(value: 'en', child: Text('English')),
               DropdownMenuItem(value: 'ar', child: Text('Arabic')),
               DropdownMenuItem(value: 'ur', child: Text('Urdu')),
-              DropdownMenuItem(value: 'fr', child: Text('French')),
-              DropdownMenuItem(value: 'es', child: Text('Spanish')),
             ],
             onChanged: (val) => setState(() => _language = val!),
           ),
