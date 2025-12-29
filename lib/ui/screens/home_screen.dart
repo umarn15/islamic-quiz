@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:islamicquiz/data/models/question_model.dart';
+import 'package:islamicquiz/ui/screens/quiz/quiz_screen.dart';
 import 'package:islamicquiz/ui/screens/settings_screen.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -99,24 +101,24 @@ class _HomeScreenState extends State<HomeScreen> {
               
               _buildDifficultyCard(
                 textTheme: textTheme,
-                title: 'Beginner',
+                title: 'Easy',
                 subtitle: 'Easy questions for beginners',
                 icon: Icons.school,
                 color: Colors.green,
                 onTap: () {
-                  _navigateToQuiz('beginner');
+                  _navigateToQuiz(QuestionDifficulty.easy);
                 },
               ),
               const SizedBox(height: 12),
               
               _buildDifficultyCard(
                 textTheme: textTheme,
-                title: 'Normal',
+                title: 'Medium',
                 subtitle: 'Moderate difficulty questions',
                 icon: Icons.psychology,
                 color: colorScheme.primary,
                 onTap: () {
-                  _navigateToQuiz('normal');
+                  _navigateToQuiz(QuestionDifficulty.medium);
                 },
               ),
               const SizedBox(height: 12),
@@ -128,7 +130,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 icon: Icons.military_tech,
                 color: Colors.red,
                 onTap: () {
-                  _navigateToQuiz('hard');
+                  _navigateToQuiz(QuestionDifficulty.hard);
                 },
               ),
             ],
@@ -138,13 +140,12 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  void _navigateToQuiz(String difficulty) {
-    // TODO: Navigate to quiz screen with selected difficulty
-    // Navigator.of(context).push(
-    //   MaterialPageRoute(
-    //     builder: (context) => QuizScreen(difficulty: difficulty),
-    //   ),
-    // );
+  void _navigateToQuiz(QuestionDifficulty difficulty) {
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (context) => QuizScreen(difficulty: difficulty),
+      ),
+    );
   }
 
   Widget _buildStatCard({
