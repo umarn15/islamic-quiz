@@ -145,7 +145,6 @@ class _HomeScreenState extends State<HomeScreen> {
     //     builder: (context) => QuizScreen(difficulty: difficulty),
     //   ),
     // );
-    print('Selected difficulty: $difficulty');
   }
 
   Widget _buildStatCard({
