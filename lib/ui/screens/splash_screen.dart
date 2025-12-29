@@ -1,14 +1,17 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:islamicquiz/data/providers/shared_prefs_provider.dart';
+import 'package:islamicquiz/data/services/question_seeder.dart';
 import 'package:islamicquiz/ui/screens/home_screen.dart';
 
-class SplashScreen extends StatefulWidget {
+class SplashScreen extends ConsumerStatefulWidget {
   const SplashScreen({super.key});
 
   @override
-  State<SplashScreen> createState() => _SplashScreenState();
+  ConsumerState<SplashScreen> createState() => _SplashScreenState();
 }
 
-class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderStateMixin {
+class _SplashScreenState extends ConsumerState<SplashScreen> with SingleTickerProviderStateMixin {
   late AnimationController _controller;
   late Animation<double> _fadeAnimation;
   late Animation<double> _scaleAnimation;
@@ -32,14 +35,29 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
     
     _controller.forward();
     
-    // Navigate to home screen after 3 seconds
-    Future.delayed(const Duration(seconds: 3), () {
-      if (mounted) {
-        Navigator.of(context).pushReplacement(
-          MaterialPageRoute(builder: (context) => const HomeScreen()),
-        );
-      }
-    });
+    // Initialize app and navigate
+    _initializeAndNavigate();
+  }
+
+  Future<void> _initializeAndNavigate() async {
+    // Seed questions on first launch
+    try {
+      final prefs = ref.read(sharedPrefsProvider);
+      final seeder = QuestionSeeder(prefs: prefs);
+      await seeder.seedIfNeeded();
+    } catch (e) {
+      // Silently fail - local questions will be used as fallback
+      debugPrint('Question seeding failed: $e');
+    }
+
+    // Wait for animation to complete (minimum 3 seconds)
+    await Future.delayed(const Duration(seconds: 3));
+    
+    if (mounted) {
+      Navigator.of(context).pushReplacement(
+        MaterialPageRoute(builder: (context) => const HomeScreen()),
+      );
+    }
   }
 
   @override
