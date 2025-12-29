@@ -99,19 +99,13 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
                 
                 // Subtitle
                 const Text(
-                  'Learn & Have Fun!',
+                  'Learn Islam through interactive quizzes',
                   style: TextStyle(
-                    fontSize: 18,
+                    fontSize: 16,
                     color: Colors.white70,
                     fontWeight: FontWeight.w500,
                   ),
-                ),
-                const SizedBox(height: 50),
-                
-                // Loading Indicator
-                const CircularProgressIndicator(
-                  valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
-                ),
+                )
               ],
             ),
           ),

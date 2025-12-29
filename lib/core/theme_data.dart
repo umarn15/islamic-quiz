@@ -4,7 +4,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import '../data/providers/shared_prefs_provider.dart';
 
-const Color primaryGreen = Color(0xFF4CAF50); // Fresh green
+const Color primaryGreen = const Color(0xFF388E3C); // Fresh green
 const Color secondaryTeal = Color(0xFF00BCD4); // Bright teal
 const Color accentGold = Color(0xFFFFB300); // Warm gold
 const Color backgroundCream = Color(0xFFFFF8E1); // Soft cream
@@ -127,7 +127,7 @@ class ThemeProvider extends ChangeNotifier {
       ),
     ),
 
-    dividerColor: Colors.grey.shade700,
+    dividerColor: Colors.grey.shade400,
 
     // Icon Theme
     iconTheme: const IconThemeData(
@@ -217,7 +217,7 @@ class ThemeProvider extends ChangeNotifier {
       ),
     ),
 
-    dividerColor: Colors.grey.shade400,
+    dividerColor: Colors.grey.shade700,
 
     // Icon Theme
     iconTheme: const IconThemeData(

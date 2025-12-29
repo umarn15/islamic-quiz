@@ -90,57 +90,45 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
               const SizedBox(height: 24),
               
-              // Quiz Categories
+              // Quiz Difficulty
               Text(
-                'Choose a Category',
+                'Choose Difficulty',
                 style: textTheme.titleLarge,
               ),
               const SizedBox(height: 16),
               
-              _buildCategoryCard(
+              _buildDifficultyCard(
                 textTheme: textTheme,
-                title: 'Prophets',
-                subtitle: 'Learn about the Prophets',
-                icon: Icons.person,
-                color: colorScheme.primary,
-                onTap: () {
-                  // TODO: Navigate to Prophets quiz
-                },
-              ),
-              const SizedBox(height: 12),
-              
-              _buildCategoryCard(
-                textTheme: textTheme,
-                title: 'Quran',
-                subtitle: 'Test your Quran knowledge',
-                icon: Icons.menu_book,
-                color: colorScheme.secondary,
-                onTap: () {
-                  // TODO: Navigate to Quran quiz
-                },
-              ),
-              const SizedBox(height: 12),
-              
-              _buildCategoryCard(
-                textTheme: textTheme,
-                title: 'Pillars of Islam',
-                subtitle: 'Learn the 5 pillars',
-                icon: Icons.mosque,
-                color: colorScheme.tertiary,
-                onTap: () {
-                  // TODO: Navigate to Pillars quiz
-                },
-              ),
-              const SizedBox(height: 12),
-              
-              _buildCategoryCard(
-                textTheme: textTheme,
-                title: 'Good Deeds',
-                subtitle: 'Learn about good actions',
-                icon: Icons.favorite,
+                title: 'Beginner',
+                subtitle: 'Easy questions for beginners',
+                icon: Icons.school,
                 color: Colors.green,
                 onTap: () {
-                  // TODO: Navigate to Good Deeds quiz
+                  _navigateToQuiz('beginner');
+                },
+              ),
+              const SizedBox(height: 12),
+              
+              _buildDifficultyCard(
+                textTheme: textTheme,
+                title: 'Normal',
+                subtitle: 'Moderate difficulty questions',
+                icon: Icons.psychology,
+                color: colorScheme.primary,
+                onTap: () {
+                  _navigateToQuiz('normal');
+                },
+              ),
+              const SizedBox(height: 12),
+              
+              _buildDifficultyCard(
+                textTheme: textTheme,
+                title: 'Hard',
+                subtitle: 'Challenging questions for experts',
+                icon: Icons.military_tech,
+                color: Colors.red,
+                onTap: () {
+                  _navigateToQuiz('hard');
                 },
               ),
             ],
@@ -148,6 +136,16 @@ class _HomeScreenState extends State<HomeScreen> {
         ),
       ),
     );
+  }
+
+  void _navigateToQuiz(String difficulty) {
+    // TODO: Navigate to quiz screen with selected difficulty
+    // Navigator.of(context).push(
+    //   MaterialPageRoute(
+    //     builder: (context) => QuizScreen(difficulty: difficulty),
+    //   ),
+    // );
+    print('Selected difficulty: $difficulty');
   }
 
   Widget _buildStatCard({
@@ -180,7 +178,7 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  Widget _buildCategoryCard({
+  Widget _buildDifficultyCard({
     required TextTheme textTheme,
     required String title,
     required String subtitle,
@@ -189,40 +187,70 @@ class _HomeScreenState extends State<HomeScreen> {
     required VoidCallback onTap,
   }) {
     return Card(
+      elevation: 4,
       child: InkWell(
         onTap: onTap,
         borderRadius: BorderRadius.circular(16),
-        child: Padding(
-          padding: const EdgeInsets.all(16),
+        child: Container(
+          padding: const EdgeInsets.all(20),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(16),
+            gradient: LinearGradient(
+              colors: [
+                color.withValues(alpha: 0.1),
+                color.withValues(alpha: 0.05),
+              ],
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+            ),
+          ),
           child: Row(
             children: [
               Container(
-                width: 60,
-                height: 60,
+                width: 70,
+                height: 70,
                 decoration: BoxDecoration(
                   color: color.withValues(alpha: 0.2),
-                  borderRadius: BorderRadius.circular(12),
+                  borderRadius: BorderRadius.circular(16),
+                  border: Border.all(
+                    color: color.withValues(alpha: 0.3),
+                    width: 2,
+                  ),
                 ),
-                child: Icon(icon, size: 32, color: color),
+                child: Icon(icon, size: 36, color: color),
               ),
-              const SizedBox(width: 16),
+              const SizedBox(width: 20),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
                       title,
-                      style: textTheme.titleLarge,
+                      style: textTheme.headlineSmall?.copyWith(
+                        color: color,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
-                    const SizedBox(height: 4),
+                    const SizedBox(height: 6),
                     Text(
                       subtitle,
-                      style: textTheme.bodyMedium,
+                      style: textTheme.bodyLarge,
                     ),
                   ],
                 ),
               ),
-              const Icon(Icons.arrow_forward_ios, size: 20),
+              Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: color.withValues(alpha: 0.1),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Icon(
+                  Icons.arrow_forward_ios,
+                  size: 20,
+                  color: color,
+                ),
+              ),
             ],
           ),
         ),
