@@ -218,8 +218,9 @@ class _HomeScreenState extends State<HomeScreen> {
                   children: [
                     Text(
                       title,
-                      style: textTheme.headlineSmall?.copyWith(
+                      style: TextStyle(
                         color: color,
+                        fontSize: 22,
                         fontWeight: FontWeight.bold,
                       ),
                     ),
