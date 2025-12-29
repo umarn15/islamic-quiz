@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:islamicquiz/core/theme_data.dart';
 import 'package:islamicquiz/ui/screens/home_screen.dart';
 
 class SplashScreen extends StatefulWidget {
@@ -51,8 +50,10 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    
     return Scaffold(
-      backgroundColor: primaryGreen,
+      backgroundColor: colorScheme.primary,
       body: Center(
         child: FadeTransition(
           opacity: _fadeAnimation,
@@ -76,10 +77,10 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
                       ),
                     ],
                   ),
-                  child: const Icon(
+                  child: Icon(
                     Icons.star,
                     size: 60,
-                    color: accentGold,
+                    color: colorScheme.tertiary,
                   ),
                 ),
                 const SizedBox(height: 30),

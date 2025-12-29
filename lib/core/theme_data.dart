@@ -62,7 +62,6 @@ class ThemeProvider extends ChangeNotifier {
       backgroundColor: Color(0xFF1E1E1E),
       foregroundColor: Colors.white,
       elevation: 0,
-      centerTitle: true,
       titleTextStyle: TextStyle(
         color: Colors.white,
         fontSize: 24,
@@ -128,6 +127,8 @@ class ThemeProvider extends ChangeNotifier {
       ),
     ),
 
+    dividerColor: Colors.grey.shade700,
+
     // Icon Theme
     iconTheme: const IconThemeData(
       color: primaryGreen,
@@ -151,7 +152,6 @@ class ThemeProvider extends ChangeNotifier {
       backgroundColor: primaryGreen,
       foregroundColor: Colors.white,
       elevation: 0,
-      centerTitle: true,
       titleTextStyle: TextStyle(
         color: Colors.white,
         fontSize: 24,
@@ -216,6 +216,8 @@ class ThemeProvider extends ChangeNotifier {
         ),
       ),
     ),
+
+    dividerColor: Colors.grey.shade400,
 
     // Icon Theme
     iconTheme: const IconThemeData(

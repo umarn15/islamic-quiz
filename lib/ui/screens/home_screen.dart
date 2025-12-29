@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:islamicquiz/core/theme_data.dart';
+import 'package:islamicquiz/ui/screens/settings_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -12,6 +12,7 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     final textTheme = Theme.of(context).textTheme;
+    final colorScheme = Theme.of(context).colorScheme;
 
     return Scaffold(
       appBar: AppBar(
@@ -20,7 +21,11 @@ class _HomeScreenState extends State<HomeScreen> {
           IconButton(
             icon: const Icon(Icons.settings),
             onPressed: () {
-              // TODO: Navigate to settings
+              Navigator.of(context).push(
+                MaterialPageRoute(
+                  builder: (context) => const SettingsScreen(),
+                ),
+              );
             },
           ),
         ],
@@ -40,7 +45,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       const Icon(
                         Icons.waving_hand,
                         size: 48,
-                        color: accentGold,
+                        color: Colors.amber,
                       ),
                       const SizedBox(height: 12),
                       Text(
@@ -68,7 +73,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       icon: Icons.emoji_events,
                       label: 'Points',
                       value: '0',
-                      color: accentGold,
+                      color: Colors.amber,
                     ),
                   ),
                   const SizedBox(width: 12),
@@ -78,7 +83,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       icon: Icons.star,
                       label: 'Level',
                       value: '1',
-                      color: starYellow,
+                      color: Colors.yellow,
                     ),
                   ),
                 ],
@@ -97,7 +102,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 title: 'Prophets',
                 subtitle: 'Learn about the Prophets',
                 icon: Icons.person,
-                color: primaryGreen,
+                color: colorScheme.primary,
                 onTap: () {
                   // TODO: Navigate to Prophets quiz
                 },
@@ -109,7 +114,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 title: 'Quran',
                 subtitle: 'Test your Quran knowledge',
                 icon: Icons.menu_book,
-                color: secondaryTeal,
+                color: colorScheme.secondary,
                 onTap: () {
                   // TODO: Navigate to Quran quiz
                 },
@@ -121,7 +126,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 title: 'Pillars of Islam',
                 subtitle: 'Learn the 5 pillars',
                 icon: Icons.mosque,
-                color: accentGold,
+                color: colorScheme.tertiary,
                 onTap: () {
                   // TODO: Navigate to Pillars quiz
                 },
@@ -133,7 +138,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 title: 'Good Deeds',
                 subtitle: 'Learn about good actions',
                 icon: Icons.favorite,
-                color: successGreen,
+                color: Colors.green,
                 onTap: () {
                   // TODO: Navigate to Good Deeds quiz
                 },
