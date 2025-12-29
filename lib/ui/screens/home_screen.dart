@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:islamicquiz/ui/screens/admin/admin_panel_screen.dart';
 import 'package:islamicquiz/ui/screens/settings_screen.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -19,17 +18,6 @@ class _HomeScreenState extends State<HomeScreen> {
       appBar: AppBar(
         title: const Text('Islamic Quiz'),
         actions: [
-          IconButton(
-            icon: const Icon(Icons.admin_panel_settings),
-            onPressed: () {
-              Navigator.of(context).push(
-                MaterialPageRoute(
-                  builder: (context) => const AdminPanelScreen(),
-                ),
-              );
-            },
-            tooltip: 'Admin Panel',
-          ),
           IconButton(
             icon: const Icon(Icons.settings),
             onPressed: () {
