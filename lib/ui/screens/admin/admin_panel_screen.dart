@@ -35,7 +35,7 @@ class _AdminPanelScreenState extends ConsumerState<AdminPanelScreen> {
             icon: const Icon(Icons.more_vert),
             onSelected: (value) => _handleMenuAction(value),
             itemBuilder: (context) => [
-              const PopupMenuItem(value: 'seed', child: Text('Seed Questions')),
+              // const PopupMenuItem(value: 'seed', child: Text('Seed Questions')),
               const PopupMenuItem(value: 'clear_filters', child: Text('Clear Filters')),
             ],
           ),
