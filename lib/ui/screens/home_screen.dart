@@ -1,21 +1,29 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:islamicquiz/data/models/question_model.dart';
+import 'package:islamicquiz/data/providers/auth_provider.dart';
 import 'package:islamicquiz/ui/screens/quiz/quiz_screen.dart';
 import 'package:islamicquiz/ui/screens/settings_screen.dart';
 
-class HomeScreen extends StatefulWidget {
+class HomeScreen extends ConsumerStatefulWidget {
   const HomeScreen({super.key});
 
   @override
-  State<HomeScreen> createState() => _HomeScreenState();
+  ConsumerState<HomeScreen> createState() => _HomeScreenState();
 }
 
-class _HomeScreenState extends State<HomeScreen> {
+class _HomeScreenState extends ConsumerState<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     final textTheme = Theme.of(context).textTheme;
     final colorScheme = Theme.of(context).colorScheme;
     bool darkMode = Theme.of(context).brightness == Brightness.dark;
+
+    final userData = ref.watch(userDataProvider);
+    final points = userData.valueOrNull?.points ?? 0;
+    final level = userData.valueOrNull?.level ?? 1;
+    final displayName = userData.valueOrNull?.displayName ?? '';
+    final firstName = displayName.split(' ').first;
 
     return Scaffold(
       appBar: AppBar(
@@ -85,7 +93,9 @@ class _HomeScreenState extends State<HomeScreen> {
                 child: Column(
                   children: [
                     Text(
-                      'Assalamu Alaikum',
+                      firstName.isNotEmpty 
+                          ? 'Assalamu Alaikum, $firstName'
+                          : 'Assalamu Alaikum',
                       style: textTheme.headlineSmall?.copyWith(
                         color: Colors.white,
                         fontWeight: FontWeight.w300,
@@ -106,7 +116,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       children: [
                         _buildInlineStat(
                           icon: Icons.emoji_events_outlined,
-                          value: '0',
+                          value: points.toString(),
                           label: 'Points',
                         ),
                         Container(
@@ -117,7 +127,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         ),
                         _buildInlineStat(
                           icon: Icons.trending_up,
-                          value: '1',
+                          value: level.toString(),
                           label: 'Level',
                         ),
                       ],

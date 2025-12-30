@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:islamicquiz/data/models/question_model.dart';
+import 'package:islamicquiz/data/providers/auth_provider.dart';
 import 'package:islamicquiz/ui/screens/home_screen.dart';
 import 'quiz_screen.dart';
 
-class QuizResultScreen extends StatelessWidget {
+class QuizResultScreen extends ConsumerStatefulWidget {
   final int score;
   final int totalScore;
   final int correctAnswers;
@@ -20,9 +22,30 @@ class QuizResultScreen extends StatelessWidget {
   });
 
   @override
+  ConsumerState<QuizResultScreen> createState() => _QuizResultScreenState();
+}
+
+class _QuizResultScreenState extends ConsumerState<QuizResultScreen> {
+  bool _pointsUpdated = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _updateUserPoints();
+  }
+
+  Future<void> _updateUserPoints() async {
+    if (_pointsUpdated) return;
+    _pointsUpdated = true;
+    
+    // Add the score as points to user's account
+    await ref.read(userDataProvider.notifier).updatePoints(widget.score);
+  }
+
+  @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
-    final percentage = (score / totalScore * 100).round();
+    final percentage = (widget.score / widget.totalScore * 100).round();
     final resultData = _getResultData(percentage);
 
     return Scaffold(
@@ -71,7 +94,7 @@ class QuizResultScreen extends StatelessWidget {
               // Score Card
               Container(
                 width: double.infinity,
-                padding: const EdgeInsets.all(24),
+                padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
                   gradient: LinearGradient(
                     colors: [
@@ -94,7 +117,7 @@ class QuizResultScreen extends StatelessWidget {
                       textBaseline: TextBaseline.alphabetic,
                       children: [
                         Text(
-                          '$score',
+                          '${widget.score}',
                           style: const TextStyle(
                             fontSize: 48,
                             fontWeight: FontWeight.bold,
@@ -102,7 +125,7 @@ class QuizResultScreen extends StatelessWidget {
                           ),
                         ),
                         Text(
-                          ' / ${totalQuestions * 30}',
+                          ' / ${widget.totalQuestions * 30}',
                           style: TextStyle(
                             fontSize: 24,
                             fontWeight: FontWeight.w500,
@@ -135,13 +158,13 @@ class QuizResultScreen extends StatelessWidget {
                       children: [
                         _buildStatItem(
                           icon: Icons.check_circle,
-                          value: '$correctAnswers',
+                          value: '${widget.correctAnswers}',
                           label: 'Correct',
                           color: Colors.green,
                         ),
                         _buildStatItem(
                           icon: Icons.cancel,
-                          value: '${totalQuestions - correctAnswers}',
+                          value: '${widget.totalQuestions - widget.correctAnswers}',
                           label: 'Wrong',
                           color: Colors.red,
                         ),
@@ -156,35 +179,7 @@ class QuizResultScreen extends StatelessWidget {
                   ],
                 ),
               ),
-              const SizedBox(height: 24),
-
-              // Difficulty Badge
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                decoration: BoxDecoration(
-                  color: _getDifficultyColor(difficulty).withValues(alpha: 0.2),
-                  borderRadius: BorderRadius.circular(20),
-                ),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Icon(
-                      Icons.speed,
-                      color: _getDifficultyColor(difficulty),
-                      size: 20,
-                    ),
-                    const SizedBox(width: 8),
-                    Text(
-                      '${difficulty.name.toUpperCase()} Mode',
-                      style: TextStyle(
-                        color: _getDifficultyColor(difficulty),
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(height: 40),
+              const SizedBox(height: 32),
 
               // Action Buttons
               Row(
@@ -195,7 +190,7 @@ class QuizResultScreen extends StatelessWidget {
                         Navigator.pushReplacement(
                           context,
                           MaterialPageRoute(
-                            builder: (context) => QuizScreen(difficulty: difficulty),
+                            builder: (context) => QuizScreen(difficulty: widget.difficulty),
                           ),
                         );
                       },
@@ -230,6 +225,34 @@ class QuizResultScreen extends StatelessWidget {
                     ),
                   ),
                 ],
+              ),
+              const SizedBox(height: 18),
+
+              // Difficulty Badge
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                decoration: BoxDecoration(
+                  color: _getDifficultyColor(widget.difficulty).withValues(alpha: 0.2),
+                  borderRadius: BorderRadius.circular(20),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(
+                      Icons.speed,
+                      color: _getDifficultyColor(widget.difficulty),
+                      size: 20,
+                    ),
+                    const SizedBox(width: 8),
+                    Text(
+                      '${widget.difficulty.name.toUpperCase()} Mode',
+                      style: TextStyle(
+                        color: _getDifficultyColor(widget.difficulty),
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ],
           ),
@@ -279,7 +302,7 @@ class QuizResultScreen extends StatelessWidget {
   }
 
   void _showScoringInfo(BuildContext context) {
-    final lostPoints = totalQuestions * 30 - score;
+    final lostPoints = widget.totalQuestions * 30 - widget.score;
     
     showDialog(
       context: context,
@@ -301,7 +324,7 @@ class QuizResultScreen extends StatelessWidget {
               '⏱️ Minimum 14 points per correct answer',
               style: TextStyle(height: 1.6),
             ),
-            if (correctAnswers == totalQuestions && lostPoints > 0) ...[
+            if (widget.correctAnswers == widget.totalQuestions && lostPoints > 0) ...[
               const SizedBox(height: 16),
               Container(
                 padding: const EdgeInsets.all(12),

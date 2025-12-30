@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:islamicquiz/core/theme_data.dart';
+import 'package:islamicquiz/data/providers/auth_provider.dart';
+import 'package:islamicquiz/data/services/auth_service.dart';
+import 'package:islamicquiz/ui/screens/auth/login_screen.dart';
 
 class SettingsScreen extends ConsumerWidget {
   const SettingsScreen({super.key});
@@ -169,6 +172,95 @@ class SettingsScreen extends ConsumerWidget {
                   ),
                 ),
               ),
+              
+              const SizedBox(height: 24),
+              
+              // Account Section
+              Text(
+                'Account',
+                style: textTheme.titleLarge?.copyWith(
+                  color: colorScheme.primary,
+                ),
+              ),
+              const SizedBox(height: 16),
+              
+              Card(
+                child: Padding(
+                  padding: const EdgeInsets.all(16),
+                  child: Column(
+                    children: [
+                      // User info
+                      Consumer(
+                        builder: (context, ref, _) {
+                          final userData = ref.watch(userDataProvider);
+                          final user = userData.valueOrNull;
+                          
+                          return Row(
+                            children: [
+                              CircleAvatar(
+                                backgroundColor: colorScheme.primary.withValues(alpha: 0.1),
+                                child: Icon(
+                                  Icons.person,
+                                  color: colorScheme.primary,
+                                ),
+                              ),
+                              const SizedBox(width: 16),
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      user?.displayName ?? 'User',
+                                      style: textTheme.titleMedium,
+                                    ),
+                                    Text(
+                                      user?.email ?? '',
+                                      style: textTheme.bodyMedium?.copyWith(
+                                        color: colorScheme.onSurfaceVariant,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ],
+                          );
+                        },
+                      ),
+                      const Divider(height: 32),
+                      // Logout button
+                      InkWell(
+                        onTap: () => _showLogoutDialog(context, ref),
+                        borderRadius: BorderRadius.circular(8),
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(vertical: 8),
+                          child: Row(
+                            children: [
+                              Icon(
+                                Icons.logout,
+                                color: colorScheme.error,
+                              ),
+                              const SizedBox(width: 16),
+                              Expanded(
+                                child: Text(
+                                  'Sign Out',
+                                  style: textTheme.titleMedium?.copyWith(
+                                    color: colorScheme.error,
+                                  ),
+                                ),
+                              ),
+                              Icon(
+                                Icons.arrow_forward_ios,
+                                size: 16,
+                                color: colorScheme.error.withValues(alpha: 0.5),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
             ],
           ),
         ),
@@ -242,6 +334,44 @@ class SettingsScreen extends ConsumerWidget {
                 foregroundColor: colorScheme.error,
               ),
               child: const Text('Reset'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  void _showLogoutDialog(BuildContext context, WidgetRef ref) {
+    final colorScheme = Theme.of(context).colorScheme;
+    
+    showDialog(
+      context: context,
+      builder: (BuildContext dialogContext) {
+        return AlertDialog(
+          title: const Text('Sign Out'),
+          content: const Text('Are you sure you want to sign out?'),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(dialogContext).pop(),
+              child: const Text('Cancel'),
+            ),
+            TextButton(
+              onPressed: () async {
+                Navigator.of(dialogContext).pop();
+                await AuthService().signOut();
+                ref.read(userDataProvider.notifier).clearUser();
+                
+                if (context.mounted) {
+                  Navigator.of(context).pushAndRemoveUntil(
+                    MaterialPageRoute(builder: (_) => const LoginScreen()),
+                    (route) => false,
+                  );
+                }
+              },
+              style: TextButton.styleFrom(
+                foregroundColor: colorScheme.error,
+              ),
+              child: const Text('Sign Out'),
             ),
           ],
         );
