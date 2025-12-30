@@ -173,7 +173,7 @@ class _AdminPanelScreenState extends ConsumerState<AdminPanelScreen> {
               TextButton.icon(
                 onPressed: () => _handleMenuAction('seed'),
                 icon: const Icon(Icons.download),
-                label: const Text('Seed Initial Questions'),
+                label: const Text('Seed Local Questions'),
               ),
             ],
           ],
