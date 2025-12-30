@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:islamicquiz/data/models/question_model.dart';
 import 'package:islamicquiz/data/providers/auth_provider.dart';
+import 'package:islamicquiz/data/providers/local_stats_provider.dart';
 import 'package:islamicquiz/ui/screens/home_screen.dart';
 import 'quiz_screen.dart';
 
@@ -38,10 +39,13 @@ class _QuizResultScreenState extends ConsumerState<QuizResultScreen> {
     if (_pointsUpdated) return;
     _pointsUpdated = true;
     
-    // Only add points if user is logged in
     final userData = ref.read(userDataProvider);
     if (userData.valueOrNull != null) {
+      // Logged in - save to Firestore
       await ref.read(userDataProvider.notifier).updatePoints(widget.score);
+    } else {
+      // Guest - save locally
+      await ref.read(localStatsProvider.notifier).addPoints(widget.score);
     }
   }
 

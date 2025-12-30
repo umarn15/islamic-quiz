@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:islamicquiz/data/models/question_model.dart';
 import 'package:islamicquiz/data/providers/auth_provider.dart';
+import 'package:islamicquiz/data/providers/local_stats_provider.dart';
 import 'package:islamicquiz/ui/screens/quiz/quiz_screen.dart';
 import 'package:islamicquiz/ui/screens/settings_screen.dart';
 
@@ -20,9 +21,12 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     bool darkMode = Theme.of(context).brightness == Brightness.dark;
 
     final userData = ref.watch(userDataProvider);
+    final localStats = ref.watch(localStatsProvider);
     final user = userData.valueOrNull;
-    final points = user?.points ?? 0;
-    final level = user?.level ?? 1;
+    final isLoggedIn = user != null;
+    
+    final points = isLoggedIn ? user.points : localStats.points;
+    final level = isLoggedIn ? user.level : localStats.level;
     final firstName = user?.displayName.split(' ').first ?? '';
 
     return Scaffold(
