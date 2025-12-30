@@ -185,16 +185,101 @@ class _QuizScreenState extends ConsumerState<QuizScreen> with TickerProviderStat
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+
     if (_isLoading) {
       return Scaffold(
-        body: Center(
-          child: const CircularProgressIndicator(),
+        body: Container(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+              colors: [
+                colorScheme.primary.withValues(alpha: 0.1),
+                colorScheme.surface,
+              ],
+            ),
+          ),
+          child: Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                // Animated quiz icon
+                TweenAnimationBuilder<double>(
+                  tween: Tween(begin: 0.8, end: 1.0),
+                  duration: const Duration(milliseconds: 800),
+                  curve: Curves.easeInOut,
+                  builder: (context, value, child) {
+                    return Transform.scale(
+                      scale: value,
+                      child: Container(
+                        width: 100,
+                        height: 100,
+                        decoration: BoxDecoration(
+                          color: colorScheme.primary.withValues(alpha: 0.2),
+                          shape: BoxShape.circle,
+                        ),
+                        child: Icon(
+                          Icons.quiz,
+                          size: 50,
+                          color: colorScheme.primary,
+                        ),
+                      ),
+                    );
+                  },
+                  onEnd: () => setState(() {}),
+                ),
+                const SizedBox(height: 32),
+                // Loading text with dots animation
+                _LoadingText(difficulty: widget.difficulty),
+                const SizedBox(height: 24),
+                // Progress indicator
+                SizedBox(
+                  width: 200,
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(8),
+                    child: LinearProgressIndicator(
+                      backgroundColor: colorScheme.surfaceContainerHighest,
+                      minHeight: 6,
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 40),
+                // Fun tip
+                Container(
+                  margin: EdgeInsets.symmetric(horizontal: MediaQuery.sizeOf(context).width * 0.14),
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    color: Colors.amber.withValues(alpha: 0.1),
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(
+                      color: Colors.amber.withValues(alpha: 0.3),
+                    ),
+                  ),
+                  child: Row(
+                    children: [
+                      const Icon(Icons.lightbulb, color: Colors.amber),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Text(
+                          _getRandomTip(),
+                          style: TextStyle(
+                            color: Colors.amber[800],
+                            fontSize: 13,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
         ),
       );
     }
 
     final question = _questions[_currentIndex];
-    final colorScheme = Theme.of(context).colorScheme;
 
     return Scaffold(
       body: SafeArea(
@@ -526,6 +611,90 @@ class _QuizScreenState extends ConsumerState<QuizScreen> with TickerProviderStat
           ),
         ],
       ),
+    );
+  }
+
+  String _getRandomTip() {
+    final tips = [
+      'Answer quickly for more points! ⚡',
+      'You have 10 seconds per question ⏱️',
+      'Stay calm and do your best! 💪',
+      'Learning is fun! 🌟',
+    ];
+    return tips[Random().nextInt(tips.length)];
+  }
+}
+
+// Animated loading text widget
+class _LoadingText extends StatefulWidget {
+  final QuestionDifficulty difficulty;
+  
+  const _LoadingText({required this.difficulty});
+
+  @override
+  State<_LoadingText> createState() => _LoadingTextState();
+}
+
+class _LoadingTextState extends State<_LoadingText> with SingleTickerProviderStateMixin {
+  late AnimationController _controller;
+  int _dotCount = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      duration: const Duration(milliseconds: 500),
+      vsync: this,
+    )..addStatusListener((status) {
+        if (status == AnimationStatus.completed) {
+          setState(() {
+            _dotCount = (_dotCount + 1) % 4;
+          });
+          _controller.reset();
+          _controller.forward();
+        }
+      });
+    _controller.forward();
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  String _getDifficultyLabel() {
+    switch (widget.difficulty) {
+      case QuestionDifficulty.easy:
+        return 'Beginner';
+      case QuestionDifficulty.medium:
+        return 'Normal';
+      case QuestionDifficulty.hard:
+        return 'Hard';
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final dots = '.' * _dotCount;
+    return Column(
+      children: [
+        Text(
+          'Preparing ${_getDifficultyLabel()} Quiz$dots',
+          style: const TextStyle(
+            fontSize: 18,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+        const SizedBox(height: 8),
+        Text(
+          'Get ready to test your knowledge!',
+          style: TextStyle(
+            fontSize: 14,
+            color: Colors.grey[600],
+          ),
+        ),
+      ],
     );
   }
 }
