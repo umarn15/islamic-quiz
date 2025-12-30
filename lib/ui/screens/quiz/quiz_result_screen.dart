@@ -84,11 +84,13 @@ class QuizResultScreen extends StatelessWidget {
                 ),
                 child: Column(
                   children: [
+                    const Icon(Icons.star, color: Colors.amber, size: 40),
+                    const SizedBox(height: 8),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.center,
+                      crossAxisAlignment: CrossAxisAlignment.baseline,
+                      textBaseline: TextBaseline.alphabetic,
                       children: [
-                        const Icon(Icons.star, color: Colors.amber, size: 32),
-                        const SizedBox(width: 8),
                         Text(
                           '$score',
                           style: const TextStyle(
@@ -97,14 +99,22 @@ class QuizResultScreen extends StatelessWidget {
                             color: Colors.amber,
                           ),
                         ),
-                        const Text(
-                          ' points',
+                        Text(
+                          ' / ${totalQuestions * 30}',
                           style: TextStyle(
-                            fontSize: 20,
-                            color: Colors.amber,
+                            fontSize: 24,
+                            fontWeight: FontWeight.w500,
+                            color: Colors.amber.shade300,
                           ),
                         ),
                       ],
+                    ),
+                    const Text(
+                      'points',
+                      style: TextStyle(
+                        fontSize: 16,
+                        color: Colors.amber,
+                      ),
                     ),
                     const SizedBox(height: 16),
                     const Divider(),
