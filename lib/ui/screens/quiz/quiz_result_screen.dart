@@ -328,7 +328,10 @@ class QuizResultScreen extends StatelessWidget {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('Got it!'),
+            child: const Text('Got it!',
+             style: TextStyle(
+               fontSize: 18
+             ),),
           ),
         ],
       ),
