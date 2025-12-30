@@ -167,6 +167,7 @@ class _QuizScreenState extends ConsumerState<QuizScreen> with TickerProviderStat
       MaterialPageRoute(
         builder: (context) => QuizResultScreen(
           score: _score,
+          totalScore: _questions.length * 30,
           correctAnswers: _correctAnswers,
           totalQuestions: _questions.length,
           difficulty: widget.difficulty,

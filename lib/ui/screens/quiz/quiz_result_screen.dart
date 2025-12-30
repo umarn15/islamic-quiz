@@ -5,6 +5,7 @@ import 'quiz_screen.dart';
 
 class QuizResultScreen extends StatelessWidget {
   final int score;
+  final int totalScore;
   final int correctAnswers;
   final int totalQuestions;
   final QuestionDifficulty difficulty;
@@ -12,6 +13,7 @@ class QuizResultScreen extends StatelessWidget {
   const QuizResultScreen({
     super.key,
     required this.score,
+    required this.totalScore,
     required this.correctAnswers,
     required this.totalQuestions,
     required this.difficulty,
@@ -20,7 +22,7 @@ class QuizResultScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
-    final percentage = (correctAnswers / totalQuestions * 100).round();
+    final percentage = (score / totalScore * 100).round();
     final resultData = _getResultData(percentage);
 
     return Scaffold(
@@ -341,21 +343,21 @@ class QuizResultScreen extends StatelessWidget {
         message: 'SubhanAllah! You answered everything perfectly!',
         color: Colors.amber,
       );
-    } else if (percentage >= 90) {
+    } else if (percentage >= 80) {
       return _ResultData(
         icon: Icons.auto_awesome,
         title: 'Excellent!',
         message: 'MashaAllah! You did amazing!',
         color: Colors.deepPurple.shade300,
       );
-    } else if (percentage >= 75) {
+    } else if (percentage >= 60) {
       return _ResultData(
         icon: Icons.thumb_up,
         title: 'Good Job!',
         message: 'Keep learning and improving!',
         color: Colors.green,
       );
-    } else if (percentage >= 50) {
+    } else if (percentage >= 40) {
       return _ResultData(
         icon: Icons.sentiment_satisfied,
         title: 'Nice Try!',
