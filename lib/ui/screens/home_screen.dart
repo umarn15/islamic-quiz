@@ -104,7 +104,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 title: 'Easy',
                 subtitle: 'Easy questions for beginners',
                 icon: Icons.school,
-                color: Colors.green,
+                color: Colors.green.shade700,
                 onTap: () {
                   _navigateToQuiz(QuestionDifficulty.easy);
                 },
