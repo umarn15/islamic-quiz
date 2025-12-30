@@ -756,7 +756,7 @@ const List<Map<String, dynamic>> initialQuestions = [
   },
   {
     'id': 'medium_004',
-    'questionText': 'How many rakats are in Fajr prayer?',
+    'questionText': 'How many fardh rakats are in Fajr prayer?',
     'difficulty': 'medium',
     'options': ['2 rakats', '3 rakats', '4 rakats', '1 rakat'],
     'correctOptionIndex': 0,
@@ -952,7 +952,7 @@ const List<Map<String, dynamic>> initialQuestions = [
   },
   {
     'id': 'medium_018',
-    'questionText': 'How many rakats are in Maghrib prayer?',
+    'questionText': 'How many fardh rakats are in Maghrib prayer?',
     'difficulty': 'medium',
     'options': ['2 rakats', '3 rakats', '4 rakats', '5 rakats'],
     'correctOptionIndex': 1,
@@ -1232,7 +1232,7 @@ const List<Map<String, dynamic>> initialQuestions = [
   },
   {
     'id': 'medium_038',
-    'questionText': 'How many rakats are in Dhuhr prayer?',
+    'questionText': 'How many fardh rakats are in Dhuhr prayer?',
     'difficulty': 'medium',
     'options': ['2 rakats', '3 rakats', '4 rakats', '5 rakats'],
     'correctOptionIndex': 2,
@@ -1400,7 +1400,7 @@ const List<Map<String, dynamic>> initialQuestions = [
   },
   {
     'id': 'medium_050',
-    'questionText': 'How many rakats are in Isha prayer?',
+    'questionText': 'How many fardh rakats are in Isha prayer?',
     'difficulty': 'medium',
     'options': ['2 rakats', '3 rakats', '4 rakats', '5 rakats'],
     'correctOptionIndex': 2,
