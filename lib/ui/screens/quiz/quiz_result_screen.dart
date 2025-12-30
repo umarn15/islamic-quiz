@@ -286,7 +286,7 @@ class QuizResultScreen extends StatelessWidget {
       builder: (context) => AlertDialog(
         title: Row(
           children: [
-            Icon(Icons.info_outline, color: Colors.blue[700]),
+            Icon(Icons.info_outline, color: Theme.of(context).colorScheme.primary),
             const SizedBox(width: 8),
             const Text('How Scoring Works'),
           ],
