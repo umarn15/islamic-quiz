@@ -49,11 +49,13 @@ class ThemeProvider extends ChangeNotifier {
     useMaterial3: true,
     brightness: Brightness.dark,
     colorScheme: ColorScheme.dark(
-      primary: primaryGreen,
-      secondary: secondaryTeal,
-      tertiary: accentGold,
+      primary: const Color(0xFF4ADE80), // Bright emerald green
+      secondary: const Color(0xFF5EEAD4), // Bright teal
+      tertiary: const Color(0xFFFCD34D), // Bright gold
       surface: const Color(0xFF1E293B),
-      error: errorRed,
+      error: const Color(0xFFF87171), // Softer red for dark
+      onPrimary: const Color(0xFF0F172A),
+      onSecondary: const Color(0xFF0F172A),
     ),
     scaffoldBackgroundColor: darkBackgroundColor,
 

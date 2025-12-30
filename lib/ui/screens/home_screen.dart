@@ -186,66 +186,78 @@ class _HomeScreenState extends State<HomeScreen> {
     required Color color,
     required VoidCallback onTap,
   }) {
-    return Card(
-      elevation: 4,
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(16),
-        child: Container(
-          padding: const EdgeInsets.all(20),
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(16),
-            color: color.withValues(alpha: 0.01)
-          ),
-          child: Row(
-            children: [
-              Container(
-                width: 60,
-                height: 60,
-                decoration: BoxDecoration(
-                  color: color.withValues(alpha: 0.2),
-                  borderRadius: BorderRadius.circular(16),
-                  border: Border.all(
-                    color: color.withValues(alpha: 0.3),
-                    width: 2,
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+    final effectiveColor = isDarkMode ? Color.lerp(color, Colors.white, 0.35)! : color;
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 4),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: onTap,
+          borderRadius: BorderRadius.circular(12),
+          child: Ink(
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(
+                color: isDarkMode 
+                    ? effectiveColor.withValues(alpha: 0.5)
+                    : color.withValues(alpha: 0.25),
+                width: 1.5,
+              ),
+              gradient: LinearGradient(
+                begin: Alignment.centerLeft,
+                end: Alignment.centerRight,
+                colors: isDarkMode
+                    ? [
+                        effectiveColor.withValues(alpha: 0.2),
+                        effectiveColor.withValues(alpha: 0.08),
+                      ]
+                    : [
+                        color.withValues(alpha: 0.08),
+                        color.withValues(alpha: 0.02),
+                      ],
+              ),
+            ),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+              child: Row(
+                children: [
+                  Icon(icon, size: 32, color: effectiveColor),
+                  const SizedBox(width: 16),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          title,
+                          style: TextStyle(
+                            color: effectiveColor,
+                            fontSize: 22,
+                            fontWeight: FontWeight.w600,
+                            letterSpacing: 0.2,
+                          ),
+                        ),
+                        const SizedBox(height: 2),
+                        Text(
+                          subtitle,
+                          style: textTheme.bodyMedium?.copyWith(
+                            color: isDarkMode 
+                                ? Colors.white70 
+                                : Colors.black54,
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
-                ),
-                child: Icon(icon, size: 32, color: color),
+                  Icon(
+                    Icons.arrow_forward_ios,
+                    size: 20,
+                    color: effectiveColor.withValues(alpha: 0.7),
+                  ),
+                ],
               ),
-              const SizedBox(width: 20),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      title,
-                      style: TextStyle(
-                        color: color,
-                        fontSize: 22,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    const SizedBox(height: 6),
-                    Text(
-                      subtitle,
-                      style: textTheme.bodyMedium,
-                    ),
-                  ],
-                ),
-              ),
-              Container(
-                padding: const EdgeInsets.all(6),
-                decoration: BoxDecoration(
-                  color: color.withValues(alpha: 0.1),
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: Icon(
-                  Icons.arrow_forward_ios,
-                  size: 18,
-                  color: color,
-                ),
-              ),
-            ],
+            ),
           ),
         ),
       ),
