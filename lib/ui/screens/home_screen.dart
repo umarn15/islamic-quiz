@@ -94,7 +94,7 @@ class _HomeScreenState extends State<HomeScreen> {
               
               // Quiz Difficulty
               Text(
-                'Choose Difficulty',
+                'Choose Difficulty Level',
                 style: textTheme.titleLarge,
               ),
               const SizedBox(height: 16),
@@ -109,7 +109,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   _navigateToQuiz(QuestionDifficulty.easy);
                 },
               ),
-              const SizedBox(height: 12),
+              const SizedBox(height: 8),
               
               _buildDifficultyCard(
                 textTheme: textTheme,
@@ -121,7 +121,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   _navigateToQuiz(QuestionDifficulty.medium);
                 },
               ),
-              const SizedBox(height: 12),
+              const SizedBox(height: 8),
               
               _buildDifficultyCard(
                 textTheme: textTheme,
@@ -200,8 +200,8 @@ class _HomeScreenState extends State<HomeScreen> {
           child: Row(
             children: [
               Container(
-                width: 70,
-                height: 70,
+                width: 60,
+                height: 60,
                 decoration: BoxDecoration(
                   color: color.withValues(alpha: 0.2),
                   borderRadius: BorderRadius.circular(16),
@@ -210,7 +210,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     width: 2,
                   ),
                 ),
-                child: Icon(icon, size: 36, color: color),
+                child: Icon(icon, size: 32, color: color),
               ),
               const SizedBox(width: 20),
               Expanded(
@@ -228,20 +228,20 @@ class _HomeScreenState extends State<HomeScreen> {
                     const SizedBox(height: 6),
                     Text(
                       subtitle,
-                      style: textTheme.bodyLarge,
+                      style: textTheme.bodyMedium,
                     ),
                   ],
                 ),
               ),
               Container(
-                padding: const EdgeInsets.all(8),
+                padding: const EdgeInsets.all(6),
                 decoration: BoxDecoration(
                   color: color.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: Icon(
                   Icons.arrow_forward_ios,
-                  size: 20,
+                  size: 18,
                   color: color,
                 ),
               ),
