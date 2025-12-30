@@ -1,3 +1,4 @@
+import 'package:confetti/confetti.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:islamicquiz/data/models/question_model.dart';
@@ -28,11 +29,27 @@ class QuizResultScreen extends ConsumerStatefulWidget {
 
 class _QuizResultScreenState extends ConsumerState<QuizResultScreen> {
   bool _pointsUpdated = false;
+  late ConfettiController _confettiController;
 
   @override
   void initState() {
     super.initState();
+    _confettiController = ConfettiController(duration: const Duration(seconds: 3));
     _updateUserPoints();
+    _checkForCelebration();
+  }
+
+  @override
+  void dispose() {
+    _confettiController.dispose();
+    super.dispose();
+  }
+
+  void _checkForCelebration() {
+    final percentage = (widget.score / widget.totalScore * 100).round();
+    if (percentage >= 90) {
+      _confettiController.play();
+    }
   }
 
   Future<void> _updateUserPoints() async {
@@ -56,214 +73,237 @@ class _QuizResultScreenState extends ConsumerState<QuizResultScreen> {
     final resultData = _getResultData(percentage);
 
     return Scaffold(
-      body: SafeArea(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.all(24),
-          child: Column(
-            children: [
-              const SizedBox(height: 20),
-              // Result Icon
-              Container(
-                width: 120,
-                height: 120,
-                decoration: BoxDecoration(
-                  color: resultData.color.withValues(alpha: 0.2),
-                  shape: BoxShape.circle,
-                ),
-                child: Icon(
-                  resultData.icon,
-                  size: 64,
-                  color: resultData.color,
-                ),
-              ),
-              const SizedBox(height: 24),
-              
-              // Result Title
-              Text(
-                resultData.title,
-                style: TextStyle(
-                  fontSize: 32,
-                  fontWeight: FontWeight.bold,
-                  color: resultData.color,
-                ),
-              ),
-              const SizedBox(height: 8),
-              Text(
-                resultData.message,
-                style: TextStyle(
-                  fontSize: 16,
-                  color: Colors.grey[600],
-                ),
-                textAlign: TextAlign.center,
-              ),
-              const SizedBox(height: 32),
+      body: Stack(
+        children: [
+          SafeArea(
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.all(24),
+              child: Column(
+                children: [
+                  const SizedBox(height: 20),
+                  // Result Icon
+                  Container(
+                    width: 120,
+                    height: 120,
+                    decoration: BoxDecoration(
+                      color: resultData.color.withValues(alpha: 0.2),
+                      shape: BoxShape.circle,
+                    ),
+                    child: Icon(
+                      resultData.icon,
+                      size: 64,
+                      color: resultData.color,
+                    ),
+                  ),
+                  const SizedBox(height: 24),
+                  
+                  // Result Title
+                  Text(
+                    resultData.title,
+                    style: TextStyle(
+                      fontSize: 32,
+                      fontWeight: FontWeight.bold,
+                      color: resultData.color,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    resultData.message,
+                    style: TextStyle(
+                      fontSize: 16,
+                      color: Colors.grey[600],
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 32),
 
-              // Score Card
-              Container(
-                width: double.infinity,
-                padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    colors: [
-                      colorScheme.primary.withValues(alpha: 0.1),
-                      colorScheme.secondary.withValues(alpha: 0.05),
-                    ],
-                  ),
-                  borderRadius: BorderRadius.circular(20),
-                  border: Border.all(
-                    color: colorScheme.primary.withValues(alpha: 0.2),
-                  ),
-                ),
-                child: Column(
-                  children: [
-                    const Icon(Icons.star, color: Colors.amber, size: 40),
-                    const SizedBox(height: 8),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      crossAxisAlignment: CrossAxisAlignment.baseline,
-                      textBaseline: TextBaseline.alphabetic,
+                  // Score Card
+                  Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        colors: [
+                          colorScheme.primary.withValues(alpha: 0.1),
+                          colorScheme.secondary.withValues(alpha: 0.05),
+                        ],
+                      ),
+                      borderRadius: BorderRadius.circular(20),
+                      border: Border.all(
+                        color: colorScheme.primary.withValues(alpha: 0.2),
+                      ),
+                    ),
+                    child: Column(
                       children: [
-                        Text(
-                          '${widget.score}',
-                          style: const TextStyle(
-                            fontSize: 48,
-                            fontWeight: FontWeight.bold,
+                        const Icon(Icons.star, color: Colors.amber, size: 40),
+                        const SizedBox(height: 8),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          crossAxisAlignment: CrossAxisAlignment.baseline,
+                          textBaseline: TextBaseline.alphabetic,
+                          children: [
+                            Text(
+                              '${widget.score}',
+                              style: const TextStyle(
+                                fontSize: 48,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.amber,
+                              ),
+                            ),
+                            Text(
+                              ' / ${widget.totalQuestions * 30}',
+                              style: TextStyle(
+                                fontSize: 24,
+                                fontWeight: FontWeight.w500,
+                                color: Colors.amber.shade300,
+                              ),
+                            ),
+                            const SizedBox(width: 6),
+                            GestureDetector(
+                              onTap: () => _showScoringInfo(context),
+                              child: Icon(
+                                Icons.info_outline,
+                                color: Colors.amber.shade600,
+                                size: 20,
+                              ),
+                            ),
+                          ],
+                        ),
+                        const Text(
+                          'points',
+                          style: TextStyle(
+                            fontSize: 16,
                             color: Colors.amber,
                           ),
                         ),
-                        Text(
-                          ' / ${widget.totalQuestions * 30}',
-                          style: TextStyle(
-                            fontSize: 24,
-                            fontWeight: FontWeight.w500,
-                            color: Colors.amber.shade300,
-                          ),
-                        ),
-                        const SizedBox(width: 6),
-                        GestureDetector(
-                          onTap: () => _showScoringInfo(context),
-                          child: Icon(
-                            Icons.info_outline,
-                            color: Colors.amber.shade600,
-                            size: 20,
-                          ),
-                        ),
-                      ],
-                    ),
-                    const Text(
-                      'points',
-                      style: TextStyle(
-                        fontSize: 16,
-                        color: Colors.amber,
-                      ),
-                    ),
-                    const SizedBox(height: 16),
-                    const Divider(),
-                    const SizedBox(height: 16),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                      children: [
-                        _buildStatItem(
-                          icon: Icons.check_circle,
-                          value: '${widget.correctAnswers}',
-                          label: 'Correct',
-                          color: Colors.green,
-                        ),
-                        _buildStatItem(
-                          icon: Icons.cancel,
-                          value: '${widget.totalQuestions - widget.correctAnswers}',
-                          label: 'Wrong',
-                          color: Colors.red,
-                        ),
-                        _buildStatItem(
-                          icon: Icons.percent,
-                          value: '$percentage%',
-                          label: 'Score',
-                          color: colorScheme.primary,
+                        const SizedBox(height: 16),
+                        const Divider(),
+                        const SizedBox(height: 16),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                          children: [
+                            _buildStatItem(
+                              icon: Icons.check_circle,
+                              value: '${widget.correctAnswers}',
+                              label: 'Correct',
+                              color: Colors.green,
+                            ),
+                            _buildStatItem(
+                              icon: Icons.cancel,
+                              value: '${widget.totalQuestions - widget.correctAnswers}',
+                              label: 'Wrong',
+                              color: Colors.red,
+                            ),
+                            _buildStatItem(
+                              icon: Icons.percent,
+                              value: '$percentage%',
+                              label: 'Score',
+                              color: colorScheme.primary,
+                            ),
+                          ],
                         ),
                       ],
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(height: 32),
-
-              // Action Buttons
-              Row(
-                children: [
-                  Expanded(
-                    child: OutlinedButton.icon(
-                      onPressed: () {
-                        Navigator.pushReplacement(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => QuizScreen(difficulty: widget.difficulty),
-                          ),
-                        );
-                      },
-                      icon: const Icon(Icons.replay),
-                      label: const Text('Play Again'),
-                      style: OutlinedButton.styleFrom(
-                        padding: const EdgeInsets.symmetric(vertical: 16),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                      ),
                     ),
                   ),
-                  const SizedBox(width: 16),
-                  Expanded(
-                    child: ElevatedButton.icon(
-                      onPressed: () {
-                        Navigator.pushAndRemoveUntil(
-                          context,
-                          MaterialPageRoute(builder: (context) => const HomeScreen()),
-                          (route) => false,
-                        );
-                      },
-                      icon: const Icon(Icons.home),
-                      label: const Text('Home'),
-                      style: ElevatedButton.styleFrom(
-                        padding: const EdgeInsets.symmetric(vertical: 16),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
+                  const SizedBox(height: 32),
+
+                  // Action Buttons
+                  Row(
+                    children: [
+                      Expanded(
+                        child: OutlinedButton.icon(
+                          onPressed: () {
+                            Navigator.pushReplacement(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => QuizScreen(difficulty: widget.difficulty),
+                              ),
+                            );
+                          },
+                          icon: const Icon(Icons.replay),
+                          label: const Text('Play Again'),
+                          style: OutlinedButton.styleFrom(
+                            padding: const EdgeInsets.symmetric(vertical: 16),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                          ),
                         ),
                       ),
+                      const SizedBox(width: 16),
+                      Expanded(
+                        child: ElevatedButton.icon(
+                          onPressed: () {
+                            Navigator.pushAndRemoveUntil(
+                              context,
+                              MaterialPageRoute(builder: (context) => const HomeScreen()),
+                              (route) => false,
+                            );
+                          },
+                          icon: const Icon(Icons.home),
+                          label: const Text('Home'),
+                          style: ElevatedButton.styleFrom(
+                            padding: const EdgeInsets.symmetric(vertical: 16),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 18),
+
+                  // Difficulty Badge
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                    decoration: BoxDecoration(
+                      color: _getDifficultyColor(widget.difficulty).withValues(alpha: 0.2),
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(
+                          Icons.speed,
+                          color: _getDifficultyColor(widget.difficulty),
+                          size: 20,
+                        ),
+                        const SizedBox(width: 8),
+                        Text(
+                          '${widget.difficulty.name.toUpperCase()} Mode',
+                          style: TextStyle(
+                            color: _getDifficultyColor(widget.difficulty),
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ],
                     ),
                   ),
                 ],
               ),
-              const SizedBox(height: 18),
-
-              // Difficulty Badge
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                decoration: BoxDecoration(
-                  color: _getDifficultyColor(widget.difficulty).withValues(alpha: 0.2),
-                  borderRadius: BorderRadius.circular(20),
-                ),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Icon(
-                      Icons.speed,
-                      color: _getDifficultyColor(widget.difficulty),
-                      size: 20,
-                    ),
-                    const SizedBox(width: 8),
-                    Text(
-                      '${widget.difficulty.name.toUpperCase()} Mode',
-                      style: TextStyle(
-                        color: _getDifficultyColor(widget.difficulty),
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ],
+            ),
           ),
-        ),
+          // Confetti
+          Align(
+            alignment: Alignment.topCenter,
+            child: ConfettiWidget(
+              confettiController: _confettiController,
+              blastDirectionality: BlastDirectionality.explosive,
+              shouldLoop: false,
+              colors: const [
+                Colors.green,
+                Colors.amber,
+                Colors.pink,
+                Colors.blue,
+                Colors.purple,
+                Colors.orange,
+              ],
+              numberOfParticles: 30,
+              gravity: 0.2,
+            ),
+          ),
+        ],
       ),
     );
   }
