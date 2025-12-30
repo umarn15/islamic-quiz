@@ -1,11 +1,9 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:islamicquiz/data/providers/shared_prefs_provider.dart';
 import 'package:islamicquiz/data/services/question_seeder.dart';
 import 'package:islamicquiz/ui/screens/admin/admin_panel_screen.dart';
-import 'package:islamicquiz/ui/screens/auth/login_screen.dart';
 import 'package:islamicquiz/ui/screens/home_screen.dart';
 
 class SplashScreen extends ConsumerStatefulWidget {
@@ -69,11 +67,8 @@ class _SplashScreenState extends ConsumerState<SplashScreen> with SingleTickerPr
     await Future.delayed(const Duration(seconds: 3));
     
     if (mounted && !_navigationCancelled) {
-      final user = FirebaseAuth.instance.currentUser;
-      final destination = user != null ? const HomeScreen() : const LoginScreen();
-      
       Navigator.of(context).pushReplacement(
-        MaterialPageRoute(builder: (context) => destination),
+        MaterialPageRoute(builder: (context) => const HomeScreen()),
       );
     }
   }

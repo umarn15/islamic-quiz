@@ -20,10 +20,10 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     bool darkMode = Theme.of(context).brightness == Brightness.dark;
 
     final userData = ref.watch(userDataProvider);
-    final points = userData.valueOrNull?.points ?? 0;
-    final level = userData.valueOrNull?.level ?? 1;
-    final displayName = userData.valueOrNull?.displayName ?? '';
-    final firstName = displayName.split(' ').first;
+    final user = userData.valueOrNull;
+    final points = user?.points ?? 0;
+    final level = user?.level ?? 1;
+    final firstName = user?.displayName.split(' ').first ?? '';
 
     return Scaffold(
       appBar: AppBar(

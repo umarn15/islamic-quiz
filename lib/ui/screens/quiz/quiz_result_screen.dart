@@ -38,8 +38,11 @@ class _QuizResultScreenState extends ConsumerState<QuizResultScreen> {
     if (_pointsUpdated) return;
     _pointsUpdated = true;
     
-    // Add the score as points to user's account
-    await ref.read(userDataProvider.notifier).updatePoints(widget.score);
+    // Only add points if user is logged in
+    final userData = ref.read(userDataProvider);
+    if (userData.valueOrNull != null) {
+      await ref.read(userDataProvider.notifier).updatePoints(widget.score);
+    }
   }
 
   @override

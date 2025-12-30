@@ -4,6 +4,7 @@ import 'package:islamicquiz/core/theme_data.dart';
 import 'package:islamicquiz/data/providers/auth_provider.dart';
 import 'package:islamicquiz/data/services/auth_service.dart';
 import 'package:islamicquiz/ui/screens/auth/login_screen.dart';
+import 'package:islamicquiz/ui/screens/home_screen.dart';
 
 class SettingsScreen extends ConsumerWidget {
   const SettingsScreen({super.key});
@@ -13,6 +14,8 @@ class SettingsScreen extends ConsumerWidget {
     final themeNotifier = ref.watch(themeProvider);
     final textTheme = Theme.of(context).textTheme;
     final colorScheme = Theme.of(context).colorScheme;
+    final userData = ref.watch(userDataProvider);
+    final isLoggedIn = userData.valueOrNull != null;
 
     return Scaffold(
       appBar: AppBar(
@@ -187,78 +190,9 @@ class SettingsScreen extends ConsumerWidget {
               Card(
                 child: Padding(
                   padding: const EdgeInsets.all(16),
-                  child: Column(
-                    children: [
-                      // User info
-                      Consumer(
-                        builder: (context, ref, _) {
-                          final userData = ref.watch(userDataProvider);
-                          final user = userData.valueOrNull;
-                          
-                          return Row(
-                            children: [
-                              CircleAvatar(
-                                backgroundColor: colorScheme.primary.withValues(alpha: 0.1),
-                                child: Icon(
-                                  Icons.person,
-                                  color: colorScheme.primary,
-                                ),
-                              ),
-                              const SizedBox(width: 16),
-                              Expanded(
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(
-                                      user?.displayName ?? 'User',
-                                      style: textTheme.titleMedium,
-                                    ),
-                                    Text(
-                                      user?.email ?? '',
-                                      style: textTheme.bodyMedium?.copyWith(
-                                        color: colorScheme.onSurfaceVariant,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ],
-                          );
-                        },
-                      ),
-                      const Divider(height: 32),
-                      // Logout button
-                      InkWell(
-                        onTap: () => _showLogoutDialog(context, ref),
-                        borderRadius: BorderRadius.circular(8),
-                        child: Padding(
-                          padding: const EdgeInsets.symmetric(vertical: 8),
-                          child: Row(
-                            children: [
-                              Icon(
-                                Icons.logout,
-                                color: colorScheme.error,
-                              ),
-                              const SizedBox(width: 16),
-                              Expanded(
-                                child: Text(
-                                  'Sign Out',
-                                  style: textTheme.titleMedium?.copyWith(
-                                    color: colorScheme.error,
-                                  ),
-                                ),
-                              ),
-                              Icon(
-                                Icons.arrow_forward_ios,
-                                size: 16,
-                                color: colorScheme.error.withValues(alpha: 0.5),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
+                  child: isLoggedIn
+                      ? _buildLoggedInContent(context, ref, userData.valueOrNull!, textTheme, colorScheme)
+                      : _buildSignInContent(context, textTheme, colorScheme),
                 ),
               ),
             ],
@@ -296,6 +230,126 @@ class SettingsScreen extends ConsumerWidget {
                 style: textTheme.bodyMedium,
               ),
             ],
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildSignInContent(BuildContext context, TextTheme textTheme, ColorScheme colorScheme) {
+    return InkWell(
+      onTap: () {
+        Navigator.of(context).push(
+          MaterialPageRoute(builder: (_) => const LoginScreen()),
+        );
+      },
+      borderRadius: BorderRadius.circular(8),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 8),
+        child: Row(
+          children: [
+            CircleAvatar(
+              backgroundColor: colorScheme.primary.withValues(alpha: 0.1),
+              child: Icon(
+                Icons.person_outline,
+                color: colorScheme.primary,
+              ),
+            ),
+            const SizedBox(width: 16),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Sign In',
+                    style: textTheme.titleMedium,
+                  ),
+                  Text(
+                    'Sign in to save your progress',
+                    style: textTheme.bodyMedium?.copyWith(
+                      color: colorScheme.onSurfaceVariant,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            Icon(
+              Icons.arrow_forward_ios,
+              size: 16,
+              color: colorScheme.primary.withValues(alpha: 0.5),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildLoggedInContent(
+    BuildContext context,
+    WidgetRef ref,
+    dynamic user,
+    TextTheme textTheme,
+    ColorScheme colorScheme,
+  ) {
+    return Column(
+      children: [
+        Row(
+          children: [
+            CircleAvatar(
+              backgroundColor: colorScheme.primary.withValues(alpha: 0.1),
+              child: Icon(
+                Icons.person,
+                color: colorScheme.primary,
+              ),
+            ),
+            const SizedBox(width: 16),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    user.displayName ?? 'User',
+                    style: textTheme.titleMedium,
+                  ),
+                  Text(
+                    user.email ?? '',
+                    style: textTheme.bodyMedium?.copyWith(
+                      color: colorScheme.onSurfaceVariant,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+        const Divider(height: 32),
+        InkWell(
+          onTap: () => _showLogoutDialog(context, ref),
+          borderRadius: BorderRadius.circular(8),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(vertical: 8),
+            child: Row(
+              children: [
+                Icon(
+                  Icons.logout,
+                  color: colorScheme.error,
+                ),
+                const SizedBox(width: 16),
+                Expanded(
+                  child: Text(
+                    'Sign Out',
+                    style: textTheme.titleMedium?.copyWith(
+                      color: colorScheme.error,
+                    ),
+                  ),
+                ),
+                Icon(
+                  Icons.arrow_forward_ios,
+                  size: 16,
+                  color: colorScheme.error.withValues(alpha: 0.5),
+                ),
+              ],
+            ),
           ),
         ),
       ],
@@ -363,7 +417,7 @@ class SettingsScreen extends ConsumerWidget {
                 
                 if (context.mounted) {
                   Navigator.of(context).pushAndRemoveUntil(
-                    MaterialPageRoute(builder: (_) => const LoginScreen()),
+                    MaterialPageRoute(builder: (_) => const HomeScreen()),
                     (route) => false,
                   );
                 }
