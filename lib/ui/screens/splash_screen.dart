@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:islamicquiz/data/providers/shared_prefs_provider.dart';
@@ -17,14 +18,13 @@ class _SplashScreenState extends ConsumerState<SplashScreen> with SingleTickerPr
   late Animation<double> _fadeAnimation;
   late Animation<double> _scaleAnimation;
 
-  // Secret admin access - tap logo 5 times quickly
+  // Secret admin access - tap logo 7 times quickly
   int _tapCount = 0;
   DateTime? _lastTapTime;
-  static const int _requiredTaps = 9;
-  static const Duration _tapTimeout = Duration(milliseconds: 2900);
-  
-  // Admin PIN - change this to your secret PIN
-  static const String _adminPin = '78659';
+  static const int _requiredTaps = 7;
+  static const Duration _tapTimeout = Duration(milliseconds: 2500);
+
+  String _adminPin = '';
 
   bool _navigationCancelled = false;
 
@@ -46,6 +46,8 @@ class _SplashScreenState extends ConsumerState<SplashScreen> with SingleTickerPr
     );
     
     _controller.forward();
+
+    getAdminPin();
     
     // Initialize app and navigate
     _initializeAndNavigate();
@@ -86,6 +88,25 @@ class _SplashScreenState extends ConsumerState<SplashScreen> with SingleTickerPr
       _tapCount = 0;
       _navigationCancelled = true;
       _showPinDialog();
+    }
+  }
+
+  Future<void> getAdminPin() async {
+    try {
+      final snapshot = await FirebaseFirestore.instance
+          .collection('adminPin')
+          .limit(1)
+          .get();
+
+      if (snapshot.docs.isEmpty) {
+        debugPrint('Admin PIN not found');
+        return;
+      }
+
+      final data = snapshot.docs.first.data();
+      _adminPin = data['pin']?.toString() ?? '';
+    } catch (e) {
+      debugPrint('error getting admin pin $e');
     }
   }
 
@@ -147,7 +168,7 @@ class _SplashScreenState extends ConsumerState<SplashScreen> with SingleTickerPr
   }
 
   void _verifyPin(String pin, BuildContext dialogContext, StateSetter setDialogState, Function(String?) setError) {
-    if (pin == _adminPin) {
+    if (pin.trim().isNotEmpty && pin == _adminPin) {
       Navigator.pop(dialogContext);
       Navigator.of(context).pushReplacement(
         MaterialPageRoute(builder: (context) => const AdminPanelScreen()),
