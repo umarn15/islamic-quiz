@@ -130,11 +130,11 @@ class _QuizScreenState extends ConsumerState<QuizScreen> with TickerProviderStat
   }
 
   int _calculateScore() {
-    // Full marks (30 points) if answered within first 3 seconds (7+ seconds left)
-    // Then -2 points per second: 6->28, 5->26, 4->24, 3->22, 2->20, 1->18, 0->16
-    const int fullMarkThreshold = 7;
+    // Full marks (30 points) if answered within first 2 seconds (8+ seconds left)
+    // Then -2 points per second: 7->28, 6->26, 5->24, 4->22, 3->20, 2->18, 1->16, 0->14
+    const int fullMarkThreshold = 8;
     const int maxScore = 30;
-    
+
     if (_timeLeft >= fullMarkThreshold) {
       return maxScore;
     }
@@ -188,14 +188,7 @@ class _QuizScreenState extends ConsumerState<QuizScreen> with TickerProviderStat
     if (_isLoading) {
       return Scaffold(
         body: Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              const CircularProgressIndicator(),
-              const SizedBox(height: 16),
-              Text('Loading ${widget.difficulty.name} questions...'),
-            ],
-          ),
+          child: const CircularProgressIndicator(),
         ),
       );
     }

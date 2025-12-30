@@ -294,9 +294,9 @@ class QuizResultScreen extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             const Text(
-              '⏱️ Answer within 3 seconds → 30 points\n'
+              '⏱️ Answer within 2 seconds → 30 points\n'
               '⏱️ After that, -2 points per second\n'
-              '⏱️ Minimum 16 points per correct answer',
+              '⏱️ Minimum 14 points per correct answer',
               style: TextStyle(height: 1.6),
             ),
             if (correctAnswers == totalQuestions && lostPoints > 0) ...[
