@@ -107,6 +107,15 @@ class QuizResultScreen extends StatelessWidget {
                             color: Colors.amber.shade300,
                           ),
                         ),
+                        const SizedBox(width: 6),
+                        GestureDetector(
+                          onTap: () => _showScoringInfo(context),
+                          child: Icon(
+                            Icons.info_outline,
+                            color: Colors.amber.shade600,
+                            size: 20,
+                          ),
+                        ),
                       ],
                     ),
                     const Text(
@@ -265,6 +274,63 @@ class QuizResultScreen extends StatelessWidget {
       case QuestionDifficulty.hard:
         return Colors.red;
     }
+  }
+
+  void _showScoringInfo(BuildContext context) {
+    final lostPoints = totalQuestions * 30 - score;
+    
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Row(
+          children: [
+            Icon(Icons.info_outline, color: Colors.blue[700]),
+            const SizedBox(width: 8),
+            const Text('How Scoring Works'),
+          ],
+        ),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text(
+              '⏱️ Answer within 3 seconds → 30 points\n'
+              '⏱️ After that, -2 points per second\n'
+              '⏱️ Minimum 16 points per correct answer',
+              style: TextStyle(height: 1.6),
+            ),
+            if (correctAnswers == totalQuestions && lostPoints > 0) ...[
+              const SizedBox(height: 16),
+              Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: Colors.amber.withValues(alpha: 0.2),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Row(
+                  children: [
+                    const Icon(Icons.lightbulb, color: Colors.amber, size: 20),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Text(
+                        'All correct! You lost $lostPoints points due to time.',
+                        style: TextStyle(fontSize: 13, color: Colors.amber[900]),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Got it!'),
+          ),
+        ],
+      ),
+    );
   }
 
   _ResultData _getResultData(int percentage) {
