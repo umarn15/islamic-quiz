@@ -346,7 +346,7 @@ class QuizResultScreen extends StatelessWidget {
     } else if (percentage >= 80) {
       return _ResultData(
         icon: Icons.auto_awesome,
-        title: 'Excellent!',
+        title: percentage >= 90? 'Almost Perfect!' : 'Excellent!',
         message: 'MashaAllah! You did amazing!',
         color: Colors.deepPurple.shade300,
       );
