@@ -130,8 +130,17 @@ class _QuizScreenState extends ConsumerState<QuizScreen> with TickerProviderStat
   }
 
   int _calculateScore() {
-    // More points for faster answers
-    return 10 + (_timeLeft * 2);
+    // Full marks (30 points) if answered within first 3 seconds (7+ seconds left)
+    // Then -2 points per second: 6->28, 5->26, 4->24, 3->22, 2->20, 1->18, 0->16
+    const int fullMarkThreshold = 7;
+    const int maxScore = 30;
+    
+    if (_timeLeft >= fullMarkThreshold) {
+      return maxScore;
+    }
+    
+    // Deduct 2 points per second after reading time
+    return maxScore - ((fullMarkThreshold - _timeLeft) * 2);
   }
 
   void _showFeedbackAndProceed(bool isCorrect) {

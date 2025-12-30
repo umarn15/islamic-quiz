@@ -268,21 +268,21 @@ class QuizResultScreen extends StatelessWidget {
   }
 
   _ResultData _getResultData(int percentage) {
-    if (percentage >= 80) {
+    if (percentage >= 90) {
       return _ResultData(
         icon: Icons.emoji_events,
         title: 'Excellent!',
         message: 'MashaAllah! You did amazing!',
         color: Colors.amber,
       );
-    } else if (percentage >= 60) {
+    } else if (percentage >= 70) {
       return _ResultData(
         icon: Icons.thumb_up,
         title: 'Good Job!',
         message: 'Keep learning and improving!',
         color: Colors.green,
       );
-    } else if (percentage >= 40) {
+    } else if (percentage >= 50) {
       return _ResultData(
         icon: Icons.sentiment_satisfied,
         title: 'Nice Try!',
