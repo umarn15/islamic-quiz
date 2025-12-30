@@ -155,12 +155,12 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                     ),
                     child: Row(
                       children: [
-                        Icon(Icons.error_outline, color: colorScheme.error),
+                        Icon(Icons.error_outline, color: Colors.white),
                         const SizedBox(width: 12),
                         Expanded(
                           child: Text(
                             _errorMessage!,
-                            style: TextStyle(color: colorScheme.error),
+                            style: TextStyle(color: Colors.white),
                           ),
                         ),
                       ],
