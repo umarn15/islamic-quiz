@@ -87,18 +87,19 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                   gradient: LinearGradient(
                     begin: Alignment.topLeft,
                     end: Alignment.bottomRight,
-                    colors: [
+                    colors: darkMode
+                        ? [
+                      colorScheme.primary.withValues(alpha: 0.6),
+                      colorScheme.primary.withValues(alpha: 0.5),
+                      colorScheme.primary.withValues(alpha: 0.4),
+                    ]
+                        : [
                       colorScheme.primary,
-                      colorScheme.primary.withValues(alpha: 0.75),
+                      colorScheme.primary.withValues(alpha: 0.85),
+                      colorScheme.primary.withValues(alpha: 0.7),
                     ],
+                    stops: const [0.0, 0.5, 1.0],
                   ),
-                  boxShadow: [
-                    BoxShadow(
-                      color: colorScheme.primary.withValues(alpha: 0.35),
-                      blurRadius: 24,
-                      offset: const Offset(0, 12),
-                    ),
-                  ],
                 ),
                 child: Stack(
                   children: [
