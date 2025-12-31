@@ -124,60 +124,6 @@ class SettingsScreen extends ConsumerWidget {
               
               const SizedBox(height: 24),
               
-              // Reset Section
-              Text(
-                'Data',
-                style: textTheme.titleLarge?.copyWith(
-                  color: colorScheme.primary,
-                ),
-              ),
-              const SizedBox(height: 16),
-              
-              Card(
-                child: Padding(
-                  padding: const EdgeInsets.all(16),
-                  child: Column(
-                    children: [
-                      Row(
-                        children: [
-                          Icon(
-                            Icons.refresh,
-                            color: colorScheme.error,
-                          ),
-                          const SizedBox(width: 16),
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  'Reset Progress',
-                                  style: textTheme.titleMedium,
-                                ),
-                                Text(
-                                  'Clear all quiz progress and scores',
-                                  style: textTheme.bodyMedium,
-                                ),
-                              ],
-                            ),
-                          ),
-                          TextButton(
-                            onPressed: () {
-                              _showResetDialog(context);
-                            },
-                            child: Text(
-                              'Reset',
-                              style: TextStyle(color: colorScheme.error),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-              
-              const SizedBox(height: 24),
-              
               // Account Section
               Text(
                 'Account',
@@ -353,45 +299,6 @@ class SettingsScreen extends ConsumerWidget {
           ),
         ),
       ],
-    );
-  }
-
-  void _showResetDialog(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
-    
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: const Text('Reset Progress'),
-          content: const Text(
-            'Are you sure you want to reset all your quiz progress? This action cannot be undone.',
-          ),
-          actions: [
-            TextButton(
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-              child: const Text('Cancel'),
-            ),
-            TextButton(
-              onPressed: () {
-                // TODO: Implement reset functionality
-                Navigator.of(context).pop();
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text('Progress reset successfully'),
-                  ),
-                );
-              },
-              style: TextButton.styleFrom(
-                foregroundColor: colorScheme.error,
-              ),
-              child: const Text('Reset'),
-            ),
-          ],
-        );
-      },
     );
   }
 
