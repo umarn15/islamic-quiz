@@ -224,9 +224,88 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   }
 
   void _navigateToQuiz(QuestionDifficulty difficulty) {
-    Navigator.of(context).push(
-      MaterialPageRoute(
-        builder: (context) => QuizScreen(difficulty: difficulty),
+    _showQuestionCountDialog(difficulty);
+  }
+
+  void _showQuestionCountDialog(QuestionDifficulty difficulty) {
+    final colorScheme = Theme.of(context).colorScheme;
+    final questionCounts = [5, 10, 15, 20, 40];
+    
+    showModalBottomSheet(
+      context: context,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (context) => Padding(
+        padding: const EdgeInsets.all(20),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Icon(Icons.quiz, color: colorScheme.primary),
+                const SizedBox(width: 10),
+                const Text(
+                  'Number of Questions',
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                ),
+              ],
+            ),
+            const SizedBox(height: 20),
+            Wrap(
+              spacing: 12,
+              runSpacing: 12,
+              children: questionCounts.map((count) {
+                return InkWell(
+                  onTap: () {
+                    Navigator.pop(context);
+                    Navigator.of(context).push(
+                      MaterialPageRoute(
+                        builder: (context) => QuizScreen(
+                          difficulty: difficulty,
+                          questionCount: count,
+                        ),
+                      ),
+                    );
+                  },
+                  borderRadius: BorderRadius.circular(12),
+                  child: Container(
+                    width: (MediaQuery.of(context).size.width - 76) / 2,
+                    padding: const EdgeInsets.symmetric(vertical: 16),
+                    decoration: BoxDecoration(
+                      color: colorScheme.primary.withValues(alpha: 0.1),
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(
+                        color: colorScheme.primary.withValues(alpha: 0.3),
+                      ),
+                    ),
+                    child: Column(
+                      children: [
+                        Text(
+                          '$count',
+                          style: TextStyle(
+                            fontSize: 24,
+                            fontWeight: FontWeight.bold,
+                            color: colorScheme.primary,
+                          ),
+                        ),
+                        Text(
+                          'Questions',
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: colorScheme.onSurface.withValues(alpha: 0.7),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                );
+              }).toList(),
+            ),
+            const SizedBox(height: 16),
+          ],
+        ),
       ),
     );
   }

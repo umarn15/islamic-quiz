@@ -13,6 +13,7 @@ class QuizResultScreen extends ConsumerStatefulWidget {
   final int correctAnswers;
   final int totalQuestions;
   final QuestionDifficulty difficulty;
+  final int questionCount;
 
   const QuizResultScreen({
     super.key,
@@ -21,6 +22,7 @@ class QuizResultScreen extends ConsumerStatefulWidget {
     required this.correctAnswers,
     required this.totalQuestions,
     required this.difficulty,
+    required this.questionCount,
   });
 
   @override
@@ -216,7 +218,10 @@ class _QuizResultScreenState extends ConsumerState<QuizResultScreen> {
                             Navigator.pushReplacement(
                               context,
                               MaterialPageRoute(
-                                builder: (context) => QuizScreen(difficulty: widget.difficulty),
+                                builder: (context) => QuizScreen(
+                                  difficulty: widget.difficulty,
+                                  questionCount: widget.questionCount,
+                                ),
                               ),
                             );
                           },
@@ -366,9 +371,9 @@ class _QuizResultScreenState extends ConsumerState<QuizResultScreen> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             const Text(
-              '⏱️ Answer within 2 seconds → 30 points\n'
+              '⏱️ Answer within 3 seconds → 30 points\n'
               '⏱️ After that, -2 points per second\n'
-              '⏱️ Minimum 14 points per correct answer',
+              '⏱️ Minimum 16 points per correct answer',
               style: TextStyle(height: 1.6),
             ),
             if (widget.correctAnswers == widget.totalQuestions && lostPoints > 0) ...[

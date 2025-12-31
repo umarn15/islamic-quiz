@@ -8,8 +8,13 @@ import 'quiz_result_screen.dart';
 
 class QuizScreen extends ConsumerStatefulWidget {
   final QuestionDifficulty difficulty;
+  final int questionCount;
 
-  const QuizScreen({super.key, required this.difficulty});
+  const QuizScreen({
+    super.key,
+    required this.difficulty,
+    this.questionCount = 10,
+  });
 
   @override
   ConsumerState<QuizScreen> createState() => _QuizScreenState();
@@ -65,11 +70,11 @@ class _QuizScreenState extends ConsumerState<QuizScreen> with TickerProviderStat
         return;
       }
 
-      // Shuffle and take up to 10 questions
+      // Shuffle and take up to the requested number of questions
       final shuffled = List<QuestionModel>.from(questions)..shuffle(Random());
       
       setState(() {
-        _questions = shuffled.take(10).toList();
+        _questions = shuffled.take(widget.questionCount).toList();
         _isLoading = false;
       });
       
@@ -130,9 +135,9 @@ class _QuizScreenState extends ConsumerState<QuizScreen> with TickerProviderStat
   }
 
   int _calculateScore() {
-    // Full marks (30 points) if answered within first 2 seconds (8+ seconds left)
-    // Then -2 points per second: 7->28, 6->26, 5->24, 4->22, 3->20, 2->18, 1->16, 0->14
-    const int fullMarkThreshold = 8;
+    // Full marks (30 points) if answered within first 3 seconds (7+ seconds left)
+    // Then -2 points per second: 6->28, 5->26, 4->24, 3->22, 2->20, 1->18, 0->16
+    const int fullMarkThreshold = 7;
     const int maxScore = 30;
 
     if (_timeLeft >= fullMarkThreshold) {
@@ -171,6 +176,7 @@ class _QuizScreenState extends ConsumerState<QuizScreen> with TickerProviderStat
           correctAnswers: _correctAnswers,
           totalQuestions: _questions.length,
           difficulty: widget.difficulty,
+          questionCount: widget.questionCount,
         ),
       ),
     );
