@@ -487,7 +487,7 @@ class _QuizScreenState extends ConsumerState<QuizScreen> with TickerProviderStat
           textColor = Colors.red.shade700;
           trailingIcon = Icons.cancel;
         } else {
-          backgroundColor = const Color(0xFFF1F3F4);
+          backgroundColor = const Color(0xFFE8EAED);
           borderColor = const Color(0xFFDADCE0);
           textColor = const Color(0xFF5F6368);
           trailingIcon = null;
