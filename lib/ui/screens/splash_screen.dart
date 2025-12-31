@@ -199,7 +199,6 @@ class _SplashScreenState extends ConsumerState<SplashScreen> with SingleTickerPr
 
     return Scaffold(
       body: Container(
-        // Added a subtle gradient for depth
         decoration: BoxDecoration(
           gradient: LinearGradient(
             begin: Alignment.topLeft,
@@ -215,7 +214,6 @@ class _SplashScreenState extends ConsumerState<SplashScreen> with SingleTickerPr
         ),
         child: Stack(
           children: [
-            // Optional: Add a low-opacity background pattern here
             Center(
               child: FadeTransition(
                 opacity: _fadeAnimation,
