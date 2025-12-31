@@ -82,6 +82,26 @@ class SettingsScreen extends ConsumerWidget {
               ),
               
               const SizedBox(height: 24),
+
+              // Account Section
+              Text(
+                'Account',
+                style: textTheme.titleLarge?.copyWith(
+                  color: colorScheme.primary,
+                ),
+              ),
+              const SizedBox(height: 16),
+
+              Card(
+                child: Padding(
+                  padding: const EdgeInsets.all(16),
+                  child: isLoggedIn
+                      ? _buildLoggedInContent(context, ref, userData.valueOrNull!, textTheme, colorScheme)
+                      : _buildSignInContent(context, textTheme, colorScheme),
+                ),
+              ),
+
+              const SizedBox(height: 24),
               
               // About Section
               Text(
@@ -119,26 +139,6 @@ class SettingsScreen extends ConsumerWidget {
                       // ),
                     ],
                   ),
-                ),
-              ),
-              
-              const SizedBox(height: 24),
-              
-              // Account Section
-              Text(
-                'Account',
-                style: textTheme.titleLarge?.copyWith(
-                  color: colorScheme.primary,
-                ),
-              ),
-              const SizedBox(height: 16),
-              
-              Card(
-                child: Padding(
-                  padding: const EdgeInsets.all(16),
-                  child: isLoggedIn
-                      ? _buildLoggedInContent(context, ref, userData.valueOrNull!, textTheme, colorScheme)
-                      : _buildSignInContent(context, textTheme, colorScheme),
                 ),
               ),
             ],
