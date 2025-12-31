@@ -1,3 +1,4 @@
+import 'dart:math' as math;
 import 'package:audioplayers/audioplayers.dart';
 import 'package:confetti/confetti.dart';
 import 'package:flutter/material.dart';
@@ -30,15 +31,75 @@ class QuizResultScreen extends ConsumerStatefulWidget {
   ConsumerState<QuizResultScreen> createState() => _QuizResultScreenState();
 }
 
-class _QuizResultScreenState extends ConsumerState<QuizResultScreen> {
+class _QuizResultScreenState extends ConsumerState<QuizResultScreen>
+    with TickerProviderStateMixin {
   bool _pointsUpdated = false;
   late ConfettiController _confettiController;
   final AudioPlayer _audioPlayer = AudioPlayer();
 
+  late AnimationController _scaleController;
+  late AnimationController _slideController;
+  late AnimationController _pulseController;
+  late AnimationController _progressController;
+
+  late Animation<double> _scaleAnimation;
+  late Animation<Offset> _slideAnimation;
+  late Animation<double> _pulseAnimation;
+  late Animation<double> _progressAnimation;
+
   @override
   void initState() {
     super.initState();
-    _confettiController = ConfettiController(duration: const Duration(seconds: 3));
+    _confettiController = ConfettiController(duration: const Duration(seconds: 8));
+
+    // Scale animation for the result icon
+    _scaleController = AnimationController(
+      duration: const Duration(milliseconds: 800),
+      vsync: this,
+    );
+    _scaleAnimation = CurvedAnimation(
+      parent: _scaleController,
+      curve: Curves.elasticOut,
+    );
+
+    // Slide animation for content
+    _slideController = AnimationController(
+      duration: const Duration(milliseconds: 600),
+      vsync: this,
+    );
+    _slideAnimation = Tween<Offset>(
+      begin: const Offset(0, 0.3),
+      end: Offset.zero,
+    ).animate(CurvedAnimation(
+      parent: _slideController,
+      curve: Curves.easeOutCubic,
+    ));
+
+    // Pulse animation for score
+    _pulseController = AnimationController(
+      duration: const Duration(milliseconds: 1500),
+      vsync: this,
+    )..repeat(reverse: true);
+    _pulseAnimation = Tween<double>(begin: 1.0, end: 1.05).animate(
+      CurvedAnimation(parent: _pulseController, curve: Curves.easeInOut),
+    );
+
+    // Progress animation for circular indicator
+    _progressController = AnimationController(
+      duration: const Duration(milliseconds: 1500),
+      vsync: this,
+    );
+    _progressAnimation = Tween<double>(begin: 0, end: 1).animate(
+      CurvedAnimation(parent: _progressController, curve: Curves.easeOutCubic),
+    );
+
+    // Start animations
+    Future.delayed(const Duration(milliseconds: 100), () {
+      _scaleController.forward();
+      _slideController.forward();
+      _progressController.forward();
+    });
+
     _updateUserPoints();
     _checkForCelebration();
   }
@@ -47,6 +108,10 @@ class _QuizResultScreenState extends ConsumerState<QuizResultScreen> {
   void dispose() {
     _confettiController.dispose();
     _audioPlayer.dispose();
+    _scaleController.dispose();
+    _slideController.dispose();
+    _pulseController.dispose();
+    _progressController.dispose();
     super.dispose();
   }
 
@@ -65,13 +130,11 @@ class _QuizResultScreenState extends ConsumerState<QuizResultScreen> {
   Future<void> _updateUserPoints() async {
     if (_pointsUpdated) return;
     _pointsUpdated = true;
-    
+
     final userData = ref.read(userDataProvider);
     if (userData.valueOrNull != null) {
-      // Logged in - save to Firestore
       await ref.read(userDataProvider.notifier).updatePoints(widget.score);
     } else {
-      // Guest - save locally
       await ref.read(localStatsProvider.notifier).addPoints(widget.score);
     }
   }
@@ -81,239 +144,294 @@ class _QuizResultScreenState extends ConsumerState<QuizResultScreen> {
     final colorScheme = Theme.of(context).colorScheme;
     final percentage = (widget.score / widget.totalScore * 100).round();
     final resultData = _getResultData(percentage);
+    final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Scaffold(
-      body: Stack(
-        children: [
-          SafeArea(
-            child: SingleChildScrollView(
-              padding: const EdgeInsets.all(24),
-              child: Column(
-                children: [
-                  const SizedBox(height: 20),
-                  // Result Icon
-                  Container(
-                    width: 120,
-                    height: 120,
-                    decoration: BoxDecoration(
-                      color: resultData.color.withValues(alpha: 0.2),
-                      shape: BoxShape.circle,
-                    ),
-                    child: Icon(
-                      resultData.icon,
-                      size: 64,
-                      color: resultData.color,
-                    ),
-                  ),
-                  const SizedBox(height: 24),
-                  
-                  // Result Title
-                  Text(
-                    resultData.title,
-                    style: TextStyle(
-                      fontSize: 32,
-                      fontWeight: FontWeight.bold,
-                      color: resultData.color,
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  Text(
-                    resultData.message,
-                    style: TextStyle(
-                      fontSize: 16,
-                      color: Colors.grey[600],
-                    ),
-                    textAlign: TextAlign.center,
-                  ),
-                  const SizedBox(height: 32),
-
-                  // Score Card
-                  Container(
-                    width: double.infinity,
-                    padding: const EdgeInsets.all(12),
-                    decoration: BoxDecoration(
-                      gradient: LinearGradient(
-                        colors: [
-                          colorScheme.primary.withValues(alpha: 0.1),
-                          colorScheme.secondary.withValues(alpha: 0.05),
-                        ],
-                      ),
-                      borderRadius: BorderRadius.circular(20),
-                      border: Border.all(
-                        color: colorScheme.primary.withValues(alpha: 0.2),
-                      ),
-                    ),
-                    child: Column(
-                      children: [
-                        const Icon(Icons.star, color: Colors.amber, size: 40),
-                        const SizedBox(height: 8),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          crossAxisAlignment: CrossAxisAlignment.baseline,
-                          textBaseline: TextBaseline.alphabetic,
-                          children: [
-                            Text(
-                              '${widget.score}',
-                              style: const TextStyle(
-                                fontSize: 48,
-                                fontWeight: FontWeight.bold,
-                                color: Colors.amber,
-                              ),
-                            ),
-                            Text(
-                              ' / ${widget.totalQuestions * 30}',
-                              style: TextStyle(
-                                fontSize: 24,
-                                fontWeight: FontWeight.w500,
-                                color: Colors.amber.shade300,
-                              ),
-                            ),
-                            const SizedBox(width: 6),
-                            GestureDetector(
-                              onTap: () => _showScoringInfo(context),
-                              child: Icon(
-                                Icons.info_outline,
-                                color: Colors.amber.shade600,
-                                size: 20,
-                              ),
-                            ),
-                          ],
-                        ),
-                        const Text(
-                          'points',
-                          style: TextStyle(
-                            fontSize: 16,
-                            color: Colors.amber,
-                          ),
-                        ),
-                        const SizedBox(height: 16),
-                        const Divider(),
-                        const SizedBox(height: 16),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                          children: [
-                            _buildStatItem(
-                              icon: Icons.check_circle,
-                              value: '${widget.correctAnswers}',
-                              label: 'Correct',
-                              color: Colors.green,
-                            ),
-                            _buildStatItem(
-                              icon: Icons.cancel,
-                              value: '${widget.totalQuestions - widget.correctAnswers}',
-                              label: 'Wrong',
-                              color: Colors.red,
-                            ),
-                            _buildStatItem(
-                              icon: Icons.percent,
-                              value: '$percentage%',
-                              label: 'Score',
-                              color: colorScheme.primary,
-                            ),
-                          ],
-                        ),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(height: 32),
-
-                  // Action Buttons
-                  Row(
-                    children: [
-                      Expanded(
-                        child: OutlinedButton.icon(
-                          onPressed: () {
-                            Navigator.pushReplacement(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) => QuizScreen(
-                                  difficulty: widget.difficulty,
-                                  questionCount: widget.questionCount,
-                                ),
-                              ),
-                            );
-                          },
-                          icon: const Icon(Icons.replay),
-                          label: const Text('Play Again'),
-                          style: OutlinedButton.styleFrom(
-                            padding: const EdgeInsets.symmetric(vertical: 16),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                          ),
-                        ),
-                      ),
-                      const SizedBox(width: 16),
-                      Expanded(
-                        child: ElevatedButton.icon(
-                          onPressed: () {
-                            Navigator.pushAndRemoveUntil(
-                              context,
-                              MaterialPageRoute(builder: (context) => const HomeScreen()),
-                              (route) => false,
-                            );
-                          },
-                          icon: const Icon(Icons.home),
-                          label: const Text('Home'),
-                          style: ElevatedButton.styleFrom(
-                            padding: const EdgeInsets.symmetric(vertical: 16),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                          ),
-                        ),
-                      ),
+      backgroundColor: Colors.transparent,
+      body: Container(
+        decoration: BoxDecoration(
+          color: resultData.color.withValues(alpha: 0.2)
+        ),
+        child: Stack(
+          children: [
+            // Decorative circles
+            Positioned(
+              top: -100,
+              right: -100,
+              child: Container(
+                width: 300,
+                height: 300,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  gradient: RadialGradient(
+                    colors: [
+                      resultData.color.withValues(alpha: 0.06),
+                      resultData.color.withValues(alpha: 0.0),
                     ],
                   ),
-                  const SizedBox(height: 18),
+                ),
+              ),
+            ),
+            Positioned(
+              bottom: -50,
+              left: -50,
+              child: Container(
+                width: 200,
+                height: 200,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  gradient: RadialGradient(
+                    colors: [
+                      colorScheme.primary.withValues(alpha: 0.06),
+                      colorScheme.primary.withValues(alpha: 0.0),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+            SafeArea(
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.fromLTRB(24, 24, 24, 16),
+                child: SlideTransition(
+                  position: _slideAnimation,
+                  child: Column(
+                    children: [
+                      const SizedBox(height: 10),
+                      // Animated Result Icon with Circular Progress
+                      ScaleTransition(
+                        scale: _scaleAnimation,
+                        child: _buildCircularProgress(percentage, resultData, colorScheme),
+                      ),
+                      const SizedBox(height: 24),
 
-                  // Difficulty Badge
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                    decoration: BoxDecoration(
-                      color: _getDifficultyColor(widget.difficulty).withValues(alpha: 0.2),
-                      borderRadius: BorderRadius.circular(20),
-                    ),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Icon(
-                          Icons.speed,
-                          color: _getDifficultyColor(widget.difficulty),
-                          size: 20,
-                        ),
-                        const SizedBox(width: 8),
-                        Text(
-                          '${widget.difficulty.name.toUpperCase()} Mode',
-                          style: TextStyle(
-                            color: _getDifficultyColor(widget.difficulty),
-                            fontWeight: FontWeight.bold,
+                      // Result Title with gradient
+                      ShaderMask(
+                        shaderCallback: (bounds) => LinearGradient(
+                          colors: [resultData.color, resultData.color.withValues(alpha: 0.7)],
+                        ).createShader(bounds),
+                        child: Text(
+                          resultData.title,
+                          style: const TextStyle(
+                            fontSize: 34,
+                            fontWeight: FontWeight.w800,
+                            color: Colors.white,
+                            letterSpacing: -0.5,
                           ),
                         ),
-                      ],
-                    ),
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
+                        resultData.message,
+                        style: TextStyle(
+                          fontSize: 16,
+                          color: Colors.grey,
+                          fontWeight: FontWeight.w500,
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                      const SizedBox(height: 28),
+
+                      // Score Card with glassmorphism effect
+                      ScaleTransition(
+                        scale: _pulseAnimation,
+                        child: _buildScoreCard(colorScheme, isDark),
+                      ),
+                      const SizedBox(height: 20),
+
+                      // Stats Row
+                      _buildStatsRow(colorScheme, percentage, isDark),
+                      const SizedBox(height: 28),
+
+                      // Action Buttons
+                      _buildActionButtons(context, colorScheme),
+                      const SizedBox(height: 20),
+
+                      // Difficulty Badge
+                      _buildDifficultyBadge(),
+                      const SizedBox(height: 20),
+                    ],
                   ),
+                ),
+              ),
+            ),
+            // Confetti
+            Align(
+              alignment: Alignment.topCenter,
+              child: ConfettiWidget(
+                confettiController: _confettiController,
+                blastDirectionality: BlastDirectionality.explosive,
+                shouldLoop: false,
+                colors: const [
+                  Colors.green,
+                  Colors.amber,
+                  Colors.pink,
+                  Colors.blue,
+                  Colors.purple,
+                  Colors.orange,
+                  Colors.teal,
+                ],
+                numberOfParticles: 300,
+                gravity: 0.3,
+                emissionFrequency: 0.08,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildCircularProgress(int percentage, _ResultData resultData, ColorScheme colorScheme) {
+    return AnimatedBuilder(
+      animation: _progressAnimation,
+      builder: (context, child) {
+        return SizedBox(
+          width: 160,
+          height: 160,
+          child: Stack(
+            alignment: Alignment.center,
+            children: [
+              // Background circle
+              CustomPaint(
+                size: const Size(160, 160),
+                painter: _CircularProgressPainter(
+                  progress: _progressAnimation.value * (percentage / 100),
+                  backgroundColor: Colors.grey.withValues(alpha: 0.2),
+                  progressColor: resultData.color,
+                  strokeWidth: 12,
+                ),
+              ),
+              // Inner glow container
+              Container(
+                width: 140,
+                height: 140,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  gradient: RadialGradient(
+                    colors: [
+                      resultData.color.withValues(alpha: 0.2),
+                      resultData.color.withValues(alpha: 0.05),
+                    ],
+                  ),
+                  boxShadow: [
+                    BoxShadow(
+                      color: resultData.color.withValues(alpha: 0.24),
+                      blurRadius: 20,
+                      spreadRadius: 2,
+                    ),
+                  ],
+                ),
+                child: Icon(
+                  resultData.icon,
+                  size: 68,
+                  color: resultData.color,
+                ),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildScoreCard(ColorScheme colorScheme, bool isDark) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [
+            Colors.amber.withValues(alpha: isDark ? 0.15 : 0.1),
+            Colors.orange.withValues(alpha: isDark ? 0.1 : 0.05),
+          ],
+        ),
+        borderRadius: BorderRadius.circular(24),
+        border: Border.all(
+          color: Colors.amber.withValues(alpha: 0.3),
+          width: 1.5,
+        ),
+        // boxShadow: [
+        //   BoxShadow(
+        //     color: Colors.amber.withValues(alpha: 0.15),
+        //     blurRadius: 20,
+        //     offset: const Offset(0, 8),
+        //   ),
+        // ],
+      ),
+      child: Column(
+        children: [
+          // Star icon with glow
+          Container(
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              gradient: RadialGradient(
+                colors: [
+                  Colors.amber.withValues(alpha: 0.3),
+                  Colors.amber.withValues(alpha: 0),
                 ],
               ),
             ),
+            child: const Icon(Icons.star_rounded, color: Colors.amber, size: 44),
           ),
-          // Confetti
-          Align(
-            alignment: Alignment.topCenter,
-            child: ConfettiWidget(
-              confettiController: _confettiController,
-              blastDirectionality: BlastDirectionality.explosive,
-              shouldLoop: false,
-              colors: const [
-                Colors.green,
-                Colors.amber,
-                Colors.pink,
-                Colors.blue,
-                Colors.purple,
-                Colors.orange,
-              ],
-              numberOfParticles: 30,
-              gravity: 0.2,
+          const SizedBox(height: 8),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.baseline,
+            textBaseline: TextBaseline.alphabetic,
+            children: [
+              Text(
+                '${widget.score}',
+                style: TextStyle(
+                  fontSize: 56,
+                  fontWeight: FontWeight.w800,
+                  color: Colors.amber.shade600,
+                  height: 1,
+                ),
+              ),
+              Text(
+                ' / ${widget.totalQuestions * 30}',
+                style: TextStyle(
+                  fontSize: 22,
+                  fontWeight: FontWeight.w600,
+                  color: Colors.amber.shade400,
+                ),
+              ),
+              const SizedBox(width: 8),
+              GestureDetector(
+                onTap: () => _showScoringInfo(context),
+                child: Container(
+                  padding: const EdgeInsets.all(4),
+                  decoration: BoxDecoration(
+                    color: Colors.amber.withValues(alpha: 0.2),
+                    shape: BoxShape.circle,
+                  ),
+                  child: Icon(
+                    Icons.info_outline_rounded,
+                    color: Colors.amber.shade700,
+                    size: 18,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 4),
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+            decoration: BoxDecoration(
+              color: Colors.amber.withValues(alpha: 0.15),
+              borderRadius: BorderRadius.circular(20),
+            ),
+            child: Text(
+              'POINTS EARNED',
+              style: TextStyle(
+                fontSize: 12,
+                fontWeight: FontWeight.w700,
+                color: Colors.amber.shade700,
+                letterSpacing: 1.5,
+              ),
             ),
           ),
         ],
@@ -321,32 +439,213 @@ class _QuizResultScreenState extends ConsumerState<QuizResultScreen> {
     );
   }
 
-  Widget _buildStatItem({
+  Widget _buildStatsRow(ColorScheme colorScheme, int percentage, bool isDark) {
+    return Row(
+      children: [
+        Expanded(
+          child: _buildStatCard(
+            icon: Icons.check_circle_rounded,
+            value: '${widget.correctAnswers}',
+            label: 'Correct',
+            color: Colors.green,
+            isDark: isDark,
+          ),
+        ),
+        const SizedBox(width: 12),
+        Expanded(
+          child: _buildStatCard(
+            icon: Icons.cancel_rounded,
+            value: '${widget.totalQuestions - widget.correctAnswers}',
+            label: 'Wrong',
+            color: Colors.red,
+            isDark: isDark,
+          ),
+        ),
+        const SizedBox(width: 12),
+        Expanded(
+          child: _buildStatCard(
+            icon: Icons.percent_rounded,
+            value: '$percentage%',
+            label: 'Accuracy',
+            color: Color(0xFF4ADE80),
+            isDark: isDark,
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildStatCard({
     required IconData icon,
     required String value,
     required String label,
     required Color color,
+    required bool isDark,
   }) {
-    return Column(
+    return Container(
+      padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 8),
+      decoration: BoxDecoration(
+        color: color.withValues(alpha: 0.15),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(
+          color: color.withValues(alpha: 0.2),
+        ),
+      ),
+      child: Column(
+        children: [
+          // Container(
+          //   padding: const EdgeInsets.all(8),
+          //   decoration: BoxDecoration(
+          //     color: color.withValues(alpha: 0.15),
+          //     shape: BoxShape.circle,
+          //   ),
+          //   child: Icon(icon, color: color, size: 22),
+          // ),
+          // const SizedBox(height: 8),
+          Text(
+            value,
+            style: TextStyle(
+              fontSize: 22,
+              fontWeight: FontWeight.w800,
+              color: color,
+            ),
+          ),
+          const SizedBox(height: 2),
+          Text(
+            label,
+            style: TextStyle(
+              fontSize: 11,
+              fontWeight: FontWeight.w600,
+              color: isDark ? Colors.grey[400] : Colors.grey[600],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildActionButtons(BuildContext context, ColorScheme colorScheme) {
+    return Row(
       children: [
-        Icon(icon, color: color, size: 28),
-        const SizedBox(height: 4),
-        Text(
-          value,
-          style: TextStyle(
-            fontSize: 24,
-            fontWeight: FontWeight.bold,
-            color: color,
+        Expanded(
+          child: Container(
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(color: colorScheme.primary.withValues(alpha: 0.5)),
+              gradient: LinearGradient(
+                colors: [colorScheme.primary, colorScheme.primary.withValues(alpha: 0.6)],
+              ),
+            ),
+            child: InkWell(
+              borderRadius: BorderRadius.circular(16),
+              onTap: () {
+                Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => QuizScreen(
+                      difficulty: widget.difficulty,
+                      questionCount: widget.questionCount,
+                    ),
+                  ),
+                );
+              },
+              child: Padding(
+                padding: const EdgeInsets.symmetric(vertical: 16),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(Icons.replay_rounded, color: Colors.grey.shade300),
+                    const SizedBox(width: 8),
+                    Text(
+                      'Play Again',
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w600,
+                        color: Colors.grey.shade300,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
           ),
         ),
-        Text(
-          label,
-          style: TextStyle(
-            fontSize: 12,
-            color: Colors.grey[600],
+        const SizedBox(width: 12),
+        Expanded(
+          child: Container(
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(16),
+              gradient: LinearGradient(
+                colors: [colorScheme.primary, colorScheme.primary.withValues(alpha: 0.6)],
+              ),
+            ),
+            child: Material(
+              color: Colors.transparent,
+              child: InkWell(
+                borderRadius: BorderRadius.circular(16),
+                onTap: () {
+                  Navigator.pushAndRemoveUntil(
+                    context,
+                    MaterialPageRoute(builder: (context) => const HomeScreen()),
+                    (route) => false,
+                  );
+                },
+                child: Padding(
+                  padding: EdgeInsets.symmetric(vertical: 16),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(Icons.home_rounded, color: Colors.grey.shade300),
+                      SizedBox(width: 8),
+                      Text(
+                        'Home',
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w600,
+                          color: Colors.grey.shade300,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
           ),
         ),
       ],
+    );
+  }
+
+  Widget _buildDifficultyBadge() {
+    final color = _getDifficultyColor(widget.difficulty);
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          colors: [
+            color.withValues(alpha: 0.2),
+            color.withValues(alpha: 0.1),
+          ],
+        ),
+        borderRadius: BorderRadius.circular(24),
+        border: Border.all(color: color.withValues(alpha: 0.3)),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(Icons.speed_rounded, color: color, size: 20),
+          const SizedBox(width: 8),
+          Text(
+            '${widget.difficulty.name.toUpperCase()} MODE',
+            style: TextStyle(
+              color: color,
+              fontWeight: FontWeight.w700,
+              fontSize: 13,
+              letterSpacing: 1,
+            ),
+          ),
+        ],
+      ),
     );
   }
 
@@ -363,43 +662,57 @@ class _QuizResultScreenState extends ConsumerState<QuizResultScreen> {
 
   void _showScoringInfo(BuildContext context) {
     final lostPoints = widget.totalQuestions * 30 - widget.score;
-    
+    final colorScheme = Theme.of(context).colorScheme;
+
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
         title: Row(
           children: [
-            Icon(Icons.info_outline, color: Theme.of(context).colorScheme.primary),
-            const SizedBox(width: 8),
-            const Text('How Scoring Works'),
+            Container(
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: colorScheme.primary.withValues(alpha: 0.1),
+                shape: BoxShape.circle,
+              ),
+              child: Icon(Icons.info_outline_rounded, color: colorScheme.primary),
+            ),
+            const SizedBox(width: 12),
+            const Text('How Scoring Works', style: TextStyle(fontSize: 18)),
           ],
         ),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text(
-              '⏱️ Answer within 3 seconds → 30 points\n'
-              '⏱️ After that, -2 points per second\n'
-              '⏱️ Minimum 16 points per correct answer',
-              style: TextStyle(height: 1.6),
-            ),
+            _buildScoringRow('⚡', 'Answer within 3 seconds', '30 points'),
+            const SizedBox(height: 8),
+            _buildScoringRow('⏱️', 'After 3 seconds', '-2 pts/sec'),
+            const SizedBox(height: 8),
+            _buildScoringRow('🛡️', 'Minimum per correct', '16 points'),
             if (widget.correctAnswers == widget.totalQuestions && lostPoints > 0) ...[
               const SizedBox(height: 16),
               Container(
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
-                  color: Colors.amber.withValues(alpha: 0.2),
-                  borderRadius: BorderRadius.circular(8),
+                  gradient: LinearGradient(
+                    colors: [
+                      Colors.amber.withValues(alpha: 0.2),
+                      Colors.orange.withValues(alpha: 0.1),
+                    ],
+                  ),
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: Colors.amber.withValues(alpha: 0.3)),
                 ),
                 child: Row(
                   children: [
-                    const Icon(Icons.lightbulb, color: Colors.amber, size: 20),
-                    const SizedBox(width: 8),
+                    const Icon(Icons.lightbulb_rounded, color: Colors.amber, size: 22),
+                    const SizedBox(width: 10),
                     Expanded(
                       child: Text(
-                        'All correct! You lost $lostPoints points due to time.',
-                        style: TextStyle(fontSize: 13, color: Colors.amber[900]),
+                        'Perfect answers! Lost $lostPoints pts to time.',
+                        style: TextStyle(fontSize: 13, color: Colors.amber[800], fontWeight: FontWeight.w500),
                       ),
                     ),
                   ],
@@ -411,50 +724,61 @@ class _QuizResultScreenState extends ConsumerState<QuizResultScreen> {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('Got it!',
-             style: TextStyle(
-               fontSize: 18
-             ),),
+            style: TextButton.styleFrom(
+              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+            ),
+            child: const Text('Got it!', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
           ),
         ],
       ),
     );
   }
 
+  Widget _buildScoringRow(String emoji, String description, String points) {
+    return Row(
+      children: [
+        Text(emoji, style: const TextStyle(fontSize: 18)),
+        const SizedBox(width: 10),
+        Expanded(child: Text(description, style: const TextStyle(fontSize: 14))),
+        Text(points, style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600)),
+      ],
+    );
+  }
+
   _ResultData _getResultData(int percentage) {
     if (percentage == 100) {
       return _ResultData(
-        icon: Icons.emoji_events,
+        icon: Icons.emoji_events_rounded,
         title: 'Perfect Score!',
         message: 'SubhanAllah! You answered everything perfectly!',
         color: Colors.amber,
       );
     } else if (percentage >= 80) {
       return _ResultData(
-        icon: Icons.auto_awesome,
-        title: percentage >= 90? 'Almost Perfect!' : 'Excellent!',
+        icon: Icons.auto_awesome_rounded,
+        title: percentage >= 90 ? 'Almost Perfect!' : 'Excellent!',
         message: 'MashaAllah! You did amazing!',
-        color: Colors.deepPurple.shade300,
+        color: Colors.deepPurple.shade400,
       );
     } else if (percentage >= 60) {
       return _ResultData(
-        icon: Icons.thumb_up,
+        icon: Icons.thumb_up_rounded,
         title: 'Good Job!',
         message: 'Keep learning and improving!',
         color: Colors.green,
       );
     } else if (percentage >= 40) {
       return _ResultData(
-        icon: Icons.sentiment_satisfied,
+        icon: Icons.sentiment_satisfied_rounded,
         title: 'Nice Try!',
         message: 'Practice makes perfect!',
         color: Colors.orange,
       );
     } else {
       return _ResultData(
-        icon: Icons.school,
+        icon: Icons.school_rounded,
         title: 'Keep Learning!',
-        message: 'Don\'t give up, try again!',
+        message: "Don't give up, try again!",
         color: Colors.blue,
       );
     }
@@ -473,4 +797,63 @@ class _ResultData {
     required this.message,
     required this.color,
   });
+}
+
+// Custom painter for circular progress
+class _CircularProgressPainter extends CustomPainter {
+  final double progress;
+  final Color backgroundColor;
+  final Color progressColor;
+  final double strokeWidth;
+
+  _CircularProgressPainter({
+    required this.progress,
+    required this.backgroundColor,
+    required this.progressColor,
+    required this.strokeWidth,
+  });
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final center = Offset(size.width / 2, size.height / 2);
+    final radius = (size.width - strokeWidth) / 2;
+
+    // Background circle
+    final bgPaint = Paint()
+      ..color = backgroundColor
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = strokeWidth
+      ..strokeCap = StrokeCap.round;
+
+    canvas.drawCircle(center, radius, bgPaint);
+
+    // Progress arc
+    final progressPaint = Paint()
+      ..shader = SweepGradient(
+        startAngle: -math.pi / 2,
+        endAngle: 3 * math.pi / 2,
+        colors: [
+          progressColor.withValues(alpha: 0.6),
+          progressColor,
+          progressColor,
+        ],
+        stops: const [0.0, 0.5, 1.0],
+      ).createShader(Rect.fromCircle(center: center, radius: radius))
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = strokeWidth
+      ..strokeCap = StrokeCap.round;
+
+    canvas.drawArc(
+      Rect.fromCircle(center: center, radius: radius),
+      -math.pi / 2,
+      2 * math.pi * progress,
+      false,
+      progressPaint,
+    );
+  }
+
+  @override
+  bool shouldRepaint(covariant _CircularProgressPainter oldDelegate) {
+    return oldDelegate.progress != progress;
+  }
 }
