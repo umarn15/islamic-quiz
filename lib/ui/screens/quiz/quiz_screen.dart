@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_tts/flutter_tts.dart';
 import 'package:islamicquiz/data/models/question_model.dart';
 import 'package:islamicquiz/data/providers/question_provider.dart';
 import 'quiz_result_screen.dart';
@@ -34,6 +35,10 @@ class _QuizScreenState extends ConsumerState<QuizScreen> with TickerProviderStat
   int _timeLeft = _timerDuration;
   Timer? _timer;
 
+  // Text-to-Speech
+  late FlutterTts _flutterTts;
+  bool _isSpeaking = false;
+
   // Animations
   late AnimationController _timerAnimationController;
   late AnimationController _optionAnimationController;
@@ -42,6 +47,7 @@ class _QuizScreenState extends ConsumerState<QuizScreen> with TickerProviderStat
   @override
   void initState() {
     super.initState();
+    _initTts();
     _timerAnimationController = AnimationController(
       duration: const Duration(seconds: _timerDuration),
       vsync: this,
@@ -54,6 +60,31 @@ class _QuizScreenState extends ConsumerState<QuizScreen> with TickerProviderStat
     );
 
     _loadQuestions();
+  }
+
+  Future<void> _initTts() async {
+    _flutterTts = FlutterTts();
+    await _flutterTts.setLanguage('en-US');
+    await _flutterTts.setSpeechRate(0.5);
+    await _flutterTts.setVolume(1.0);
+    await _flutterTts.setPitch(1.0);
+    
+    _flutterTts.setStartHandler(() {
+      setState(() => _isSpeaking = true);
+    });
+    
+    _flutterTts.setCompletionHandler(() {
+      setState(() => _isSpeaking = false);
+    });
+    
+    _flutterTts.setCancelHandler(() {
+      setState(() => _isSpeaking = false);
+    });
+  }
+
+  Future<void> _speakQuestion(QuestionModel question) async {
+    await _flutterTts.stop();
+    await _flutterTts.speak(question.questionText);
   }
 
   Future<void> _loadQuestions() async {
@@ -79,6 +110,7 @@ class _QuizScreenState extends ConsumerState<QuizScreen> with TickerProviderStat
       });
       
       _startTimer();
+      _speakQuestion(_questions[_currentIndex]);
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -159,6 +191,7 @@ class _QuizScreenState extends ConsumerState<QuizScreen> with TickerProviderStat
           _selectedOptionIndex = null;
         });
         _startTimer();
+        _speakQuestion(_questions[_currentIndex]);
       } else {
         _finishQuiz();
       }
@@ -185,6 +218,7 @@ class _QuizScreenState extends ConsumerState<QuizScreen> with TickerProviderStat
   @override
   void dispose() {
     _timer?.cancel();
+    _flutterTts.stop();
     _timerAnimationController.dispose();
     _optionAnimationController.dispose();
     super.dispose();
@@ -419,7 +453,7 @@ class _QuizScreenState extends ConsumerState<QuizScreen> with TickerProviderStat
   Widget _buildQuestionCard(QuestionModel question, ColorScheme colorScheme) {
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.all(24),
+      padding: const EdgeInsets.all(18),
       decoration: BoxDecoration(
         gradient: LinearGradient(
           colors: [
@@ -437,20 +471,34 @@ class _QuizScreenState extends ConsumerState<QuizScreen> with TickerProviderStat
       ),
       child: Column(
         children: [
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-            decoration: BoxDecoration(
-              color: _getDifficultyColor(question.difficulty).withValues(alpha: 0.2),
-              borderRadius: BorderRadius.circular(20),
-            ),
-            child: Text(
-              question.difficulty.name.toUpperCase(),
-              style: TextStyle(
-                color: _getDifficultyColor(question.difficulty),
-                fontWeight: FontWeight.bold,
-                fontSize: 12,
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                decoration: BoxDecoration(
+                  color: _getDifficultyColor(question.difficulty).withValues(alpha: 0.2),
+                  borderRadius: BorderRadius.circular(20),
+                ),
+                child: Text(
+                  question.difficulty.name.toUpperCase(),
+                  style: TextStyle(
+                    color: _getDifficultyColor(question.difficulty),
+                    fontWeight: FontWeight.bold,
+                    fontSize: 12,
+                  ),
+                ),
               ),
-            ),
+              const SizedBox(width: 8),
+              IconButton(
+                onPressed: () => _speakQuestion(question),
+                icon: Icon(
+                  _isSpeaking ? Icons.volume_up : Icons.volume_up_outlined,
+                  color: colorScheme.primary,
+                ),
+                tooltip: 'Read question aloud',
+              ),
+            ],
           ),
           const SizedBox(height: 16),
           Text(
