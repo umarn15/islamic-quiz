@@ -1,3 +1,4 @@
+import 'package:audioplayers/audioplayers.dart';
 import 'package:confetti/confetti.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -32,6 +33,7 @@ class QuizResultScreen extends ConsumerStatefulWidget {
 class _QuizResultScreenState extends ConsumerState<QuizResultScreen> {
   bool _pointsUpdated = false;
   late ConfettiController _confettiController;
+  final AudioPlayer _audioPlayer = AudioPlayer();
 
   @override
   void initState() {
@@ -44,6 +46,7 @@ class _QuizResultScreenState extends ConsumerState<QuizResultScreen> {
   @override
   void dispose() {
     _confettiController.dispose();
+    _audioPlayer.dispose();
     super.dispose();
   }
 
@@ -51,7 +54,12 @@ class _QuizResultScreenState extends ConsumerState<QuizResultScreen> {
     final percentage = (widget.score / widget.totalScore * 100).round();
     if (percentage >= 90) {
       _confettiController.play();
+      _playCelebrationSound();
     }
+  }
+
+  Future<void> _playCelebrationSound() async {
+    await _audioPlayer.play(AssetSource('sounds/celebration.wav'));
   }
 
   Future<void> _updateUserPoints() async {
