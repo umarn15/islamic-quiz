@@ -20,7 +20,7 @@ class _AdminPanelScreenState extends ConsumerState<AdminPanelScreen> {
   @override
   Widget build(BuildContext context) {
     final questionsAsync = ref.watch(questionNotifierProvider);
-    final colorScheme = Theme.of(context).colorScheme;remove
+    final colorScheme = Theme.of(context).colorScheme;
 
     return Scaffold(
       appBar: AppBar(
