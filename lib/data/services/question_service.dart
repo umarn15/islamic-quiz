@@ -1,6 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../models/question_model.dart';
-import '../initial_questions.dart';
+import '../local_questions.dart';
 
 class QuestionService {
   final FirebaseFirestore _firestore;

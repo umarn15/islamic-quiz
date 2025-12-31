@@ -422,7 +422,7 @@ class _AdminPanelScreenState extends ConsumerState<AdminPanelScreen> {
           context: context,
           builder: (context) => AlertDialog(
             title: const Text('Seed Questions'),
-            content: const Text('This will add initial questions to Firestore. Existing questions will not be overwritten.'),
+            content: const Text('This will add local questions to Firestore. Existing questions will not be overwritten.'),
             actions: [
               TextButton(
                 onPressed: () => Navigator.pop(context, false),

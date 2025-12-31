@@ -70,7 +70,7 @@ class QuestionModel {
     );
   }
 
-  /// Creates a QuestionModel from local JSON (initial_questions.dart)
+  /// Creates a QuestionModel from local JSON (local_questions.dart)
   factory QuestionModel.fromLocalJson(Map<String, dynamic> json) {
     return QuestionModel(
       id: json['id'] as String,
