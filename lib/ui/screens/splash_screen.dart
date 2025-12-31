@@ -195,6 +195,7 @@ class _SplashScreenState extends ConsumerState<SplashScreen> with SingleTickerPr
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
+    bool darkMode = Theme.of(context).brightness == Brightness.dark;
 
     return Scaffold(
       body: Container(
@@ -203,7 +204,10 @@ class _SplashScreenState extends ConsumerState<SplashScreen> with SingleTickerPr
           gradient: LinearGradient(
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
-            colors: [
+            colors: darkMode? [
+              colorScheme.primary.withValues(alpha: 0.6),
+              colorScheme.primary.withValues(alpha: 0.5),
+            ] : [
               colorScheme.primary,
               colorScheme.primaryContainer,
             ],
