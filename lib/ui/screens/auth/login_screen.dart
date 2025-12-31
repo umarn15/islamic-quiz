@@ -250,7 +250,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                         )
                       : const Text('Sign In', style: TextStyle(fontSize: 16)),
                 ),
-                const SizedBox(height: 24),
+                const SizedBox(height: 18),
 
                 // Register link
                 Row(

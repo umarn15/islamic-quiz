@@ -281,7 +281,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                         )
                       : const Text('Create Account', style: TextStyle(fontSize: 16)),
                 ),
-                const SizedBox(height: 24),
+                const SizedBox(height: 18),
 
                 // Login link
                 Row(
