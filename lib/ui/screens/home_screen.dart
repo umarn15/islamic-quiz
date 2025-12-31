@@ -298,11 +298,11 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 end: Alignment.centerRight,
                 colors: isDarkMode
                     ? [
-                        effectiveColor.withValues(alpha: 0.2),
-                        effectiveColor.withValues(alpha: 0.08),
+                        effectiveColor.withValues(alpha: 0.1),
+                        effectiveColor.withValues(alpha: 0.06),
                       ]
                     : [
-                        color.withValues(alpha: 0.08),
+                        color.withValues(alpha: 0.06),
                         color.withValues(alpha: 0.02),
                       ],
               ),
