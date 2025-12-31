@@ -22,7 +22,7 @@ class _SplashScreenState extends ConsumerState<SplashScreen> with SingleTickerPr
   int _tapCount = 0;
   DateTime? _lastTapTime;
   static const int _requiredTaps = 7;
-  static const Duration _tapTimeout = Duration(milliseconds: 2500);
+  static const Duration _tapTimeout = Duration(seconds: 2);
 
   String _adminPin = '';
 
