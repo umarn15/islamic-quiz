@@ -80,65 +80,98 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              // Hero Section
               Container(
-                padding: const EdgeInsets.symmetric(vertical: 32, horizontal: 20),
+                padding: const EdgeInsets.symmetric(vertical: 28, horizontal: 20),
                 decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(22),
                   gradient: LinearGradient(
                     begin: Alignment.topLeft,
                     end: Alignment.bottomRight,
                     colors: [
                       colorScheme.primary,
-                      colorScheme.primary.withValues(alpha: 0.8),
+                      colorScheme.primary.withValues(alpha: 0.75),
                     ],
                   ),
-                  borderRadius: BorderRadius.circular(20),
+                  boxShadow: [
+                    BoxShadow(
+                      color: colorScheme.primary.withValues(alpha: 0.35),
+                      blurRadius: 24,
+                      offset: const Offset(0, 12),
+                    ),
+                  ],
                 ),
-                child: Column(
+                child: Stack(
                   children: [
-                    Text(
-                      firstName.isNotEmpty 
-                          ? 'Assalamu Alaikum, $firstName'
-                          : 'Assalamu Alaikum',
-                      style: textTheme.headlineSmall?.copyWith(
-                        color: Colors.white,
-                        fontWeight: FontWeight.w300,
-                        letterSpacing: 0.5,
+                    // Decorative pattern
+                    Positioned(
+                      right: 0,
+                      top: -6,
+                      child: Icon(
+                        Icons.mosque,
+                        size: 140,
+                        color: Colors.white.withValues(alpha: 0.08),
                       ),
                     ),
-                    const SizedBox(height: 4),
-                    Text(
-                      'Test Your Knowledge',
-                      style: textTheme.titleMedium?.copyWith(
-                        color: Colors.white.withValues(alpha: 0.85),
-                      ),
-                    ),
-                    const SizedBox(height: 24),
-                    // Inline Stats
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
+
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        _buildInlineStat(
-                          icon: Icons.emoji_events_outlined,
-                          value: points.toString(),
-                          label: 'Points',
+                        Text(
+                          firstName.isNotEmpty
+                              ? 'Assalamu Alaikum, $firstName'
+                              : 'Assalamu Alaikum',
+                          style: textTheme.headlineSmall?.copyWith(
+                            color: Colors.white,
+                            fontWeight: FontWeight.w600,
+                            letterSpacing: 0.3,
+                          ),
                         ),
+                        const SizedBox(height: 6),
+                        Text(
+                          'Test and grow your Islamic knowledge',
+                          style: textTheme.bodyMedium?.copyWith(
+                            color: Colors.white.withValues(alpha: 0.85),
+                          ),
+                        ),
+                        const SizedBox(height: 22),
+
+                        // Stats card
                         Container(
-                          height: 36,
-                          width: 1,
-                          margin: const EdgeInsets.symmetric(horizontal: 24),
-                          color: Colors.white.withValues(alpha: 0.3),
-                        ),
-                        _buildInlineStat(
-                          icon: Icons.trending_up,
-                          value: level.toString(),
-                          label: 'Level',
+                          padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 16),
+                          decoration: BoxDecoration(
+                            color: Colors.white.withValues(alpha: 0.12),
+                            borderRadius: BorderRadius.circular(14),
+                            border: Border.all(
+                              color: Colors.white.withValues(alpha: 0.2),
+                            ),
+                          ),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                            children: [
+                              _buildInlineStat(
+                                icon: Icons.emoji_events_outlined,
+                                value: points.toString(),
+                                label: 'Points',
+                              ),
+                              Container(
+                                height: 36,
+                                width: 1,
+                                color: Colors.white.withValues(alpha: 0.3),
+                              ),
+                              _buildInlineStat(
+                                icon: Icons.trending_up,
+                                value: level.toString(),
+                                label: 'Level',
+                              ),
+                            ],
+                          ),
                         ),
                       ],
                     ),
                   ],
                 ),
               ),
+
               const SizedBox(height: 28),
               
               // Quiz Difficulty
