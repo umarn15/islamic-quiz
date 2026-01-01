@@ -194,7 +194,7 @@ class _QuizResultScreenState extends ConsumerState<QuizResultScreen>
                 builder: (context, constraints) {
                   final isSmallScreen = constraints.maxHeight < 799;
                   return SingleChildScrollView(
-                    padding: EdgeInsets.fromLTRB(20, isSmallScreen ? 12 : 24, 20, 12),
+                    padding: EdgeInsets.fromLTRB(20, isSmallScreen ? 16 : 24, 20, 12),
                     child: SlideTransition(
                       position: _slideAnimation,
                       child: Column(
@@ -274,7 +274,7 @@ class _QuizResultScreenState extends ConsumerState<QuizResultScreen>
                   Colors.orange,
                   Colors.teal,
                 ],
-                numberOfParticles: 200,
+                numberOfParticles: 60,
                 gravity: 0.3,
                 emissionFrequency: 0.08,
               ),
