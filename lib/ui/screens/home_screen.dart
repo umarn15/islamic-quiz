@@ -391,7 +391,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           color: Theme.of(context).scaffoldBackgroundColor,
           borderRadius: const BorderRadius.vertical(top: Radius.circular(32)),
         ),
-        padding: const EdgeInsets.all(24),
+        padding: const EdgeInsets.fromLTRB(18, 18, 18, 6),
         child: SingleChildScrollView(
           child: Column(
             mainAxisSize: MainAxisSize.min,
@@ -416,10 +416,10 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                       ),
                       borderRadius: BorderRadius.circular(16),
                     ),
-                    child: const Icon(
+                    child: Icon(
                       Icons.quiz_rounded,
                       size: 24,
-                      color: Colors.white,
+                      color: Colors.grey.shade300,
                     ),
                   ),
                   const SizedBox(width: 12),
