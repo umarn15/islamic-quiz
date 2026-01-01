@@ -480,7 +480,7 @@ class _QuizScreenState extends ConsumerState<QuizScreen> with TickerProviderStat
               boxShadow: [
                 BoxShadow(
                   color: const Color(0xFFFCD34D).withValues(alpha: 0.4),
-                  blurRadius: 8,
+                  blurRadius: 4,
                   offset: const Offset(0, 2),
                 ),
               ],

@@ -190,68 +190,72 @@ class _QuizResultScreenState extends ConsumerState<QuizResultScreen>
               ),
             ),
             SafeArea(
-              child: SingleChildScrollView(
-                padding: const EdgeInsets.fromLTRB(24, 24, 24, 16),
-                child: SlideTransition(
-                  position: _slideAnimation,
-                  child: Column(
-                    children: [
-                      const SizedBox(height: 10),
-                      // Animated Result Icon with Circular Progress
-                      ScaleTransition(
-                        scale: _scaleAnimation,
-                        child: _buildCircularProgress(percentage, resultData, colorScheme),
-                      ),
-                      const SizedBox(height: 24),
-
-                      // Result Title with gradient
-                      ShaderMask(
-                        shaderCallback: (bounds) => LinearGradient(
-                          colors: [resultData.color, resultData.color.withValues(alpha: 0.7)],
-                        ).createShader(bounds),
-                        child: Text(
-                          resultData.title,
-                          style: const TextStyle(
-                            fontSize: 34,
-                            fontWeight: FontWeight.w800,
-                            color: Colors.white,
-                            letterSpacing: -0.5,
+              child: LayoutBuilder(
+                builder: (context, constraints) {
+                  final isSmallScreen = constraints.maxHeight < 799;
+                  return SingleChildScrollView(
+                    padding: EdgeInsets.fromLTRB(20, isSmallScreen ? 12 : 24, 20, 12),
+                    child: SlideTransition(
+                      position: _slideAnimation,
+                      child: Column(
+                        children: [
+                          // Animated Result Icon with Circular Progress
+                          ScaleTransition(
+                            scale: _scaleAnimation,
+                            child: _buildCircularProgress(percentage, resultData, colorScheme, isSmallScreen),
                           ),
-                        ),
+                          SizedBox(height: isSmallScreen ? 16 : 24),
+
+                          // Result Title with gradient
+                          ShaderMask(
+                            shaderCallback: (bounds) => LinearGradient(
+                              colors: [resultData.color, resultData.color.withValues(alpha: 0.7)],
+                            ).createShader(bounds),
+                            child: Text(
+                              resultData.title,
+                              style: TextStyle(
+                                fontSize: isSmallScreen ? 28 : 34,
+                                fontWeight: FontWeight.w800,
+                                color: Colors.white,
+                                letterSpacing: -0.5,
+                              ),
+                            ),
+                          ),
+                          const SizedBox(height: 6),
+                          Text(
+                            resultData.message,
+                            style: TextStyle(
+                              fontSize: isSmallScreen ? 14 : 16,
+                              color: Colors.grey,
+                              fontWeight: FontWeight.w500,
+                            ),
+                            textAlign: TextAlign.center,
+                          ),
+                          SizedBox(height: isSmallScreen ? 16 : 28),
+
+                          // Score Card with glassmorphism effect
+                          ScaleTransition(
+                            scale: _pulseAnimation,
+                            child: _buildScoreCard(colorScheme, isDark, isSmallScreen),
+                          ),
+                          SizedBox(height: isSmallScreen ? 12 : 20),
+
+                          // Stats Row
+                          _buildStatsRow(colorScheme, percentage, isDark, isSmallScreen),
+                          SizedBox(height: isSmallScreen ? 16 : 28),
+
+                          // Action Buttons
+                          _buildActionButtons(context, colorScheme),
+                          SizedBox(height: isSmallScreen ? 12 : 20),
+
+                          // Difficulty Badge
+                          _buildDifficultyBadge(),
+                          const SizedBox(height: 12),
+                        ],
                       ),
-                      const SizedBox(height: 8),
-                      Text(
-                        resultData.message,
-                        style: TextStyle(
-                          fontSize: 16,
-                          color: Colors.grey,
-                          fontWeight: FontWeight.w500,
-                        ),
-                        textAlign: TextAlign.center,
-                      ),
-                      const SizedBox(height: 28),
-
-                      // Score Card with glassmorphism effect
-                      ScaleTransition(
-                        scale: _pulseAnimation,
-                        child: _buildScoreCard(colorScheme, isDark),
-                      ),
-                      const SizedBox(height: 20),
-
-                      // Stats Row
-                      _buildStatsRow(colorScheme, percentage, isDark),
-                      const SizedBox(height: 28),
-
-                      // Action Buttons
-                      _buildActionButtons(context, colorScheme),
-                      const SizedBox(height: 20),
-
-                      // Difficulty Badge
-                      _buildDifficultyBadge(),
-                      const SizedBox(height: 20),
-                    ],
-                  ),
-                ),
+                    ),
+                  );
+                },
               ),
             ),
             // Confetti
@@ -281,30 +285,34 @@ class _QuizResultScreenState extends ConsumerState<QuizResultScreen>
     );
   }
 
-  Widget _buildCircularProgress(int percentage, _ResultData resultData, ColorScheme colorScheme) {
+  Widget _buildCircularProgress(int percentage, _ResultData resultData, ColorScheme colorScheme, bool isSmallScreen) {
+    final size = isSmallScreen ? 130.0 : 160.0;
+    final innerSize = isSmallScreen ? 110.0 : 140.0;
+    final iconSize = isSmallScreen ? 54.0 : 68.0;
+    
     return AnimatedBuilder(
       animation: _progressAnimation,
       builder: (context, child) {
         return SizedBox(
-          width: 160,
-          height: 160,
+          width: size,
+          height: size,
           child: Stack(
             alignment: Alignment.center,
             children: [
               // Background circle
               CustomPaint(
-                size: const Size(160, 160),
+                size: Size(size, size),
                 painter: _CircularProgressPainter(
                   progress: _progressAnimation.value * (percentage / 100),
                   backgroundColor: Colors.grey.withValues(alpha: 0.2),
                   progressColor: resultData.color,
-                  strokeWidth: 12,
+                  strokeWidth: isSmallScreen ? 10 : 12,
                 ),
               ),
               // Inner glow container
               Container(
-                width: 140,
-                height: 140,
+                width: innerSize,
+                height: innerSize,
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
                   gradient: RadialGradient(
@@ -323,7 +331,7 @@ class _QuizResultScreenState extends ConsumerState<QuizResultScreen>
                 ),
                 child: Icon(
                   resultData.icon,
-                  size: 68,
+                  size: iconSize,
                   color: resultData.color,
                 ),
               ),
@@ -334,10 +342,10 @@ class _QuizResultScreenState extends ConsumerState<QuizResultScreen>
     );
   }
 
-  Widget _buildScoreCard(ColorScheme colorScheme, bool isDark) {
+  Widget _buildScoreCard(ColorScheme colorScheme, bool isDark, bool isSmallScreen) {
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.all(12),
+      padding: EdgeInsets.all(isSmallScreen ? 8 : 12),
       decoration: BoxDecoration(
         gradient: LinearGradient(
           begin: Alignment.topLeft,
@@ -352,19 +360,12 @@ class _QuizResultScreenState extends ConsumerState<QuizResultScreen>
           color: Colors.amber.withValues(alpha: 0.3),
           width: 1.5,
         ),
-        // boxShadow: [
-        //   BoxShadow(
-        //     color: Colors.amber.withValues(alpha: 0.15),
-        //     blurRadius: 20,
-        //     offset: const Offset(0, 8),
-        //   ),
-        // ],
       ),
       child: Column(
         children: [
           // Star icon with glow
           Container(
-            padding: const EdgeInsets.all(12),
+            padding: EdgeInsets.all(isSmallScreen ? 8 : 12),
             decoration: BoxDecoration(
               shape: BoxShape.circle,
               gradient: RadialGradient(
@@ -374,9 +375,9 @@ class _QuizResultScreenState extends ConsumerState<QuizResultScreen>
                 ],
               ),
             ),
-            child: const Icon(Icons.star_rounded, color: Colors.amber, size: 44),
+            child: Icon(Icons.star_rounded, color: Colors.amber, size: isSmallScreen ? 36 : 44),
           ),
-          const SizedBox(height: 8),
+          SizedBox(height: isSmallScreen ? 4 : 8),
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             crossAxisAlignment: CrossAxisAlignment.baseline,
@@ -385,7 +386,7 @@ class _QuizResultScreenState extends ConsumerState<QuizResultScreen>
               Text(
                 '${widget.score}',
                 style: TextStyle(
-                  fontSize: 56,
+                  fontSize: isSmallScreen ? 44 : 56,
                   fontWeight: FontWeight.w800,
                   color: Colors.amber.shade600,
                   height: 1,
@@ -394,7 +395,7 @@ class _QuizResultScreenState extends ConsumerState<QuizResultScreen>
               Text(
                 ' / ${widget.totalQuestions * 30}',
                 style: TextStyle(
-                  fontSize: 22,
+                  fontSize: isSmallScreen ? 18 : 22,
                   fontWeight: FontWeight.w600,
                   color: Colors.amber.shade400,
                 ),
@@ -439,7 +440,7 @@ class _QuizResultScreenState extends ConsumerState<QuizResultScreen>
     );
   }
 
-  Widget _buildStatsRow(ColorScheme colorScheme, int percentage, bool isDark) {
+  Widget _buildStatsRow(ColorScheme colorScheme, int percentage, bool isDark, bool isSmallScreen) {
     return Row(
       children: [
         Expanded(
@@ -449,6 +450,7 @@ class _QuizResultScreenState extends ConsumerState<QuizResultScreen>
             label: 'Correct',
             color: Colors.green,
             isDark: isDark,
+            isSmallScreen: isSmallScreen,
           ),
         ),
         const SizedBox(width: 12),
@@ -459,6 +461,7 @@ class _QuizResultScreenState extends ConsumerState<QuizResultScreen>
             label: 'Wrong',
             color: Colors.red,
             isDark: isDark,
+            isSmallScreen: isSmallScreen,
           ),
         ),
         const SizedBox(width: 12),
@@ -469,6 +472,7 @@ class _QuizResultScreenState extends ConsumerState<QuizResultScreen>
             label: 'Accuracy',
             color: Color(0xFF4ADE80),
             isDark: isDark,
+            isSmallScreen: isSmallScreen,
           ),
         ),
       ],
@@ -481,9 +485,10 @@ class _QuizResultScreenState extends ConsumerState<QuizResultScreen>
     required String label,
     required Color color,
     required bool isDark,
+    required bool isSmallScreen,
   }) {
     return Container(
-      padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 8),
+      padding: EdgeInsets.symmetric(vertical: isSmallScreen ? 12 : 16, horizontal: 8),
       decoration: BoxDecoration(
         color: color.withValues(alpha: 0.15),
         borderRadius: BorderRadius.circular(16),
@@ -493,19 +498,10 @@ class _QuizResultScreenState extends ConsumerState<QuizResultScreen>
       ),
       child: Column(
         children: [
-          // Container(
-          //   padding: const EdgeInsets.all(8),
-          //   decoration: BoxDecoration(
-          //     color: color.withValues(alpha: 0.15),
-          //     shape: BoxShape.circle,
-          //   ),
-          //   child: Icon(icon, color: color, size: 22),
-          // ),
-          // const SizedBox(height: 8),
           Text(
             value,
             style: TextStyle(
-              fontSize: 22,
+              fontSize: isSmallScreen ? 18 : 22,
               fontWeight: FontWeight.w800,
               color: color,
             ),
