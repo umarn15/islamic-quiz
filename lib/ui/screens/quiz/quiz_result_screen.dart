@@ -270,7 +270,7 @@ class _QuizResultScreenState extends ConsumerState<QuizResultScreen>
                   Colors.orange,
                   Colors.teal,
                 ],
-                numberOfParticles: 300,
+                numberOfParticles: 200,
                 gravity: 0.3,
                 emissionFrequency: 0.08,
               ),
