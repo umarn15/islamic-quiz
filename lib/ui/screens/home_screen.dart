@@ -570,7 +570,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                         title,
                         style: TextStyle(
                           color: effectiveColor,
-                          fontSize: 26,
+                          fontSize: 24,
                           fontWeight: FontWeight.w900,
                           letterSpacing: 0.5,
                         ),
@@ -579,7 +579,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                       Text(
                         subtitle,
                         style: TextStyle(
-                          fontSize: 14,
+                          fontSize: 13,
                           fontWeight: FontWeight.w600,
                           color: isDarkMode 
                               ? Colors.white70 
@@ -596,8 +596,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                     shape: BoxShape.circle,
                   ),
                   child: Icon(
-                    Icons.arrow_forward_rounded,
-                    size: 24,
+                    Icons.arrow_forward_ios,
+                    size: 22,
                     color: effectiveColor,
                   ),
                 ),
