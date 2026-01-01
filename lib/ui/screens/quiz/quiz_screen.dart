@@ -367,13 +367,23 @@ class _QuizScreenState extends ConsumerState<QuizScreen> with TickerProviderStat
             _buildHeader(colorScheme, isDarkMode),
             _buildTimerBar(colorScheme, isDarkMode),
             Expanded(
-              child: SingleChildScrollView(
-                padding: const EdgeInsets.all(20),
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 20),
                 child: Column(
                   children: [
-                    _buildQuestionCard(question, colorScheme, isDarkMode),
-                    const SizedBox(height: 24),
-                    ..._buildOptions(question, colorScheme, isDarkMode),
+                    const SizedBox(height: 12),
+                    Flexible(
+                      flex: 2,
+                      child: _buildQuestionCard(question, colorScheme, isDarkMode),
+                    ),
+                    const SizedBox(height: 16),
+                    Expanded(
+                      flex: 3,
+                      child: ListView(
+                        padding: EdgeInsets.zero,
+                        children: _buildOptions(question, colorScheme, isDarkMode),
+                      ),
+                    ),
                   ],
                 ),
               ),
@@ -572,7 +582,7 @@ class _QuizScreenState extends ConsumerState<QuizScreen> with TickerProviderStat
   Widget _buildQuestionCard(QuestionModel question, ColorScheme colorScheme, bool isDarkMode) {
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.all(24),
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
       decoration: BoxDecoration(
         gradient: LinearGradient(
           colors: isDarkMode
@@ -587,55 +597,56 @@ class _QuizScreenState extends ConsumerState<QuizScreen> with TickerProviderStat
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
-        borderRadius: BorderRadius.circular(28),
+        borderRadius: BorderRadius.circular(24),
         border: Border.all(
           color: const Color(0xFF6B4CE6).withValues(alpha: 0.3),
-          width: 2.5,
+          width: 2,
         ),
         boxShadow: [
           BoxShadow(
             color: const Color(0xFF6B4CE6).withValues(alpha: 0.15),
-            blurRadius: 16,
-            offset: const Offset(0, 6),
+            blurRadius: 12,
+            offset: const Offset(0, 4),
           ),
         ],
       ),
       child: Column(
+        mainAxisSize: MainAxisSize.min,
         children: [
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                 decoration: BoxDecoration(
                   color: _getDifficultyColor(question.difficulty).withValues(alpha: 0.2),
-                  borderRadius: BorderRadius.circular(20),
+                  borderRadius: BorderRadius.circular(16),
                   border: Border.all(
                     color: _getDifficultyColor(question.difficulty).withValues(alpha: 0.4),
-                    width: 2,
+                    width: 1.5,
                   ),
                 ),
                 child: Row(
                   children: [
                     Icon(
                       _getDifficultyIcon(question.difficulty),
-                      size: 16,
+                      size: 14,
                       color: _getDifficultyColor(question.difficulty),
                     ),
-                    const SizedBox(width: 6),
+                    const SizedBox(width: 4),
                     Text(
                       question.difficulty.name.toUpperCase(),
                       style: TextStyle(
                         color: _getDifficultyColor(question.difficulty),
                         fontWeight: FontWeight.w900,
-                        fontSize: 12,
+                        fontSize: 11,
                         letterSpacing: 0.5,
                       ),
                     ),
                   ],
                 ),
               ),
-              const SizedBox(width: 12),
+              const SizedBox(width: 8),
               Container(
                 decoration: BoxDecoration(
                   color: const Color(0xFF6B4CE6).withValues(alpha: 0.15),
@@ -645,25 +656,29 @@ class _QuizScreenState extends ConsumerState<QuizScreen> with TickerProviderStat
                   onPressed: () => _speakQuestion(question),
                   icon: Icon(
                     _isSpeaking ? Icons.volume_up_rounded : Icons.volume_up_outlined,
-                    size: 24,
+                    size: 20,
                     color: const Color(0xFF6B4CE6),
                   ),
                   tooltip: 'Read question aloud',
+                  padding: const EdgeInsets.all(8),
+                  constraints: const BoxConstraints(),
                 ),
               ),
             ],
           ),
-          const SizedBox(height: 20),
-          Text(
-            question.questionText,
-            style: TextStyle(
-              fontSize: 20,
-              fontWeight: FontWeight.w700,
-              height: 1.5,
-              color: isDarkMode ? Colors.white : const Color(0xFF2D3748),
-              letterSpacing: 0.3,
+          const SizedBox(height: 12),
+          Flexible(
+            child: Text(
+              question.questionText,
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.w700,
+                height: 1.4,
+                color: isDarkMode ? Colors.white : const Color(0xFF2D3748),
+                letterSpacing: 0.2,
+              ),
+              textAlign: TextAlign.center,
             ),
-            textAlign: TextAlign.center,
           ),
         ],
       ),
@@ -731,25 +746,25 @@ class _QuizScreenState extends ConsumerState<QuizScreen> with TickerProviderStat
       }
 
       return Padding(
-        padding: const EdgeInsets.only(bottom: 14),
+        padding: const EdgeInsets.only(bottom: 10),
         child: Material(
           color: Colors.transparent,
           child: InkWell(
             onTap: _hasAnswered ? null : () => _selectOption(index),
-            borderRadius: BorderRadius.circular(20),
+            borderRadius: BorderRadius.circular(16),
             child: AnimatedContainer(
               duration: const Duration(milliseconds: 300),
-              padding: const EdgeInsets.all(18),
+              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
               decoration: BoxDecoration(
                 color: backgroundColor,
-                borderRadius: BorderRadius.circular(20),
-                border: Border.all(color: borderColor, width: 2.5),
+                borderRadius: BorderRadius.circular(16),
+                border: Border.all(color: borderColor, width: 2),
                 boxShadow: isSelected && showResult
                     ? [
                         BoxShadow(
                           color: borderColor.withValues(alpha: 0.3),
-                          blurRadius: 12,
-                          offset: const Offset(0, 4),
+                          blurRadius: 8,
+                          offset: const Offset(0, 2),
                         ),
                       ]
                     : null,
@@ -757,8 +772,8 @@ class _QuizScreenState extends ConsumerState<QuizScreen> with TickerProviderStat
               child: Row(
                 children: [
                   Container(
-                    width: 50,
-                    height: 50,
+                    width: 40,
+                    height: 40,
                     decoration: BoxDecoration(
                       color: showResult
                           ? (isCorrect
@@ -766,13 +781,13 @@ class _QuizScreenState extends ConsumerState<QuizScreen> with TickerProviderStat
                               : (isSelected ? const Color(0xFFF44336) : Colors.grey))
                                   .withValues(alpha: 0.2)
                           : optionColors[index].withValues(alpha: 0.2),
-                      borderRadius: BorderRadius.circular(14),
+                      borderRadius: BorderRadius.circular(12),
                     ),
                     child: Center(
                       child: Text(
                         optionLabels[index],
                         style: TextStyle(
-                          fontSize: 22,
+                          fontSize: 20,
                           fontWeight: FontWeight.w900,
                           color: showResult
                               ? (isCorrect
@@ -783,7 +798,7 @@ class _QuizScreenState extends ConsumerState<QuizScreen> with TickerProviderStat
                       ),
                     ),
                   ),
-                  const SizedBox(width: 16),
+                  const SizedBox(width: 12),
                   Expanded(
                     child: Text(
                       question.options[index],
@@ -798,7 +813,7 @@ class _QuizScreenState extends ConsumerState<QuizScreen> with TickerProviderStat
                   if (resultIcon != null)
                     Icon(
                       resultIcon,
-                      size: 28,
+                      size: 26,
                       color: isCorrect ? const Color(0xFF4CAF50) : const Color(0xFFF44336),
                     ),
                 ],
