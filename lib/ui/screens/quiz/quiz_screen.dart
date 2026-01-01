@@ -38,6 +38,8 @@ class _QuizScreenState extends ConsumerState<QuizScreen> with TickerProviderStat
   // Text-to-Speech
   late FlutterTts _flutterTts;
   bool _isSpeaking = false;
+  bool _ttsReady = false;
+  bool _isMuted = false;
 
   // Animations
   late AnimationController _timerAnimationController;
@@ -47,7 +49,6 @@ class _QuizScreenState extends ConsumerState<QuizScreen> with TickerProviderStat
   @override
   void initState() {
     super.initState();
-    _initTts();
     _timerAnimationController = AnimationController(
       duration: const Duration(seconds: _timerDuration),
       vsync: this,
@@ -59,7 +60,15 @@ class _QuizScreenState extends ConsumerState<QuizScreen> with TickerProviderStat
       vsync: this,
     );
 
-    _loadQuestions();
+    _initializeQuiz();
+  }
+
+  Future<void> _initializeQuiz() async {
+    // Initialize TTS and load questions in parallel
+    await Future.wait([
+      _initTts(),
+      _loadQuestions(),
+    ]);
   }
 
   Future<void> _initTts() async {
@@ -80,11 +89,31 @@ class _QuizScreenState extends ConsumerState<QuizScreen> with TickerProviderStat
     _flutterTts.setCancelHandler(() {
       setState(() => _isSpeaking = false);
     });
+    
+    _ttsReady = true;
   }
 
   Future<void> _speakQuestion(QuestionModel question) async {
+    if (_isMuted) return;
+    
+    // Wait for TTS to be ready if it's not yet
+    if (!_ttsReady) {
+      await _initTts();
+    }
     await _flutterTts.stop();
     await _flutterTts.speak(question.questionText);
+  }
+
+  void _toggleMute() {
+    setState(() {
+      _isMuted = !_isMuted;
+    });
+    if (_isMuted) {
+      _flutterTts.stop();
+    } else {
+      // Speak current question when unmuting
+      _speakQuestion(_questions[_currentIndex]);
+    }
   }
 
   Future<void> _loadQuestions() async {
@@ -110,6 +139,7 @@ class _QuizScreenState extends ConsumerState<QuizScreen> with TickerProviderStat
       });
       
       _startTimer();
+      // TTS is guaranteed ready now since we awaited both in parallel
       _speakQuestion(_questions[_currentIndex]);
     } catch (e) {
       if (mounted) {
@@ -653,13 +683,13 @@ class _QuizScreenState extends ConsumerState<QuizScreen> with TickerProviderStat
                   shape: BoxShape.circle,
                 ),
                 child: IconButton(
-                  onPressed: () => _speakQuestion(question),
+                  onPressed: _toggleMute,
                   icon: Icon(
-                    _isSpeaking ? Icons.volume_up_rounded : Icons.volume_up_outlined,
+                    _isMuted ? Icons.volume_off_rounded : Icons.volume_up_rounded,
                     size: 20,
-                    color: const Color(0xFF6B4CE6),
+                    color: _isMuted ? Colors.grey : const Color(0xFF6B4CE6),
                   ),
-                  tooltip: 'Read question aloud',
+                  tooltip: _isMuted ? 'Unmute' : 'Mute',
                   padding: const EdgeInsets.all(8),
                   constraints: const BoxConstraints(),
                 ),
