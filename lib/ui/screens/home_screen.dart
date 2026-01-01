@@ -70,7 +70,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               decoration: BoxDecoration(
                 color: darkMode 
                     ? Colors.white.withValues(alpha: 0.1)
-                    : Colors.white,
+                    : Colors.white.withValues(alpha: 0.3),
                 shape: BoxShape.circle,
               ),
               child: IconButton(
