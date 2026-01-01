@@ -13,10 +13,14 @@ class SplashScreen extends ConsumerStatefulWidget {
   ConsumerState<SplashScreen> createState() => _SplashScreenState();
 }
 
-class _SplashScreenState extends ConsumerState<SplashScreen> with SingleTickerProviderStateMixin {
+class _SplashScreenState extends ConsumerState<SplashScreen> with TickerProviderStateMixin {
   late AnimationController _controller;
+  late AnimationController _pulseController;
+  late AnimationController _rotateController;
   late Animation<double> _fadeAnimation;
   late Animation<double> _scaleAnimation;
+  late Animation<double> _pulseAnimation;
+  late Animation<double> _rotateAnimation;
 
   // Secret admin access - tap logo 7 times quickly
   int _tapCount = 0;
@@ -37,6 +41,16 @@ class _SplashScreenState extends ConsumerState<SplashScreen> with SingleTickerPr
       vsync: this,
     );
     
+    _pulseController = AnimationController(
+      duration: const Duration(milliseconds: 2000),
+      vsync: this,
+    )..repeat(reverse: true);
+    
+    _rotateController = AnimationController(
+      duration: const Duration(seconds: 20),
+      vsync: this,
+    )..repeat();
+    
     _fadeAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
       CurvedAnimation(parent: _controller, curve: Curves.easeIn),
     );
@@ -44,6 +58,12 @@ class _SplashScreenState extends ConsumerState<SplashScreen> with SingleTickerPr
     _scaleAnimation = Tween<double>(begin: 0.5, end: 1.0).animate(
       CurvedAnimation(parent: _controller, curve: Curves.easeOutBack),
     );
+    
+    _pulseAnimation = Tween<double>(begin: 0.8, end: 1.0).animate(
+      CurvedAnimation(parent: _pulseController, curve: Curves.easeInOut),
+    );
+    
+    _rotateAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(_rotateController);
     
     _controller.forward();
 
@@ -189,6 +209,8 @@ class _SplashScreenState extends ConsumerState<SplashScreen> with SingleTickerPr
   @override
   void dispose() {
     _controller.dispose();
+    _pulseController.dispose();
+    _rotateController.dispose();
     super.dispose();
   }
 
@@ -214,6 +236,43 @@ class _SplashScreenState extends ConsumerState<SplashScreen> with SingleTickerPr
         ),
         child: Stack(
           children: [
+            // Animated background particles
+            ...List.generate(15, (index) => _buildFloatingParticle(index)),
+            
+            // Rotating decorative circles
+            Center(
+              child: RotationTransition(
+                turns: _rotateAnimation,
+                child: Container(
+                  width: 300,
+                  height: 300,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    border: Border.all(
+                      color: Colors.white.withValues(alpha: 0.1),
+                      width: 1,
+                    ),
+                  ),
+                ),
+              ),
+            ),
+            Center(
+              child: RotationTransition(
+                turns: Tween<double>(begin: 1.0, end: 0.0).animate(_rotateController),
+                child: Container(
+                  width: 240,
+                  height: 240,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    border: Border.all(
+                      color: Colors.white.withValues(alpha: 0.08),
+                      width: 1,
+                    ),
+                  ),
+                ),
+              ),
+            ),
+            
             Center(
               child: FadeTransition(
                 opacity: _fadeAnimation,
@@ -222,79 +281,124 @@ class _SplashScreenState extends ConsumerState<SplashScreen> with SingleTickerPr
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      // Improved Secret Tap Target
-                      GestureDetector(
-                        onTap: _handleSecretTap,
-                        child: Container(
-                          width: 140,
-                          height: 140,
-                          decoration: BoxDecoration(
-                            color: Colors.white.withValues(alpha: 0.1), // Glassmorphism effect
-                            shape: BoxShape.circle,
-                            border: Border.all(color: Colors.white24, width: 2),
-                            boxShadow: [
-                              BoxShadow(
-                                color: Colors.black.withValues(alpha: 0.15),
-                                blurRadius: 30,
-                                spreadRadius: 5,
+                      // Enhanced logo with pulsing glow
+                      ScaleTransition(
+                        scale: _pulseAnimation,
+                        child: GestureDetector(
+                          onTap: _handleSecretTap,
+                          child: Container(
+                            width: 140,
+                            height: 140,
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.white.withValues(alpha: 0.3),
+                                  blurRadius: 40,
+                                  spreadRadius: 10,
+                                ),
+                                BoxShadow(
+                                  color: colorScheme.primary.withValues(alpha: 0.5),
+                                  blurRadius: 60,
+                                  spreadRadius: 20,
+                                ),
+                              ],
+                            ),
+                            child: Container(
+                              decoration: BoxDecoration(
+                                color: Colors.white.withValues(alpha: 0.15),
+                                shape: BoxShape.circle,
+                                border: Border.all(color: Colors.white30, width: 2),
+                              ),
+                              child: Center(
+                                child: Container(
+                                  width: 100,
+                                  height: 100,
+                                  decoration: BoxDecoration(
+                                    color: Colors.white,
+                                    shape: BoxShape.circle,
+                                    boxShadow: [
+                                      BoxShadow(
+                                        color: Colors.black.withValues(alpha: 0.2),
+                                        blurRadius: 20,
+                                        spreadRadius: 2,
+                                      ),
+                                    ],
+                                  ),
+                                  child: Icon(
+                                    Icons.auto_awesome,
+                                    size: 50,
+                                    color: colorScheme.primary,
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 50),
+
+                      // App Title with shimmer effect
+                      ShaderMask(
+                        shaderCallback: (bounds) => LinearGradient(
+                          colors: [
+                            Colors.white,
+                            Colors.white.withValues(alpha: 0.8),
+                            Colors.white,
+                          ],
+                          stops: const [0.0, 0.5, 1.0],
+                        ).createShader(bounds),
+                        child: Text(
+                          'ISLAMIC QUIZ',
+                          style: TextStyle(
+                            fontSize: 38,
+                            fontWeight: FontWeight.w900,
+                            color: Colors.white,
+                            letterSpacing: 5.0,
+                            shadows: [
+                              Shadow(
+                                blurRadius: 20,
+                                color: Colors.black.withValues(alpha: 0.4),
+                                offset: const Offset(0, 4),
+                              ),
+                              Shadow(
+                                blurRadius: 40,
+                                color: Colors.white.withValues(alpha: 0.3),
+                                offset: const Offset(0, 0),
                               ),
                             ],
                           ),
-                          child: Center(
-                            child: Container(
-                              width: 100,
-                              height: 100,
-                              decoration: const BoxDecoration(
-                                color: Colors.white,
-                                shape: BoxShape.circle,
-                              ),
-                              child: Icon(
-                                Icons.auto_awesome,
-                                size: 50,
-                                color: colorScheme.primary,
-                              ),
-                            ),
-                          ),
                         ),
                       ),
-                      const SizedBox(height: 40),
+                      const SizedBox(height: 16),
 
-                      // App Title with better font styling
-                      Text(
-                        'ISLAMIC QUIZ',
-                        style: TextStyle(
-                          fontSize: 36,
-                          fontWeight: FontWeight.w900,
-                          color: Colors.white,
-                          letterSpacing: 4.0, // Increased tracking for a modern look
-                          shadows: [
-                            Shadow(
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 10),
+                        decoration: BoxDecoration(
+                          color: Colors.white.withValues(alpha: 0.15),
+                          borderRadius: BorderRadius.circular(25),
+                          border: Border.all(
+                            color: Colors.white.withValues(alpha: 0.3),
+                            width: 1,
+                          ),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withValues(alpha: 0.1),
                               blurRadius: 10,
-                              color: Colors.black.withValues(alpha: 0.3),
-                              offset: const Offset(0, 4),
+                              spreadRadius: 2,
                             ),
                           ],
-                        ),
-                      ),
-                      const SizedBox(height: 12),
-
-                      // Subtitle with a "pill" background
-                      Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
-                        decoration: BoxDecoration(
-                          color: Colors.black.withValues(alpha: 0.1),
-                          borderRadius: BorderRadius.circular(20),
                         ),
                         child: const Text(
                           'Master your knowledge',
                           style: TextStyle(
-                            fontSize: 14,
-                            color: Colors.white70,
-                            fontWeight: FontWeight.w400,
-                            letterSpacing: 1.2,
+                            fontSize: 15,
+                            color: Colors.white,
+                            fontWeight: FontWeight.w500,
+                            letterSpacing: 1.5,
                           ),
                         ),
-                      )
+                      ),
                     ],
                   ),
                 ),
@@ -302,6 +406,46 @@ class _SplashScreenState extends ConsumerState<SplashScreen> with SingleTickerPr
             ),
           ],
         ),
+      ),
+    );
+  }
+  
+  Widget _buildFloatingParticle(int index) {
+    final size = 4.0 + (index % 3) * 2.0;
+    final duration = 3000 + (index % 5) * 1000;
+    
+    return Positioned(
+      left: (index * 73.0) % MediaQuery.of(context).size.width,
+      top: (index * 97.0) % MediaQuery.of(context).size.height,
+      child: TweenAnimationBuilder<double>(
+        tween: Tween(begin: 0.0, end: 1.0),
+        duration: Duration(milliseconds: duration),
+        builder: (context, value, child) {
+          return Transform.translate(
+            offset: Offset(
+              20 * (value - 0.5) * (index % 2 == 0 ? 1 : -1),
+              30 * (value - 0.5),
+            ),
+            child: Opacity(
+              opacity: (0.3 + 0.4 * (1 - (value - 0.5).abs() * 2)).clamp(0.0, 1.0),
+              child: Container(
+                width: size,
+                height: size,
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  shape: BoxShape.circle,
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.white.withValues(alpha: 0.5),
+                      blurRadius: 8,
+                      spreadRadius: 2,
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          );
+        },
       ),
     );
   }
