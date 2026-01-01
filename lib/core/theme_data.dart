@@ -4,17 +4,18 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import '../data/providers/shared_prefs_provider.dart';
 
-const Color primaryGreen = Color(0xFF1B5E20); // Deep forest green
-const Color secondaryTeal = Color(0xFF26A69A); // Elegant teal
-const Color accentGold = Color(0xFFD4AF37); // Rich Islamic gold
-const Color backgroundCream = Color(0xFFF5F5F5); // Clean light gray
+// Playful purple theme for kids
+const Color primaryPurple = Color(0xFF6B4CE6); // Vibrant purple
+const Color secondaryPurple = Color(0xFF8B6EF7); // Light purple
+const Color accentPink = Color(0xFFFF6B9D); // Fun pink
+const Color backgroundCream = Color(0xFFF5F7FF); // Soft lavender
 const Color cardWhite = Color(0xFFFFFFFF);
-const Color textDark = Color(0xFF1A1A2E); // Deep navy-black
-const Color textLight = Color(0xFF6B7280); // Soft gray
-const Color successGreen = Color(0xFF10B981); // Modern emerald
-const Color errorRed = Color(0xFFDC2626); // Clean red
-const Color starYellow = Color(0xFFF59E0B); // Amber
-const Color darkBackgroundColor = Color(0xFF0F172A); // Deep slate
+const Color textDark = Color(0xFF2D3748); // Soft dark
+const Color textLight = Color(0xFF718096); // Soft gray
+const Color successGreen = Color(0xFF4CAF50); // Bright green
+const Color errorRed = Color(0xFFF44336); // Bright red
+const Color starYellow = Color(0xFFFFC107); // Bright yellow
+const Color darkBackgroundColor = Color(0xFF1A1F2E); // Deep purple-dark
 
 SystemUiOverlayStyle systemOverlayStyle(bool darkMode){
   return SystemUiOverlayStyle(
@@ -49,25 +50,25 @@ class ThemeProvider extends ChangeNotifier {
     useMaterial3: true,
     brightness: Brightness.dark,
     colorScheme: ColorScheme.dark(
-      primary: const Color(0xFF4ADE80), // Bright emerald green
-      secondary: const Color(0xFF5EEAD4), // Bright teal
-      tertiary: const Color(0xFFFCD34D), // Bright gold
-      surface: const Color(0xFF1E293B),
+      primary: const Color(0xFF8B6EF7), // Bright purple
+      secondary: const Color(0xFFAB8EFF), // Light purple
+      tertiary: const Color(0xFFFF6B9D), // Fun pink
+      surface: const Color(0xFF252B3B),
       error: const Color(0xFFF87171), // Softer red for dark
-      onPrimary: const Color(0xFF0F172A),
-      onSecondary: const Color(0xFF0F172A),
+      onPrimary: Colors.white,
+      onSecondary: Colors.white,
     ),
     scaffoldBackgroundColor: darkBackgroundColor,
 
     // AppBar Theme
     appBarTheme: const AppBarTheme(
-      backgroundColor: Color(0xFF1E293B),
+      backgroundColor: Color(0xFF252B3B),
       foregroundColor: Colors.white,
       elevation: 0,
       titleTextStyle: TextStyle(
         color: Colors.white,
         fontSize: 22,
-        fontWeight: FontWeight.w600,
+        fontWeight: FontWeight.w800,
         letterSpacing: 0.5,
       ),
     ),
@@ -106,37 +107,37 @@ class ThemeProvider extends ChangeNotifier {
 
     // Card Theme
     cardTheme: CardThemeData(
-      color: const Color(0xFF1E293B),
+      color: const Color(0xFF252B3B),
       elevation: 0,
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(16),
-        side: BorderSide(color: Color(0xFF334155), width: 1),
+        borderRadius: BorderRadius.circular(24),
+        side: BorderSide(color: Color(0xFF3D4458), width: 1.5),
       ),
     ),
 
     // Elevated Button Theme
     elevatedButtonTheme: ElevatedButtonThemeData(
       style: ElevatedButton.styleFrom(
-        backgroundColor: primaryGreen,
+        backgroundColor: const Color(0xFF8B6EF7),
         foregroundColor: Colors.white,
         padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(12),
+          borderRadius: BorderRadius.circular(20),
         ),
         elevation: 0,
         textStyle: const TextStyle(
           fontSize: 16,
-          fontWeight: FontWeight.w600,
+          fontWeight: FontWeight.w700,
           letterSpacing: 0.5,
         ),
       ),
     ),
 
-    dividerColor: const Color(0xFF334155),
+    dividerColor: const Color(0xFF3D4458),
 
     // Icon Theme
     iconTheme: const IconThemeData(
-      color: Color(0xFF26A69A),
+      color: Color(0xFF8B6EF7),
       size: 24,
     ),
   );
@@ -144,9 +145,9 @@ class ThemeProvider extends ChangeNotifier {
   static ThemeData get lightTheme => ThemeData(
     useMaterial3: true,
     colorScheme: ColorScheme.light(
-      primary: primaryGreen,
-      secondary: secondaryTeal,
-      tertiary: accentGold,
+      primary: primaryPurple,
+      secondary: secondaryPurple,
+      tertiary: accentPink,
       surface: cardWhite,
       error: errorRed,
     ),
@@ -154,13 +155,13 @@ class ThemeProvider extends ChangeNotifier {
 
     // AppBar Theme
     appBarTheme: const AppBarTheme(
-      backgroundColor: Color(0xFF1B5E20),
-      foregroundColor: Colors.white,
+      backgroundColor: Colors.transparent,
+      foregroundColor: Color(0xFF2D3748),
       elevation: 0,
       titleTextStyle: TextStyle(
-        color: Colors.white,
+        color: Color(0xFF2D3748),
         fontSize: 22,
-        fontWeight: FontWeight.w600,
+        fontWeight: FontWeight.w800,
         letterSpacing: 0.5,
       ),
     ),
@@ -202,24 +203,24 @@ class ThemeProvider extends ChangeNotifier {
       color: cardWhite,
       elevation: 0,
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(16),
-        side: BorderSide(color: Color(0xFFE5E7EB), width: 1),
+        borderRadius: BorderRadius.circular(24),
+        side: BorderSide(color: Color(0xFFE5E7EB), width: 1.5),
       ),
     ),
 
     // Elevated Button Theme
     elevatedButtonTheme: ElevatedButtonThemeData(
       style: ElevatedButton.styleFrom(
-        backgroundColor: primaryGreen,
+        backgroundColor: primaryPurple,
         foregroundColor: Colors.white,
         padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(12),
+          borderRadius: BorderRadius.circular(20),
         ),
         elevation: 0,
         textStyle: const TextStyle(
           fontSize: 16,
-          fontWeight: FontWeight.w600,
+          fontWeight: FontWeight.w700,
           letterSpacing: 0.5,
         ),
       ),
@@ -229,7 +230,7 @@ class ThemeProvider extends ChangeNotifier {
 
     // Icon Theme
     iconTheme: const IconThemeData(
-      color: Color(0xFF1B5E20),
+      color: primaryPurple,
       size: 24,
     ),
   );

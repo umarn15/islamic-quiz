@@ -227,48 +227,65 @@ class _QuizScreenState extends ConsumerState<QuizScreen> with TickerProviderStat
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
 
     if (_isLoading) {
       return Scaffold(
+        backgroundColor: isDarkMode ? null : const Color(0xFFF5F7FF),
         body: Container(
           decoration: BoxDecoration(
             gradient: LinearGradient(
               begin: Alignment.topCenter,
               end: Alignment.bottomCenter,
-              colors: [
-                colorScheme.primary.withValues(alpha: 0.1),
-                colorScheme.surface,
-              ],
+              colors: isDarkMode
+                  ? [
+                      const Color(0xFF6B4CE6).withValues(alpha: 0.15),
+                      colorScheme.surface,
+                    ]
+                  : [
+                      const Color(0xFFEDE9FE),
+                      const Color(0xFFF5F7FF),
+                    ],
             ),
           ),
           child: Center(
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                // Animated quiz icon
+                // Animated quiz icon with bouncing effect
                 TweenAnimationBuilder<double>(
-                  tween: Tween(begin: 0.8, end: 1.0),
-                  duration: const Duration(milliseconds: 800),
-                  curve: Curves.easeInOut,
+                  tween: Tween(begin: 0.0, end: 1.0),
+                  duration: const Duration(milliseconds: 1200),
+                  curve: Curves.elasticOut,
                   builder: (context, value, child) {
                     return Transform.scale(
                       scale: value,
                       child: Container(
-                        width: 100,
-                        height: 100,
+                        width: 120,
+                        height: 120,
                         decoration: BoxDecoration(
-                          color: colorScheme.primary.withValues(alpha: 0.2),
+                          gradient: const LinearGradient(
+                            colors: [Color(0xFF6B4CE6), Color(0xFF8B6EF7)],
+                          ),
                           shape: BoxShape.circle,
+                          boxShadow: [
+                            BoxShadow(
+                              color: const Color(0xFF6B4CE6).withValues(alpha: 0.4),
+                              blurRadius: 20,
+                              offset: const Offset(0, 8),
+                            ),
+                          ],
                         ),
-                        child: Icon(
-                          Icons.quiz,
-                          size: 50,
-                          color: colorScheme.primary,
+                        child: const Center(
+                          child: Icon(
+                            Icons.quiz_rounded,
+                            size: 60,
+                            color: Colors.white,
+                          ),
                         ),
                       ),
                     );
                   },
-                  onEnd: () => setState(() {}),
                 ),
                 const SizedBox(height: 32),
                 // Loading text with dots animation
@@ -278,10 +295,13 @@ class _QuizScreenState extends ConsumerState<QuizScreen> with TickerProviderStat
                 SizedBox(
                   width: 200,
                   child: ClipRRect(
-                    borderRadius: BorderRadius.circular(8),
+                    borderRadius: BorderRadius.circular(12),
                     child: LinearProgressIndicator(
-                      backgroundColor: colorScheme.surfaceContainerHighest,
-                      minHeight: 6,
+                      backgroundColor: isDarkMode
+                          ? Colors.white.withValues(alpha: 0.1)
+                          : const Color(0xFFE9D5FF),
+                      valueColor: const AlwaysStoppedAnimation<Color>(Color(0xFF6B4CE6)),
+                      minHeight: 8,
                     ),
                   ),
                 ),
@@ -289,24 +309,41 @@ class _QuizScreenState extends ConsumerState<QuizScreen> with TickerProviderStat
                 // Fun tip
                 Container(
                   margin: EdgeInsets.symmetric(horizontal: MediaQuery.sizeOf(context).width * 0.14),
-                  padding: const EdgeInsets.all(16),
+                  padding: const EdgeInsets.all(20),
                   decoration: BoxDecoration(
-                    color: Colors.amber.withValues(alpha: 0.1),
-                    borderRadius: BorderRadius.circular(12),
+                    color: isDarkMode
+                        ? const Color(0xFFFCD34D).withValues(alpha: 0.15)
+                        : const Color(0xFFFEF3C7),
+                    borderRadius: BorderRadius.circular(20),
                     border: Border.all(
-                      color: Colors.amber.withValues(alpha: 0.3),
+                      color: const Color(0xFFFCD34D).withValues(alpha: 0.4),
+                      width: 2,
                     ),
                   ),
                   child: Row(
                     children: [
-                      const Icon(Icons.lightbulb, color: Colors.amber),
+                      Container(
+                        padding: const EdgeInsets.all(8),
+                        decoration: BoxDecoration(
+                          color: isDarkMode
+                              ? const Color(0xFFFCD34D).withValues(alpha: 0.2)
+                              : const Color(0xFFFEF3C7),
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: Icon(
+                          Icons.lightbulb_rounded,
+                          size: 28,
+                          color: isDarkMode ? const Color(0xFFFCD34D) : const Color(0xFF92400E),
+                        ),
+                      ),
                       const SizedBox(width: 12),
                       Expanded(
                         child: Text(
                           _getRandomTip(),
                           style: TextStyle(
-                            color: Colors.amber[800],
-                            fontSize: 13,
+                            color: isDarkMode ? const Color(0xFFFCD34D) : const Color(0xFF92400E),
+                            fontSize: 14,
+                            fontWeight: FontWeight.w600,
                           ),
                         ),
                       ),
@@ -323,19 +360,20 @@ class _QuizScreenState extends ConsumerState<QuizScreen> with TickerProviderStat
     final question = _questions[_currentIndex];
 
     return Scaffold(
+      backgroundColor: isDarkMode ? null : const Color(0xFFF5F7FF),
       body: SafeArea(
         child: Column(
           children: [
-            _buildHeader(colorScheme),
-            _buildTimerBar(colorScheme),
+            _buildHeader(colorScheme, isDarkMode),
+            _buildTimerBar(colorScheme, isDarkMode),
             Expanded(
               child: SingleChildScrollView(
                 padding: const EdgeInsets.all(20),
                 child: Column(
                   children: [
-                    _buildQuestionCard(question, colorScheme),
+                    _buildQuestionCard(question, colorScheme, isDarkMode),
                     const SizedBox(height: 24),
-                    ..._buildOptions(question, colorScheme),
+                    ..._buildOptions(question, colorScheme, isDarkMode),
                   ],
                 ),
               ),
@@ -346,54 +384,112 @@ class _QuizScreenState extends ConsumerState<QuizScreen> with TickerProviderStat
     );
   }
 
-  Widget _buildHeader(ColorScheme colorScheme) {
+  Widget _buildHeader(ColorScheme colorScheme, bool isDarkMode) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
       decoration: BoxDecoration(
-        color: colorScheme.surface,
+        color: isDarkMode ? colorScheme.surface : Colors.white,
+        borderRadius: const BorderRadius.vertical(bottom: Radius.circular(24)),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.05),
-            blurRadius: 4,
-            offset: const Offset(0, 2),
+            color: Colors.black.withValues(alpha: 0.08),
+            blurRadius: 12,
+            offset: const Offset(0, 4),
           ),
         ],
       ),
       child: Row(
         children: [
-          IconButton(
-            icon: const Icon(Icons.close),
-            onPressed: () => _showExitDialog(),
+          Container(
+            decoration: BoxDecoration(
+              color: isDarkMode
+                  ? Colors.white.withValues(alpha: 0.1)
+                  : const Color(0xFFF3F4F6),
+              shape: BoxShape.circle,
+            ),
+            child: IconButton(
+              icon: const Icon(Icons.close_rounded, size: 24),
+              onPressed: () => _showExitDialog(),
+            ),
           ),
+          const SizedBox(width: 12),
           Expanded(
             child: Column(
               children: [
-                Text(
-                  'Question ${_currentIndex + 1} of ${_questions.length}',
-                  style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(6),
+                      decoration: BoxDecoration(
+                        gradient: const LinearGradient(
+                          colors: [Color(0xFF6B4CE6), Color(0xFF8B6EF7)],
+                        ),
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      child: const Icon(
+                        Icons.track_changes_rounded,
+                        size: 18,
+                        color: Colors.white,
+                      ),
+                    ),
+                    const SizedBox(width: 6),
+                    Text(
+                      'Question ${_currentIndex + 1}/${_questions.length}',
+                      style: const TextStyle(
+                        fontWeight: FontWeight.w800,
+                        fontSize: 16,
+                        letterSpacing: 0.3,
+                      ),
+                    ),
+                  ],
                 ),
-                const SizedBox(height: 4),
-                LinearProgressIndicator(
-                  value: (_currentIndex + 1) / _questions.length,
-                  backgroundColor: colorScheme.surfaceContainerHighest,
-                  borderRadius: BorderRadius.circular(4),
+                const SizedBox(height: 8),
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(12),
+                  child: LinearProgressIndicator(
+                    value: (_currentIndex + 1) / _questions.length,
+                    backgroundColor: isDarkMode
+                        ? Colors.white.withValues(alpha: 0.1)
+                        : const Color(0xFFE9D5FF),
+                    valueColor: const AlwaysStoppedAnimation<Color>(Color(0xFF6B4CE6)),
+                    minHeight: 8,
+                  ),
                 ),
               ],
             ),
           ),
+          const SizedBox(width: 12),
           Container(
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
             decoration: BoxDecoration(
-              color: Colors.amber.withValues(alpha: 0.2),
+              gradient: const LinearGradient(
+                colors: [Color(0xFFFCD34D), Color(0xFFFBBF24)],
+              ),
               borderRadius: BorderRadius.circular(20),
+              boxShadow: [
+                BoxShadow(
+                  color: const Color(0xFFFCD34D).withValues(alpha: 0.4),
+                  blurRadius: 8,
+                  offset: const Offset(0, 2),
+                ),
+              ],
             ),
             child: Row(
               children: [
-                const Icon(Icons.star, color: Colors.amber, size: 18),
-                const SizedBox(width: 4),
+                const Icon(
+                  Icons.star_rounded,
+                  size: 16,
+                  color: Color(0xFF78350F),
+                ),
+                const SizedBox(width: 6),
                 Text(
                   '$_score',
-                  style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.amber),
+                  style: const TextStyle(
+                    fontWeight: FontWeight.w900,
+                    color: Color(0xFF78350F),
+                    fontSize: 16,
+                  ),
                 ),
               ],
             ),
@@ -403,44 +499,67 @@ class _QuizScreenState extends ConsumerState<QuizScreen> with TickerProviderStat
     );
   }
 
-  Widget _buildTimerBar(ColorScheme colorScheme) {
-    final timerColor = _timeLeft <= 3 ? Colors.red : (_timeLeft <= 5 ? Colors.orange : Colors.green);
+  Widget _buildTimerBar(ColorScheme colorScheme, bool isDarkMode) {
+    final timerColor = _timeLeft <= 3 
+        ? const Color(0xFFF44336) 
+        : (_timeLeft <= 5 ? const Color(0xFFFF9800) : const Color(0xFF4CAF50));
+    final timerIcon = _timeLeft <= 3 
+        ? Icons.sentiment_very_dissatisfied_rounded 
+        : (_timeLeft <= 5 ? Icons.sentiment_neutral_rounded : Icons.sentiment_satisfied_alt_rounded);
     
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
       child: Row(
         children: [
-          Icon(
-            Icons.timer,
-            color: timerColor,
-            size: 24,
+          Container(
+            padding: const EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              color: timerColor.withValues(alpha: 0.15),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Icon(
+              timerIcon,
+              size: 20,
+              color: timerColor,
+            ),
           ),
-          const SizedBox(width: 8),
+          const SizedBox(width: 12),
           Expanded(
             child: AnimatedBuilder(
               animation: _timerAnimation,
               builder: (context, child) {
                 return ClipRRect(
-                  borderRadius: BorderRadius.circular(8),
+                  borderRadius: BorderRadius.circular(12),
                   child: LinearProgressIndicator(
                     value: _timeLeft / _timerDuration,
-                    backgroundColor: colorScheme.surfaceContainerHighest,
+                    backgroundColor: isDarkMode
+                        ? Colors.white.withValues(alpha: 0.1)
+                        : timerColor.withValues(alpha: 0.15),
                     valueColor: AlwaysStoppedAnimation<Color>(timerColor),
-                    minHeight: 10,
+                    minHeight: 12,
                   ),
                 );
               },
             ),
           ),
-          const SizedBox(width: 8),
+          const SizedBox(width: 12),
           Container(
-            width: 40,
+            width: 50,
+            height: 50,
+            decoration: BoxDecoration(
+              color: timerColor.withValues(alpha: 0.15),
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(
+                color: timerColor.withValues(alpha: 0.3),
+                width: 2,
+              ),
+            ),
             alignment: Alignment.center,
             child: Text(
               '$_timeLeft',
               style: TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
+                fontSize: 22,
+                fontWeight: FontWeight.w900,
                 color: timerColor,
               ),
             ),
@@ -450,24 +569,36 @@ class _QuizScreenState extends ConsumerState<QuizScreen> with TickerProviderStat
     );
   }
 
-  Widget _buildQuestionCard(QuestionModel question, ColorScheme colorScheme) {
+  Widget _buildQuestionCard(QuestionModel question, ColorScheme colorScheme, bool isDarkMode) {
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.all(18),
+      padding: const EdgeInsets.all(24),
       decoration: BoxDecoration(
         gradient: LinearGradient(
-          colors: [
-            colorScheme.primary.withValues(alpha: 0.1),
-            colorScheme.secondary.withValues(alpha: 0.05),
-          ],
+          colors: isDarkMode
+              ? [
+                  const Color(0xFF6B4CE6).withValues(alpha: 0.2),
+                  const Color(0xFF8B6EF7).withValues(alpha: 0.1),
+                ]
+              : [
+                  const Color(0xFFEDE9FE),
+                  const Color(0xFFF5F3FF),
+                ],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
-        borderRadius: BorderRadius.circular(20),
+        borderRadius: BorderRadius.circular(28),
         border: Border.all(
-          color: colorScheme.primary.withValues(alpha: 0.2),
-          width: 2,
+          color: const Color(0xFF6B4CE6).withValues(alpha: 0.3),
+          width: 2.5,
         ),
+        boxShadow: [
+          BoxShadow(
+            color: const Color(0xFF6B4CE6).withValues(alpha: 0.15),
+            blurRadius: 16,
+            offset: const Offset(0, 6),
+          ),
+        ],
       ),
       child: Column(
         children: [
@@ -475,38 +606,62 @@ class _QuizScreenState extends ConsumerState<QuizScreen> with TickerProviderStat
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                 decoration: BoxDecoration(
                   color: _getDifficultyColor(question.difficulty).withValues(alpha: 0.2),
                   borderRadius: BorderRadius.circular(20),
-                ),
-                child: Text(
-                  question.difficulty.name.toUpperCase(),
-                  style: TextStyle(
-                    color: _getDifficultyColor(question.difficulty),
-                    fontWeight: FontWeight.bold,
-                    fontSize: 12,
+                  border: Border.all(
+                    color: _getDifficultyColor(question.difficulty).withValues(alpha: 0.4),
+                    width: 2,
                   ),
                 ),
-              ),
-              const SizedBox(width: 8),
-              IconButton(
-                onPressed: () => _speakQuestion(question),
-                icon: Icon(
-                  _isSpeaking ? Icons.volume_up : Icons.volume_up_outlined,
-                  color: colorScheme.primary,
+                child: Row(
+                  children: [
+                    Icon(
+                      _getDifficultyIcon(question.difficulty),
+                      size: 16,
+                      color: _getDifficultyColor(question.difficulty),
+                    ),
+                    const SizedBox(width: 6),
+                    Text(
+                      question.difficulty.name.toUpperCase(),
+                      style: TextStyle(
+                        color: _getDifficultyColor(question.difficulty),
+                        fontWeight: FontWeight.w900,
+                        fontSize: 12,
+                        letterSpacing: 0.5,
+                      ),
+                    ),
+                  ],
                 ),
-                tooltip: 'Read question aloud',
+              ),
+              const SizedBox(width: 12),
+              Container(
+                decoration: BoxDecoration(
+                  color: const Color(0xFF6B4CE6).withValues(alpha: 0.15),
+                  shape: BoxShape.circle,
+                ),
+                child: IconButton(
+                  onPressed: () => _speakQuestion(question),
+                  icon: Icon(
+                    _isSpeaking ? Icons.volume_up_rounded : Icons.volume_up_outlined,
+                    size: 24,
+                    color: const Color(0xFF6B4CE6),
+                  ),
+                  tooltip: 'Read question aloud',
+                ),
               ),
             ],
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: 20),
           Text(
             question.questionText,
-            style: const TextStyle(
-              fontSize: 22,
-              fontWeight: FontWeight.w600,
-              height: 1.4,
+            style: TextStyle(
+              fontSize: 20,
+              fontWeight: FontWeight.w700,
+              height: 1.5,
+              color: isDarkMode ? Colors.white : const Color(0xFF2D3748),
+              letterSpacing: 0.3,
             ),
             textAlign: TextAlign.center,
           ),
@@ -515,9 +670,25 @@ class _QuizScreenState extends ConsumerState<QuizScreen> with TickerProviderStat
     );
   }
 
-  List<Widget> _buildOptions(QuestionModel question, ColorScheme colorScheme) {
+  IconData _getDifficultyIcon(QuestionDifficulty difficulty) {
+    switch (difficulty) {
+      case QuestionDifficulty.easy:
+        return Icons.sentiment_satisfied_alt_rounded;
+      case QuestionDifficulty.medium:
+        return Icons.psychology_rounded;
+      case QuestionDifficulty.hard:
+        return Icons.local_fire_department_rounded;
+    }
+  }
+
+  List<Widget> _buildOptions(QuestionModel question, ColorScheme colorScheme, bool isDarkMode) {
     final optionLabels = ['A', 'B', 'C', 'D'];
-    final optionColors = [Colors.blue, Colors.orange, Colors.purple, Colors.teal];
+    final optionColors = [
+      const Color(0xFF3B82F6), // Blue
+      const Color(0xFFFF9800), // Orange
+      const Color(0xFF9C27B0), // Purple
+      const Color(0xFF00BCD4), // Cyan
+    ];
 
     return List.generate(question.options.length, (index) {
       final isSelected = _selectedOptionIndex == index;
@@ -527,52 +698,58 @@ class _QuizScreenState extends ConsumerState<QuizScreen> with TickerProviderStat
       Color backgroundColor;
       Color borderColor;
       Color textColor;
-      IconData? trailingIcon;
+      IconData? resultIcon;
 
       if (showResult) {
         if (isCorrect) {
-          backgroundColor = Colors.green.withValues(alpha: 0.2);
-          borderColor = Colors.green;
-          textColor = Colors.green.shade700;
-          trailingIcon = Icons.check_circle;
+          backgroundColor = const Color(0xFF4CAF50).withValues(alpha: isDarkMode ? 0.25 : 0.2);
+          borderColor = const Color(0xFF4CAF50);
+          textColor = isDarkMode ? const Color(0xFF81C784) : const Color(0xFF2E7D32);
+          resultIcon = Icons.check_circle_rounded;
         } else if (isSelected && !isCorrect) {
-          backgroundColor = Colors.red.withValues(alpha: 0.2);
-          borderColor = Colors.red;
-          textColor = Colors.red.shade700;
-          trailingIcon = Icons.cancel;
+          backgroundColor = const Color(0xFFF44336).withValues(alpha: isDarkMode ? 0.25 : 0.2);
+          borderColor = const Color(0xFFF44336);
+          textColor = isDarkMode ? const Color(0xFFE57373) : const Color(0xFFC62828);
+          resultIcon = Icons.cancel_rounded;
         } else {
-          backgroundColor = const Color(0xFFE8EAED);
-          borderColor = const Color(0xFFDADCE0);
-          textColor = const Color(0xFF5F6368);
-          trailingIcon = null;
+          backgroundColor = isDarkMode
+              ? Colors.white.withValues(alpha: 0.05)
+              : const Color(0xFFF3F4F6);
+          borderColor = isDarkMode
+              ? Colors.white.withValues(alpha: 0.1)
+              : const Color(0xFFE5E7EB);
+          textColor = isDarkMode ? Colors.white54 : const Color(0xFF9CA3AF);
+          resultIcon = null;
         }
       } else {
-        backgroundColor = optionColors[index].withValues(alpha: 0.1);
-        borderColor = optionColors[index].withValues(alpha: 0.3);
-        textColor = colorScheme.onSurface;
-        trailingIcon = null;
+        backgroundColor = isDarkMode
+            ? optionColors[index].withValues(alpha: 0.15)
+            : optionColors[index].withValues(alpha: 0.1);
+        borderColor = optionColors[index].withValues(alpha: isDarkMode ? 0.4 : 0.3);
+        textColor = isDarkMode ? Colors.white : const Color(0xFF2D3748);
+        resultIcon = null;
       }
 
       return Padding(
-        padding: const EdgeInsets.only(bottom: 12),
+        padding: const EdgeInsets.only(bottom: 14),
         child: Material(
           color: Colors.transparent,
           child: InkWell(
             onTap: _hasAnswered ? null : () => _selectOption(index),
-            borderRadius: BorderRadius.circular(16),
+            borderRadius: BorderRadius.circular(20),
             child: AnimatedContainer(
               duration: const Duration(milliseconds: 300),
-              padding: const EdgeInsets.all(16),
+              padding: const EdgeInsets.all(18),
               decoration: BoxDecoration(
                 color: backgroundColor,
-                borderRadius: BorderRadius.circular(16),
-                border: Border.all(color: borderColor, width: 2),
+                borderRadius: BorderRadius.circular(20),
+                border: Border.all(color: borderColor, width: 2.5),
                 boxShadow: isSelected && showResult
                     ? [
                         BoxShadow(
                           color: borderColor.withValues(alpha: 0.3),
-                          blurRadius: 8,
-                          offset: const Offset(0, 2),
+                          blurRadius: 12,
+                          offset: const Offset(0, 4),
                         ),
                       ]
                     : null,
@@ -580,23 +757,27 @@ class _QuizScreenState extends ConsumerState<QuizScreen> with TickerProviderStat
               child: Row(
                 children: [
                   Container(
-                    width: 44,
-                    height: 44,
+                    width: 50,
+                    height: 50,
                     decoration: BoxDecoration(
                       color: showResult
-                          ? (isCorrect ? Colors.green : (isSelected ? Colors.red : Colors.grey))
-                              .withValues(alpha: 0.2)
+                          ? (isCorrect
+                              ? const Color(0xFF4CAF50)
+                              : (isSelected ? const Color(0xFFF44336) : Colors.grey))
+                                  .withValues(alpha: 0.2)
                           : optionColors[index].withValues(alpha: 0.2),
-                      borderRadius: BorderRadius.circular(12),
+                      borderRadius: BorderRadius.circular(14),
                     ),
                     child: Center(
                       child: Text(
                         optionLabels[index],
                         style: TextStyle(
-                          fontSize: 20,
-                          fontWeight: FontWeight.bold,
+                          fontSize: 22,
+                          fontWeight: FontWeight.w900,
                           color: showResult
-                              ? (isCorrect ? Colors.green : (isSelected ? Colors.red : Colors.grey))
+                              ? (isCorrect
+                                  ? const Color(0xFF4CAF50)
+                                  : (isSelected ? const Color(0xFFF44336) : Colors.grey))
                               : optionColors[index],
                         ),
                       ),
@@ -608,16 +789,17 @@ class _QuizScreenState extends ConsumerState<QuizScreen> with TickerProviderStat
                       question.options[index],
                       style: TextStyle(
                         fontSize: 16,
-                        fontWeight: FontWeight.w500,
+                        fontWeight: FontWeight.w600,
                         color: textColor,
+                        height: 1.3,
                       ),
                     ),
                   ),
-                  if (trailingIcon != null)
+                  if (resultIcon != null)
                     Icon(
-                      trailingIcon,
-                      color: isCorrect ? Colors.green : Colors.red,
+                      resultIcon,
                       size: 28,
+                      color: isCorrect ? const Color(0xFF4CAF50) : const Color(0xFFF44336),
                     ),
                 ],
               ),
@@ -643,26 +825,56 @@ class _QuizScreenState extends ConsumerState<QuizScreen> with TickerProviderStat
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Row(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+        title: Row(
           children: [
-            Icon(Icons.warning_amber, color: Colors.orange),
-            SizedBox(width: 8),
-            Text('Leave Quiz?'),
+            Container(
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: const Color(0xFFFF9800).withValues(alpha: 0.2),
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: const Color(0xFFFF9800).withValues(alpha: 0.2),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: const Icon(
+                  Icons.warning_amber_rounded,
+                  size: 24,
+                  color: Color(0xFFFF9800),
+                ),
+              ),
+            ),
+            const SizedBox(width: 12),
+            const Text('Leave Quiz?', style: TextStyle(fontWeight: FontWeight.w800)),
           ],
         ),
-        content: const Text('Your progress will be lost. Are you sure you want to leave?'),
+        content: const Text(
+          'Your progress will be lost. Are you sure you want to leave?',
+          style: TextStyle(fontSize: 15, height: 1.4),
+        ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('Stay'),
+            style: TextButton.styleFrom(
+              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+            ),
+            child: const Text('Stay', style: TextStyle(fontWeight: FontWeight.w700)),
           ),
           ElevatedButton(
             onPressed: () {
               Navigator.pop(context);
               Navigator.pop(context);
             },
-            style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
-            child: const Text('Leave', style: TextStyle(color: Colors.white)),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: const Color(0xFFF44336),
+              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+            ),
+            child: const Text('Leave', style: TextStyle(color: Colors.white, fontWeight: FontWeight.w700)),
           ),
         ],
       ),
@@ -671,10 +883,10 @@ class _QuizScreenState extends ConsumerState<QuizScreen> with TickerProviderStat
 
   String _getRandomTip() {
     final tips = [
-      'Answer quickly for more points! ⚡',
-      'You have 10 seconds per question ⏱️',
-      'Stay calm and do your best! 💪',
-      'Learning is fun! 🌟',
+      'Answer quickly for more points!',
+      'You have 10 seconds per question',
+      'Stay calm and do your best!',
+      'Learning is fun!',
     ];
     return tips[Random().nextInt(tips.length)];
   }

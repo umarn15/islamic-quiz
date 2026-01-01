@@ -17,7 +17,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     final textTheme = Theme.of(context).textTheme;
-    final colorScheme = Theme.of(context).colorScheme;
     bool darkMode = Theme.of(context).brightness == Brightness.dark;
 
     final userData = ref.watch(userDataProvider);
@@ -26,10 +25,10 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     final isLoggedIn = user != null;
     
     final points = isLoggedIn ? user.points : localStats.points;
-    final level = isLoggedIn ? user.level : localStats.level;
     final firstName = user?.displayName.split(' ').first ?? '';
 
     return Scaffold(
+      backgroundColor: darkMode ? null : const Color(0xFFF5F7FF),
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
@@ -37,185 +36,295 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         title: Row(
           children: [
             Container(
-              padding: const EdgeInsets.all(6),
+              padding: const EdgeInsets.all(8),
               decoration: BoxDecoration(
-                color: colorScheme.primary.withValues(alpha: 0.1),
-                borderRadius: BorderRadius.circular(8),
+                gradient: LinearGradient(
+                  colors: [
+                    const Color(0xFF6B4CE6),
+                    const Color(0xFF8B6EF7),
+                  ],
+                ),
+                borderRadius: BorderRadius.circular(16),
               ),
-              child: Icon(
+              child: const Icon(
                 Icons.auto_stories,
-                size: 20,
-                color: colorScheme.primary,
+                size: 24,
+                color: Colors.white,
               ),
             ),
-            const SizedBox(width: 10),
+            const SizedBox(width: 12),
             Text(
               'Islamic Quiz',
               style: textTheme.titleLarge?.copyWith(
-                fontWeight: FontWeight.w600,
+                fontWeight: FontWeight.w800,
+                fontSize: 22,
+                letterSpacing: 0.5,
               ),
             ),
           ],
         ),
         actions: [
           Padding(
-            padding: const EdgeInsets.only(right: 6.0),
-            child: IconButton(
-              icon: Icon(Icons.settings_outlined, size: 22,
-               color: darkMode? Colors.white : Colors.black),
-              onPressed: () {
-                Navigator.of(context).push(
-                  MaterialPageRoute(
-                    builder: (context) => const SettingsScreen(),
-                  ),
-                );
-              },
+            padding: const EdgeInsets.only(right: 8.0),
+            child: Container(
+              decoration: BoxDecoration(
+                color: darkMode 
+                    ? Colors.white.withValues(alpha: 0.1)
+                    : Colors.white,
+                shape: BoxShape.circle,
+              ),
+              child: IconButton(
+                icon: Icon(
+                  Icons.settings_rounded,
+                  size: 24,
+                  color: darkMode ? Colors.white : const Color(0xFF6B4CE6),
+                ),
+                onPressed: () {
+                  Navigator.of(context).push(
+                    MaterialPageRoute(
+                      builder: (context) => const SettingsScreen(),
+                    ),
+                  );
+                },
+              ),
             ),
           ),
         ],
       ),
       body: SafeArea(
         child: SingleChildScrollView(
-          padding: const EdgeInsets.all(16),
+          padding: const EdgeInsets.all(20),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               Container(
-                padding: const EdgeInsets.symmetric(vertical: 28, horizontal: 20),
+                padding: const EdgeInsets.all(24),
                 decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(22),
-                  gradient: LinearGradient(
+                  borderRadius: BorderRadius.circular(32),
+                  gradient: const LinearGradient(
                     begin: Alignment.topLeft,
                     end: Alignment.bottomRight,
-                    colors: darkMode
-                        ? [
-                      colorScheme.primary.withValues(alpha: 0.6),
-                      colorScheme.primary.withValues(alpha: 0.5),
-                      colorScheme.primary.withValues(alpha: 0.4),
-                    ]
-                        : [
-                      colorScheme.primary,
-                      colorScheme.primary.withValues(alpha: 0.85),
-                      colorScheme.primary.withValues(alpha: 0.7),
+                    colors: [
+                      Color(0xFF6B4CE6),
+                      Color(0xFF8B6EF7),
+                      Color(0xFFAB8EFF),
                     ],
-                    stops: const [0.0, 0.5, 1.0],
                   ),
                 ),
                 child: Stack(
                   children: [
-                    // Decorative pattern
+                    // Decorative circles
                     Positioned(
-                      right: 0,
-                      top: -6,
+                      right: -20,
+                      top: -20,
+                      child: Container(
+                        width: 100,
+                        height: 100,
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          color: Colors.white.withValues(alpha: 0.1),
+                        ),
+                      ),
+                    ),
+                    Positioned(
+                      right: 30,
+                      bottom: -10,
+                      child: Container(
+                        width: 60,
+                        height: 60,
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          color: Colors.white.withValues(alpha: 0.08),
+                        ),
+                      ),
+                    ),
+                    // Decorative mosque icon
+                    Positioned(
+                      right: 10,
+                      top: 10,
                       child: Icon(
                         Icons.mosque,
-                        size: 140,
-                        color: Colors.white.withValues(alpha: 0.08),
+                        size: 80,
+                        color: Colors.white.withValues(alpha: 0.15),
                       ),
                     ),
 
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(
-                          firstName.isNotEmpty
-                              ? 'Assalamu Alaikum, $firstName'
-                              : 'Assalamu Alaikum',
-                          style: textTheme.headlineSmall?.copyWith(
-                            color: Colors.white,
-                            fontWeight: FontWeight.w600,
-                            letterSpacing: 0.3,
-                          ),
-                        ),
-                        const SizedBox(height: 6),
-                        Text(
-                          'Test and grow your Islamic knowledge',
-                          style: textTheme.bodyMedium?.copyWith(
-                            color: Colors.white.withValues(alpha: 0.85),
-                          ),
-                        ),
-                        const SizedBox(height: 22),
-
-                        // Stats card
-                        Container(
-                          padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 16),
-                          decoration: BoxDecoration(
-                            color: Colors.white.withValues(alpha: 0.12),
-                            borderRadius: BorderRadius.circular(14),
-                            border: Border.all(
-                              color: Colors.white.withValues(alpha: 0.2),
+                        Row(
+                          children: [
+                            Container(
+                              padding: const EdgeInsets.all(8),
+                              decoration: BoxDecoration(
+                                color: Colors.white.withValues(alpha: 0.2),
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              child: const Icon(
+                                Icons.waving_hand_rounded,
+                                size: 24,
+                                color: Colors.white,
+                              ),
                             ),
-                          ),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                            children: [
-                              _buildInlineStat(
-                                icon: Icons.emoji_events_outlined,
-                                value: points.toString(),
-                                label: 'Points',
+                            const SizedBox(width: 12),
+                            Expanded(
+                              child: Text(
+                                firstName.isNotEmpty
+                                    ? 'Assalamu Alaikum,\n$firstName!'
+                                    : 'Assalamu Alaikum!',
+                                style: const TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 22,
+                                  fontWeight: FontWeight.w800,
+                                  height: 1.2,
+                                  letterSpacing: 0.5,
+                                ),
                               ),
-                              Container(
-                                height: 36,
-                                width: 1,
-                                color: Colors.white.withValues(alpha: 0.3),
-                              ),
-                              _buildInlineStat(
-                                icon: Icons.trending_up,
-                                value: level.toString(),
-                                label: 'Level',
-                              ),
-                            ],
-                          ),
+                            ),
+                          ],
                         ),
+                        const SizedBox(height: 12),
+                        Row(
+                          children: [
+                            Icon(
+                              Icons.auto_awesome,
+                              size: 18,
+                              color: Colors.white.withValues(alpha: 0.95),
+                            ),
+                            const SizedBox(width: 6),
+                            Text(
+                              'Let\'s learn and have fun!',
+                              style: TextStyle(
+                                color: Colors.white.withValues(alpha: 0.95),
+                                fontSize: 15,
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 20),
+
+                        // Stats cards
+                            Container(
+                              width: double.infinity,
+                              padding: const EdgeInsets.all(12),
+                              decoration: BoxDecoration(
+                                color: Colors.white,
+                                borderRadius: BorderRadius.circular(20),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: Colors.black.withValues(alpha: 0.1),
+                                    blurRadius: 8,
+                                    offset: const Offset(0, 4),
+                                  ),
+                                ],
+                              ),
+                              child: Column(
+                                children: [
+                                  Container(
+                                    padding: const EdgeInsets.all(10),
+                                    decoration: BoxDecoration(
+                                      color: const Color(0xFFFFF4E6),
+                                      shape: BoxShape.circle,
+                                    ),
+                                    child: const Icon(
+                                      Icons.emoji_events_rounded,
+                                      size: 30,
+                                      color: Color(0xFFFFA726),
+                                    ),
+                                  ),
+                                  const SizedBox(height: 8),
+                                  Text(
+                                    points.toString(),
+                                    style: const TextStyle(
+                                      color: Color(0xFF6B4CE6),
+                                      fontSize: 30,
+                                      fontWeight: FontWeight.w900,
+                                    ),
+                                  ),
+                                  const Text(
+                                    'Points',
+                                    style: TextStyle(
+                                      color: Color(0xFF8B8B8B),
+                                      fontSize: 14,
+                                      fontWeight: FontWeight.w600,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
                       ],
                     ),
                   ],
                 ),
               ),
 
-              const SizedBox(height: 28),
+              const SizedBox(height: 32),
               
               // Quiz Difficulty
-              Text(
-                'Choose Difficulty Level',
-                style: textTheme.titleLarge,
+              Row(
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(8),
+                    decoration: BoxDecoration(
+                      gradient: const LinearGradient(
+                        colors: [Color(0xFF6B4CE6), Color(0xFF8B6EF7)],
+                      ),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: const Icon(
+                      Icons.sports_esports_rounded,
+                      size: 24,
+                      color: Colors.white,
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Text(
+                    'Pick Your Challenge!',
+                    style: textTheme.titleLarge?.copyWith(
+                      fontWeight: FontWeight.w800,
+                      fontSize: 22,
+                    ),
+                  ),
+                ],
               ),
-              const SizedBox(height: 16),
+              const SizedBox(height: 20),
               
               _buildDifficultyCard(
                 textTheme: textTheme,
                 title: 'Easy',
-                subtitle: 'Easy questions for beginners',
-                icon: Icons.school,
-                color: Colors.green.shade700,
+                subtitle: 'Perfect for beginners!',
+                icon: Icons.sentiment_satisfied_alt_rounded,
+                color: const Color(0xFF4CAF50),
                 onTap: () {
                   _navigateToQuiz(QuestionDifficulty.easy);
                 },
               ),
-              const SizedBox(height: 8),
+              const SizedBox(height: 12),
               
               _buildDifficultyCard(
                 textTheme: textTheme,
                 title: 'Medium',
-                subtitle: 'Moderate difficulty questions',
-                icon: Icons.psychology,
-                color: colorScheme.primary,
+                subtitle: 'Ready for more?',
+                icon: Icons.psychology_rounded,
+                color: const Color(0xFFFF9800),
                 onTap: () {
                   _navigateToQuiz(QuestionDifficulty.medium);
                 },
               ),
-              const SizedBox(height: 8),
+              const SizedBox(height: 12),
               
               _buildDifficultyCard(
                 textTheme: textTheme,
                 title: 'Hard',
-                subtitle: 'Challenging questions for experts',
-                icon: Icons.military_tech,
-                color: Colors.red,
+                subtitle: 'For the brave ones!',
+                icon: Icons.local_fire_department_rounded,
+                color: const Color(0xFFF44336),
                 onTap: () {
                   _navigateToQuiz(QuestionDifficulty.hard);
                 },
               ),
+              const SizedBox(height: 20),
             ],
           ),
         ),
@@ -228,83 +337,137 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   }
 
   void _showQuestionCountDialog(QuestionDifficulty difficulty) {
-    final colorScheme = Theme.of(context).colorScheme;
-    final questionCounts = [5, 10, 15, 20, 40];
+    final questionCounts = [5, 10, 15, 20];
+    final icons = [
+      Icons.looks_one_rounded,
+      Icons.looks_two_rounded,
+      Icons.looks_3_rounded,
+      Icons.looks_4_rounded,
+    ];
     
     showModalBottomSheet(
       context: context,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-      ),
-      builder: (context) => Padding(
-        padding: const EdgeInsets.all(20),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                Icon(Icons.quiz, color: colorScheme.primary),
-                const SizedBox(width: 10),
-                const Text(
-                  'Number of Questions',
-                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+      backgroundColor: Colors.transparent,
+      builder: (context) => Container(
+        decoration: BoxDecoration(
+          color: Theme.of(context).scaffoldBackgroundColor,
+          borderRadius: const BorderRadius.vertical(top: Radius.circular(32)),
+        ),
+        padding: const EdgeInsets.all(24),
+        child: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                width: 50,
+                height: 5,
+                decoration: BoxDecoration(
+                  color: Colors.grey.withValues(alpha: 0.3),
+                  borderRadius: BorderRadius.circular(10),
                 ),
-              ],
-            ),
-            const SizedBox(height: 20),
-            Wrap(
-              spacing: 12,
-              runSpacing: 12,
-              children: questionCounts.map((count) {
-                return InkWell(
-                  onTap: () {
-                    Navigator.pop(context);
-                    Navigator.of(context).push(
-                      MaterialPageRoute(
-                        builder: (context) => QuizScreen(
-                          difficulty: difficulty,
-                          questionCount: count,
-                        ),
-                      ),
-                    );
-                  },
-                  borderRadius: BorderRadius.circular(12),
-                  child: Container(
-                    width: (MediaQuery.of(context).size.width - 76) / 2,
-                    padding: const EdgeInsets.symmetric(vertical: 16),
+              ),
+              const SizedBox(height: 20),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(12),
                     decoration: BoxDecoration(
-                      color: colorScheme.primary.withValues(alpha: 0.1),
-                      borderRadius: BorderRadius.circular(12),
-                      border: Border.all(
-                        color: colorScheme.primary.withValues(alpha: 0.3),
+                      gradient: const LinearGradient(
+                        colors: [Color(0xFF6B4CE6), Color(0xFF8B6EF7)],
                       ),
+                      borderRadius: BorderRadius.circular(16),
                     ),
-                    child: Column(
-                      children: [
-                        Text(
-                          '$count',
-                          style: TextStyle(
-                            fontSize: 24,
-                            fontWeight: FontWeight.bold,
-                            color: colorScheme.primary,
-                          ),
-                        ),
-                        Text(
-                          'Questions',
-                          style: TextStyle(
-                            fontSize: 12,
-                            color: colorScheme.onSurface.withValues(alpha: 0.7),
-                          ),
-                        ),
-                      ],
+                    child: const Icon(
+                      Icons.quiz_rounded,
+                      size: 24,
+                      color: Colors.white,
                     ),
                   ),
-                );
-              }).toList(),
-            ),
-            const SizedBox(height: 16),
-          ],
+                  const SizedBox(width: 12),
+                  const Text(
+                    'How Many Questions?',
+                    style: TextStyle(
+                      fontSize: 22,
+                      fontWeight: FontWeight.w800,
+                      letterSpacing: 0.5,
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 24),
+              Wrap(
+                spacing: 12,
+                runSpacing: 12,
+                alignment: WrapAlignment.center,
+                children: questionCounts.asMap().entries.map((entry) {
+                  final index = entry.key;
+                  final count = entry.value;
+                  return InkWell(
+                    onTap: () {
+                      Navigator.pop(context);
+                      Navigator.of(context).push(
+                        MaterialPageRoute(
+                          builder: (context) => QuizScreen(
+                            difficulty: difficulty,
+                            questionCount: count,
+                          ),
+                        ),
+                      );
+                    },
+                    borderRadius: BorderRadius.circular(20),
+                    child: Container(
+                      width: (MediaQuery.of(context).size.width - 84) / 2,
+                      padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 16),
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
+                          colors: [
+                            const Color(0xFF6B4CE6).withValues(alpha: 0.15),
+                            const Color(0xFF8B6EF7).withValues(alpha: 0.08),
+                          ],
+                        ),
+                        borderRadius: BorderRadius.circular(20),
+                        border: Border.all(
+                          color: const Color(0xFF6B4CE6).withValues(alpha: 0.3),
+                          width: 2,
+                        ),
+                      ),
+                      child: Column(
+                        children: [
+                          Icon(
+                            icons[index],
+                            size: 32,
+                            color: const Color(0xFF6B4CE6),
+                          ),
+                          const SizedBox(height: 8),
+                          Text(
+                            '$count',
+                            style: const TextStyle(
+                              fontSize: 32,
+                              fontWeight: FontWeight.w900,
+                              color: Color(0xFF6B4CE6),
+                            ),
+                          ),
+                          const SizedBox(height: 4),
+                          Text(
+                            'Questions',
+                            style: TextStyle(
+                              fontSize: 13,
+                              fontWeight: FontWeight.w600,
+                              color: Colors.grey.shade600,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  );
+                }).toList(),
+              ),
+              const SizedBox(height: 20),
+            ],
+          ),
         ),
       ),
     );
@@ -354,76 +517,86 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     required VoidCallback onTap,
   }) {
     final isDarkMode = Theme.of(context).brightness == Brightness.dark;
-    final effectiveColor = isDarkMode ? Color.lerp(color, Colors.white, 0.35)! : color;
+    final effectiveColor = isDarkMode ? Color.lerp(color, Colors.white, 0.3)! : color;
 
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 4),
-      child: Material(
-        color: Colors.transparent,
-        child: InkWell(
-          onTap: onTap,
-          borderRadius: BorderRadius.circular(12),
-          child: Ink(
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(12),
-              border: Border.all(
-                color: isDarkMode 
-                    ? effectiveColor.withValues(alpha: 0.5)
-                    : color.withValues(alpha: 0.25),
-                width: 1.5,
-              ),
-              gradient: LinearGradient(
-                begin: Alignment.centerLeft,
-                end: Alignment.centerRight,
-                colors: isDarkMode
-                    ? [
-                        effectiveColor.withValues(alpha: 0.1),
-                        effectiveColor.withValues(alpha: 0.06),
-                      ]
-                    : [
-                        color.withValues(alpha: 0.06),
-                        color.withValues(alpha: 0.02),
-                      ],
-              ),
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(24),
+        child: Container(
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(24),
+            gradient: LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: [
+                      effectiveColor.withValues(alpha: 0.3),
+                      effectiveColor.withValues(alpha: 0.16),
+                    ]
             ),
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-              child: Row(
-                children: [
-                  Icon(icon, size: 32, color: effectiveColor),
-                  const SizedBox(width: 16),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          title,
-                          style: TextStyle(
-                            color: effectiveColor,
-                            fontSize: 22,
-                            fontWeight: FontWeight.w600,
-                            letterSpacing: 0.2,
-                          ),
-                        ),
-                        const SizedBox(height: 2),
-                        Text(
-                          subtitle,
-                          style: textTheme.bodyMedium?.copyWith(
-                            color: isDarkMode 
-                                ? Colors.white70 
-                                : Colors.black54,
-                          ),
-                        ),
-                      ],
-                    ),
+            border: Border.all(
+              color: effectiveColor.withValues(alpha: isDarkMode ? 0.4 : 0.2),
+              width: 2.5,
+            ),
+          ),
+          child: Padding(
+            padding: const EdgeInsets.all(20),
+            child: Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    color: effectiveColor.withValues(alpha: 0.15),
+                    borderRadius: BorderRadius.circular(18),
                   ),
-                  Icon(
-                    Icons.arrow_forward_ios,
-                    size: 20,
-                    color: effectiveColor.withValues(alpha: 0.7),
+                  child: Icon(
+                    icon,
+                    size: 36,
+                    color: effectiveColor,
                   ),
-                ],
-              ),
+                ),
+                const SizedBox(width: 16),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        title,
+                        style: TextStyle(
+                          color: effectiveColor,
+                          fontSize: 26,
+                          fontWeight: FontWeight.w900,
+                          letterSpacing: 0.5,
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        subtitle,
+                        style: TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w600,
+                          color: isDarkMode 
+                              ? Colors.white70 
+                              : Colors.grey.shade600,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                Container(
+                  padding: const EdgeInsets.all(10),
+                  decoration: BoxDecoration(
+                    color: effectiveColor.withValues(alpha: 0.15),
+                    shape: BoxShape.circle,
+                  ),
+                  child: Icon(
+                    Icons.arrow_forward_rounded,
+                    size: 24,
+                    color: effectiveColor,
+                  ),
+                ),
+              ],
             ),
           ),
         ),
