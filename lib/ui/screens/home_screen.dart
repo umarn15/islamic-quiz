@@ -253,8 +253,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                                                 const Color(0xFF6B4CE6).withValues(alpha: 0.2),
                                               ]
                                             : [
-                                                const Color(0xFFFFF4E6),
-                                                const Color(0xFFFFE0B2),
+                                                Colors.deepPurple.shade100,
+                                                Colors.deepPurple.shade50,
                                               ],
                                       ),
                                       shape: BoxShape.circle,
@@ -264,7 +264,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                                       size: 30,
                                       color: darkMode
                                           ? Colors.grey.shade300
-                                          : const Color(0xFFFF9800),
+                                          : Colors.deepPurple.shade300,
                                     ),
                                   ),
                                   const SizedBox(height: 8),
