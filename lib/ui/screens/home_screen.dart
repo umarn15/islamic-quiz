@@ -232,10 +232,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                                 boxShadow: [
                                   BoxShadow(
                                     color: darkMode
-                                        ? Colors.black.withValues(alpha: 0.2)
+                                        ? const Color(0xFF6B4CE6).withValues(alpha: 0.3)
                                         : const Color(0xFF6B4CE6).withValues(alpha: 0.15),
-                                    blurRadius: 12,
-                                    offset: const Offset(0, 4),
+                                    blurRadius: 2,
                                   ),
                                 ],
                               ),
