@@ -100,7 +100,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               Container(
                 padding: const EdgeInsets.all(24),
                 decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(32),
+                  borderRadius: BorderRadius.circular(24),
                   gradient: const LinearGradient(
                     begin: Alignment.topLeft,
                     end: Alignment.bottomRight,
@@ -209,12 +209,32 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                               width: double.infinity,
                               padding: const EdgeInsets.all(12),
                               decoration: BoxDecoration(
-                                color: Colors.white,
+                                gradient: LinearGradient(
+                                  begin: Alignment.topLeft,
+                                  end: Alignment.bottomRight,
+                                  colors: darkMode
+                                      ? [
+                                          Colors.white.withValues(alpha: 0.15),
+                                          Colors.white.withValues(alpha: 0.08),
+                                        ]
+                                      : [
+                                          const Color(0xFFEDE9FE),
+                                          const Color(0xFFDDD6FE),
+                                        ],
+                                ),
                                 borderRadius: BorderRadius.circular(20),
+                                border: Border.all(
+                                  color: darkMode
+                                      ? Colors.white.withValues(alpha: 0.2)
+                                      : const Color(0xFF8B6EF7).withValues(alpha: 0.3),
+                                  width: 2,
+                                ),
                                 boxShadow: [
                                   BoxShadow(
-                                    color: Colors.black.withValues(alpha: 0.1),
-                                    blurRadius: 8,
+                                    color: darkMode
+                                        ? Colors.black.withValues(alpha: 0.2)
+                                        : const Color(0xFF6B4CE6).withValues(alpha: 0.15),
+                                    blurRadius: 12,
                                     offset: const Offset(0, 4),
                                   ),
                                 ],
@@ -224,30 +244,51 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                                   Container(
                                     padding: const EdgeInsets.all(10),
                                     decoration: BoxDecoration(
-                                      color: const Color(0xFFFFF4E6),
+                                      gradient: LinearGradient(
+                                        begin: Alignment.topLeft,
+                                        end: Alignment.bottomRight,
+                                        colors: darkMode
+                                            ? [
+                                                const Color(0xFF8B6EF7).withValues(alpha: 0.3),
+                                                const Color(0xFF6B4CE6).withValues(alpha: 0.2),
+                                              ]
+                                            : [
+                                                const Color(0xFFFFF4E6),
+                                                const Color(0xFFFFE0B2),
+                                              ],
+                                      ),
                                       shape: BoxShape.circle,
                                     ),
-                                    child: const Icon(
+                                    child: Icon(
                                       Icons.emoji_events_rounded,
                                       size: 30,
-                                      color: Color(0xFFFFA726),
+                                      color: darkMode
+                                          ? Colors.grey.shade300
+                                          : const Color(0xFFFF9800),
                                     ),
                                   ),
                                   const SizedBox(height: 8),
                                   Text(
                                     points.toString(),
-                                    style: const TextStyle(
-                                      color: Color(0xFF6B4CE6),
+                                    style: TextStyle(
+                                      color: darkMode
+                                          ? Colors.white
+                                          : const Color(0xFF6B4CE6),
                                       fontSize: 30,
                                       fontWeight: FontWeight.w900,
+                                      letterSpacing: 0.5,
                                     ),
                                   ),
-                                  const Text(
+                                  const SizedBox(height: 4),
+                                  Text(
                                     'Points',
                                     style: TextStyle(
-                                      color: Color(0xFF8B8B8B),
+                                      color: darkMode
+                                          ? Colors.white.withValues(alpha: 0.7)
+                                          : const Color(0xFF6B4CE6).withValues(alpha: 0.7),
                                       fontSize: 14,
-                                      fontWeight: FontWeight.w600,
+                                      fontWeight: FontWeight.w700,
+                                      letterSpacing: 0.5,
                                     ),
                                   ),
                                 ],
@@ -470,41 +511,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           ),
         ),
       ),
-    );
-  }
-
-  Widget _buildInlineStat({
-    required IconData icon,
-    required String value,
-    required String label,
-  }) {
-    return Column(
-      children: [
-        Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(icon, size: 20, color: Colors.white.withValues(alpha: 0.9)),
-            const SizedBox(width: 6),
-            Text(
-              value,
-              style: const TextStyle(
-                color: Colors.white,
-                fontSize: 22,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-          ],
-        ),
-        const SizedBox(height: 2),
-        Text(
-          label,
-          style: TextStyle(
-            color: Colors.white.withValues(alpha: 0.75),
-            fontSize: 12,
-            fontWeight: FontWeight.w500,
-          ),
-        ),
-      ],
     );
   }
 
