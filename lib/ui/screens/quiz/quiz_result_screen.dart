@@ -50,7 +50,7 @@ class _QuizResultScreenState extends ConsumerState<QuizResultScreen>
   @override
   void initState() {
     super.initState();
-    _confettiController = ConfettiController(duration: const Duration(seconds: 8));
+    _confettiController = ConfettiController(duration: const Duration(seconds: 4));
 
     // Scale animation for the result icon
     _scaleController = AnimationController(
