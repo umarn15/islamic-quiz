@@ -220,8 +220,7 @@ class _QuizScreenState extends ConsumerState<QuizScreen> with TickerProviderStat
   }
 
   Future<void> _playAnswerSound(bool isCorrect) async {
-    await _audioPlayer.play(AssetSource(isCorrect? 'sounds/correct.wav' : 'sounds/wrong.mp3'),
-    volume: isCorrect? null : 0.2);
+    await _audioPlayer.play(AssetSource(isCorrect? 'sounds/correct.wav' : 'sounds/wrong.mp3'));
   }
 
   void _finishQuiz() {
