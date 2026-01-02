@@ -615,8 +615,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       greeting = 'Good Morning';
     } else if (hour >= 12 && hour < 17) {
       greeting = 'Good Afternoon';
-    } else if (hour >= 17 && hour < 24) {
-      greeting = 'Good Evening';
     } else {
       greeting = 'Good Evening';
     }
