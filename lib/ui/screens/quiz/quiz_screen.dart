@@ -6,6 +6,7 @@ import 'package:flutter_tts/flutter_tts.dart';
 import 'package:islamicquiz/data/models/question_model.dart';
 import 'package:islamicquiz/data/providers/question_provider.dart';
 import 'quiz_result_screen.dart';
+import 'package:audioplayers/audioplayers.dart';
 
 class QuizScreen extends ConsumerStatefulWidget {
   final QuestionDifficulty difficulty;
@@ -29,6 +30,7 @@ class _QuizScreenState extends ConsumerState<QuizScreen> with TickerProviderStat
   bool _isLoading = true;
   bool _hasAnswered = false;
   int? _selectedOptionIndex;
+  final AudioPlayer _audioPlayer = AudioPlayer();
 
   // Timer
   static const int _timerDuration = 10;
@@ -37,7 +39,6 @@ class _QuizScreenState extends ConsumerState<QuizScreen> with TickerProviderStat
 
   // Text-to-Speech
   late FlutterTts _flutterTts;
-  bool _isSpeaking = false;
   bool _ttsReady = false;
   bool _isMuted = false;
 
@@ -77,18 +78,6 @@ class _QuizScreenState extends ConsumerState<QuizScreen> with TickerProviderStat
     await _flutterTts.setSpeechRate(0.5);
     await _flutterTts.setVolume(4.0);
     await _flutterTts.setPitch(1.0);
-    
-    _flutterTts.setStartHandler(() {
-      setState(() => _isSpeaking = true);
-    });
-    
-    _flutterTts.setCompletionHandler(() {
-      setState(() => _isSpeaking = false);
-    });
-    
-    _flutterTts.setCancelHandler(() {
-      setState(() => _isSpeaking = false);
-    });
     
     _ttsReady = true;
   }
@@ -181,8 +170,10 @@ class _QuizScreenState extends ConsumerState<QuizScreen> with TickerProviderStat
     if (_hasAnswered) return;
 
     _timer?.cancel();
+    _flutterTts.stop();
     final question = _questions[_currentIndex];
     final isCorrect = index == question.correctOptionIndex;
+    _playAnswerSound(isCorrect);
 
     setState(() {
       _hasAnswered = true;
@@ -228,6 +219,11 @@ class _QuizScreenState extends ConsumerState<QuizScreen> with TickerProviderStat
     });
   }
 
+  Future<void> _playAnswerSound(bool isCorrect) async {
+    await _audioPlayer.play(AssetSource(isCorrect? 'sounds/correct.wav' : 'sounds/wrong.mp3'),
+    volume: isCorrect? null : 0.2);
+  }
+
   void _finishQuiz() {
     _timer?.cancel();
     Navigator.pushReplacement(
@@ -249,6 +245,7 @@ class _QuizScreenState extends ConsumerState<QuizScreen> with TickerProviderStat
   void dispose() {
     _timer?.cancel();
     _flutterTts.stop();
+    _audioPlayer.dispose();
     _timerAnimationController.dispose();
     _optionAnimationController.dispose();
     super.dispose();
