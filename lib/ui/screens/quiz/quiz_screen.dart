@@ -3,6 +3,7 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_tts/flutter_tts.dart';
+import 'package:islamicquiz/core/localization/app_localizations.dart';
 import 'package:islamicquiz/data/models/question_model.dart';
 import 'package:islamicquiz/data/providers/question_provider.dart';
 import 'quiz_result_screen.dart';
@@ -111,8 +112,9 @@ class _QuizScreenState extends ConsumerState<QuizScreen> with TickerProviderStat
       
       if (questions.isEmpty) {
         if (mounted) {
+          final l10n = AppLocalizations.of(context);
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('No questions available for this difficulty')),
+            SnackBar(content: Text(l10n.noQuestionsAvailable)),
           );
           Navigator.pop(context);
         }
@@ -132,8 +134,9 @@ class _QuizScreenState extends ConsumerState<QuizScreen> with TickerProviderStat
       _speakQuestion(_questions[_currentIndex]);
     } catch (e) {
       if (mounted) {
+        final l10n = AppLocalizations.of(context);
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error loading questions: $e')),
+          SnackBar(content: Text('${l10n.errorLoadingQuestions}: $e')),
         );
         Navigator.pop(context);
       }
@@ -686,7 +689,7 @@ class _QuizScreenState extends ConsumerState<QuizScreen> with TickerProviderStat
                     size: 20,
                     color: _isMuted ? Colors.grey : const Color(0xFF6B4CE6),
                   ),
-                  tooltip: _isMuted ? 'Unmute' : 'Mute',
+                  tooltip: _isMuted ? AppLocalizations.of(context).unmute : AppLocalizations.of(context).mute,
                   padding: const EdgeInsets.all(8),
                   constraints: const BoxConstraints(),
                 ),
@@ -864,6 +867,7 @@ class _QuizScreenState extends ConsumerState<QuizScreen> with TickerProviderStat
   }
 
   void _showExitDialog() {
+    final l10n = AppLocalizations.of(context);
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
@@ -890,11 +894,11 @@ class _QuizScreenState extends ConsumerState<QuizScreen> with TickerProviderStat
               ),
             ),
             const SizedBox(width: 12),
-            const Text('Leave Quiz?', style: TextStyle(fontWeight: FontWeight.w800)),
+            Text(l10n.leaveQuiz, style: TextStyle(fontWeight: FontWeight.w800)),
           ],
         ),
-        content: const Text(
-          'Your progress will be lost. Are you sure you want to leave?',
+        content: Text(
+          l10n.leaveQuizMessage,
           style: TextStyle(fontSize: 15, height: 1.4),
         ),
         actions: [
@@ -904,7 +908,7 @@ class _QuizScreenState extends ConsumerState<QuizScreen> with TickerProviderStat
               padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
             ),
-            child: const Text('Stay', style: TextStyle(fontWeight: FontWeight.w700)),
+            child: Text(l10n.stay, style: TextStyle(fontWeight: FontWeight.w700)),
           ),
           ElevatedButton(
             onPressed: () {
@@ -916,7 +920,7 @@ class _QuizScreenState extends ConsumerState<QuizScreen> with TickerProviderStat
               padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
             ),
-            child: const Text('Leave', style: TextStyle(color: Colors.white, fontWeight: FontWeight.w700)),
+            child: Text(l10n.leave, style: TextStyle(color: Colors.white, fontWeight: FontWeight.w700)),
           ),
         ],
       ),
@@ -924,11 +928,12 @@ class _QuizScreenState extends ConsumerState<QuizScreen> with TickerProviderStat
   }
 
   String _getRandomTip() {
+    final l10n = AppLocalizations.of(context);
     final tips = [
-      'Answer quickly for more points!',
-      'You have 10 seconds per question',
-      'Stay calm and do your best!',
-      'Learning is fun!',
+      l10n.tipAnswerQuickly,
+      l10n.tipTenSeconds,
+      l10n.tipStayCalm,
+      l10n.tipLearningIsFun,
     ];
     return tips[Random().nextInt(tips.length)];
   }
@@ -972,24 +977,25 @@ class _LoadingTextState extends State<_LoadingText> with SingleTickerProviderSta
     super.dispose();
   }
 
-  String _getDifficultyLabel() {
+  String _getDifficultyLabel(AppLocalizations l10n) {
     switch (widget.difficulty) {
       case QuestionDifficulty.easy:
-        return 'Beginner';
+        return l10n.beginner;
       case QuestionDifficulty.medium:
-        return 'Normal';
+        return l10n.normal;
       case QuestionDifficulty.hard:
-        return 'Hard';
+        return l10n.hard;
     }
   }
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final dots = '.' * _dotCount;
     return Column(
       children: [
         Text(
-          'Preparing ${_getDifficultyLabel()} Quiz$dots',
+          '${l10n.preparingQuiz(_getDifficultyLabel(l10n))}$dots',
           style: const TextStyle(
             fontSize: 18,
             fontWeight: FontWeight.w600,
@@ -997,7 +1003,7 @@ class _LoadingTextState extends State<_LoadingText> with SingleTickerProviderSta
         ),
         const SizedBox(height: 8),
         Text(
-          'Get ready to test your knowledge!',
+          l10n.getReadyToTest,
           style: TextStyle(
             fontSize: 14,
             color: Colors.grey[600],

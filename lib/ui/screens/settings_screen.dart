@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:islamicquiz/core/localization/app_localizations.dart';
+import 'package:islamicquiz/core/localization/locale_provider.dart';
 import 'package:islamicquiz/core/theme_data.dart';
 import 'package:islamicquiz/data/providers/auth_provider.dart';
 import 'package:islamicquiz/data/services/auth_service.dart';
@@ -11,15 +13,17 @@ class SettingsScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
     final themeNotifier = ref.watch(themeProvider);
     final textTheme = Theme.of(context).textTheme;
     final colorScheme = Theme.of(context).colorScheme;
     final userData = ref.watch(userDataProvider);
     final isLoggedIn = userData.valueOrNull != null;
+    final currentLocale = ref.watch(localeProvider);
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Settings'),
+        title: Text(l10n.settings),
       ),
       body: SafeArea(
         child: SingleChildScrollView(
@@ -29,7 +33,7 @@ class SettingsScreen extends ConsumerWidget {
             children: [
               // Theme Section
               Text(
-                'Appearance',
+                l10n.appearance,
                 style: textTheme.titleLarge?.copyWith(
                   color: colorScheme.primary,
                 ),
@@ -55,13 +59,13 @@ class SettingsScreen extends ConsumerWidget {
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Text(
-                                  'Dark Mode',
+                                  l10n.darkMode,
                                   style: textTheme.titleMedium,
                                 ),
                                 Text(
                                   themeNotifier.isDarkMode 
-                                      ? 'Dark theme is enabled' 
-                                      : 'Light theme is enabled',
+                                      ? l10n.darkThemeEnabled 
+                                      : l10n.lightThemeEnabled,
                                   style: textTheme.bodyMedium,
                                 ),
                               ],
@@ -76,6 +80,44 @@ class SettingsScreen extends ConsumerWidget {
                           ),
                         ],
                       ),
+                      const Divider(height: 32),
+                      // Language Selection
+                      InkWell(
+                        onTap: () => _showLanguageDialog(context, ref, currentLocale),
+                        borderRadius: BorderRadius.circular(8),
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(vertical: 8),
+                          child: Row(
+                            children: [
+                              Icon(
+                                Icons.language,
+                                color: colorScheme.primary,
+                              ),
+                              const SizedBox(width: 16),
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      l10n.language,
+                                      style: textTheme.titleMedium,
+                                    ),
+                                    Text(
+                                      l10n.currentLanguage,
+                                      style: textTheme.bodyMedium,
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              Icon(
+                                Icons.arrow_forward_ios,
+                                size: 16,
+                                color: colorScheme.primary.withValues(alpha: 0.5),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
                     ],
                   ),
                 ),
@@ -85,7 +127,7 @@ class SettingsScreen extends ConsumerWidget {
 
               // Account Section
               Text(
-                'Account',
+                l10n.account,
                 style: textTheme.titleLarge?.copyWith(
                   color: colorScheme.primary,
                 ),
@@ -96,8 +138,8 @@ class SettingsScreen extends ConsumerWidget {
                 child: Padding(
                   padding: const EdgeInsets.all(16),
                   child: isLoggedIn
-                      ? _buildLoggedInContent(context, ref, userData.valueOrNull!, textTheme, colorScheme)
-                      : _buildSignInContent(context, textTheme, colorScheme),
+                      ? _buildLoggedInContent(context, ref, userData.valueOrNull!, textTheme, colorScheme, l10n)
+                      : _buildSignInContent(context, textTheme, colorScheme, l10n),
                 ),
               ),
 
@@ -105,7 +147,7 @@ class SettingsScreen extends ConsumerWidget {
               
               // About Section
               Text(
-                'About',
+                l10n.about,
                 style: textTheme.titleLarge?.copyWith(
                   color: colorScheme.primary,
                 ),
@@ -120,29 +162,109 @@ class SettingsScreen extends ConsumerWidget {
                       _buildInfoRow(
                         context: context,
                         icon: Icons.info_outline,
-                        title: 'App Version',
+                        title: l10n.appVersion,
                         subtitle: '1.0.0',
                         colorScheme: colorScheme,
                         textTheme: textTheme,
                       ),
-                      // Padding(
-                      //   padding: const EdgeInsets.symmetric(vertical: 2.0),
-                      //   child: Divider(color: Colors.grey),
-                      // ),
-                      // _buildInfoRow(
-                      //   context: context,
-                      //   icon: Icons.star_outline,
-                      //   title: 'Islamic Quiz',
-                      //   subtitle: 'Learn Islam through interactive quizzes',
-                      //   colorScheme: colorScheme,
-                      //   textTheme: textTheme,
-                      // ),
                     ],
                   ),
                 ),
               ),
             ],
           ),
+        ),
+      ),
+    );
+  }
+
+  void _showLanguageDialog(BuildContext context, WidgetRef ref, Locale currentLocale) {
+    final l10n = AppLocalizations.of(context);
+    final colorScheme = Theme.of(context).colorScheme;
+    
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text(l10n.selectLanguage),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            _buildLanguageOption(
+              context: context,
+              ref: ref,
+              locale: const Locale('en'),
+              name: 'English',
+              nativeName: 'English',
+              isSelected: currentLocale.languageCode == 'en',
+              colorScheme: colorScheme,
+            ),
+            const SizedBox(height: 8),
+            _buildLanguageOption(
+              context: context,
+              ref: ref,
+              locale: const Locale('ur'),
+              name: 'Urdu',
+              nativeName: 'اردو',
+              isSelected: currentLocale.languageCode == 'ur',
+              colorScheme: colorScheme,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildLanguageOption({
+    required BuildContext context,
+    required WidgetRef ref,
+    required Locale locale,
+    required String name,
+    required String nativeName,
+    required bool isSelected,
+    required ColorScheme colorScheme,
+  }) {
+    return InkWell(
+      onTap: () {
+        ref.read(localeProvider.notifier).setLocale(locale);
+        Navigator.pop(context);
+      },
+      borderRadius: BorderRadius.circular(12),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        decoration: BoxDecoration(
+          color: isSelected ? colorScheme.primary.withValues(alpha: 0.1) : null,
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(
+            color: isSelected ? colorScheme.primary : Colors.grey.withValues(alpha: 0.3),
+            width: isSelected ? 2 : 1,
+          ),
+        ),
+        child: Row(
+          children: [
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    name,
+                    style: TextStyle(
+                      fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                      color: isSelected ? colorScheme.primary : null,
+                    ),
+                  ),
+                  Text(
+                    nativeName,
+                    style: TextStyle(
+                      fontSize: 12,
+                      color: Colors.grey[600],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            if (isSelected)
+              Icon(Icons.check_circle, color: colorScheme.primary),
+          ],
         ),
       ),
     );
@@ -182,7 +304,7 @@ class SettingsScreen extends ConsumerWidget {
     );
   }
 
-  Widget _buildSignInContent(BuildContext context, TextTheme textTheme, ColorScheme colorScheme) {
+  Widget _buildSignInContent(BuildContext context, TextTheme textTheme, ColorScheme colorScheme, AppLocalizations l10n) {
     return InkWell(
       onTap: () {
         Navigator.of(context).push(
@@ -207,11 +329,11 @@ class SettingsScreen extends ConsumerWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'Sign In',
+                    l10n.signIn,
                     style: textTheme.titleMedium,
                   ),
                   Text(
-                    'Sign in to save your progress',
+                    l10n.signInToSaveProgress,
                     style: textTheme.bodyMedium?.copyWith(
                       color: colorScheme.onSurfaceVariant,
                     ),
@@ -236,6 +358,7 @@ class SettingsScreen extends ConsumerWidget {
     dynamic user,
     TextTheme textTheme,
     ColorScheme colorScheme,
+    AppLocalizations l10n,
   ) {
     return Column(
       children: [
@@ -270,7 +393,7 @@ class SettingsScreen extends ConsumerWidget {
         ),
         const Divider(height: 32),
         InkWell(
-          onTap: () => _showLogoutDialog(context, ref),
+          onTap: () => _showLogoutDialog(context, ref, l10n),
           borderRadius: BorderRadius.circular(8),
           child: Padding(
             padding: const EdgeInsets.symmetric(vertical: 8),
@@ -283,7 +406,7 @@ class SettingsScreen extends ConsumerWidget {
                 const SizedBox(width: 16),
                 Expanded(
                   child: Text(
-                    'Sign Out',
+                    l10n.signOut,
                     style: textTheme.titleMedium?.copyWith(
                       color: colorScheme.error,
                     ),
@@ -302,19 +425,19 @@ class SettingsScreen extends ConsumerWidget {
     );
   }
 
-  void _showLogoutDialog(BuildContext context, WidgetRef ref) {
+  void _showLogoutDialog(BuildContext context, WidgetRef ref, AppLocalizations l10n) {
     final colorScheme = Theme.of(context).colorScheme;
     
     showDialog(
       context: context,
       builder: (BuildContext dialogContext) {
         return AlertDialog(
-          title: const Text('Sign Out'),
-          content: const Text('Are you sure you want to sign out?'),
+          title: Text(l10n.signOutConfirmTitle),
+          content: Text(l10n.signOutConfirmMessage),
           actions: [
             TextButton(
               onPressed: () => Navigator.of(dialogContext).pop(),
-              child: const Text('Cancel'),
+              child: Text(l10n.cancel),
             ),
             TextButton(
               onPressed: () async {
@@ -332,7 +455,7 @@ class SettingsScreen extends ConsumerWidget {
               style: TextButton.styleFrom(
                 foregroundColor: colorScheme.error,
               ),
-              child: const Text('Sign Out'),
+              child: Text(l10n.signOut),
             ),
           ],
         );

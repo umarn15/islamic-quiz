@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:islamicquiz/core/localization/app_localizations.dart';
 import 'package:islamicquiz/data/models/question_model.dart';
 import 'package:islamicquiz/data/providers/auth_provider.dart';
 import 'package:islamicquiz/data/providers/local_stats_provider.dart';
@@ -16,6 +17,7 @@ class HomeScreen extends ConsumerStatefulWidget {
 class _HomeScreenState extends ConsumerState<HomeScreen> {
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final textTheme = Theme.of(context).textTheme;
     bool darkMode = Theme.of(context).brightness == Brightness.dark;
 
@@ -54,7 +56,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             ),
             const SizedBox(width: 12),
             Text(
-              'Islamic Quiz',
+              l10n.appTitle,
               style: textTheme.titleLarge?.copyWith(
                 fontWeight: FontWeight.w800,
                 fontSize: 22,
@@ -169,7 +171,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                             const SizedBox(width: 12),
                             Expanded(
                               child: Text(
-                                greetingByTime(firstName),
+                                _greetingByTime(firstName, l10n),
                                 style: const TextStyle(
                                   color: Colors.white,
                                   fontSize: 22,
@@ -191,7 +193,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                             ),
                             const SizedBox(width: 6),
                             Text(
-                              'Let\'s learn and have fun!',
+                              l10n.letsLearnAndHaveFun,
                               style: TextStyle(
                                 color: Colors.white.withValues(alpha: 0.95),
                                 fontSize: 15,
@@ -278,7 +280,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                                   ),
                                   const SizedBox(height: 4),
                                   Text(
-                                    'Points',
+                                    l10n.points,
                                     style: TextStyle(
                                       color: darkMode
                                           ? Colors.white.withValues(alpha: 0.7)
@@ -318,7 +320,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                   ),
                   const SizedBox(width: 12),
                   Text(
-                    'Pick Your Challenge!',
+                    l10n.pickYourChallenge,
                     style: textTheme.titleLarge?.copyWith(
                       fontWeight: FontWeight.w800,
                       fontSize: 22,
@@ -330,8 +332,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               
               _buildDifficultyCard(
                 textTheme: textTheme,
-                title: 'Easy',
-                subtitle: 'Perfect for beginners!',
+                title: l10n.easy,
+                subtitle: l10n.perfectForBeginners,
                 icon: Icons.sentiment_satisfied_alt_rounded,
                 color: const Color(0xFF4CAF50),
                 onTap: () {
@@ -342,8 +344,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               
               _buildDifficultyCard(
                 textTheme: textTheme,
-                title: 'Medium',
-                subtitle: 'Ready for more?',
+                title: l10n.medium,
+                subtitle: l10n.readyForMore,
                 icon: Icons.psychology_rounded,
                 color: const Color(0xFFFF9800),
                 onTap: () {
@@ -354,8 +356,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               
               _buildDifficultyCard(
                 textTheme: textTheme,
-                title: 'Hard',
-                subtitle: 'For the brave ones!',
+                title: l10n.hard,
+                subtitle: l10n.forTheBraveOnes,
                 icon: Icons.local_fire_department_rounded,
                 color: const Color(0xFFF44336),
                 onTap: () {
@@ -375,6 +377,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   }
 
   void _showQuestionCountDialog(QuestionDifficulty difficulty) {
+    final l10n = AppLocalizations.of(context);
     final questionCounts = [5, 10, 15, 20];
     final icons = [
       Icons.looks_one_rounded,
@@ -423,9 +426,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                     ),
                   ),
                   const SizedBox(width: 12),
-                  const Text(
-                    'How Many Questions?',
-                    style: TextStyle(
+                  Text(
+                    l10n.howManyQuestions,
+                    style: const TextStyle(
                       fontSize: 22,
                       fontWeight: FontWeight.w800,
                       letterSpacing: 0.5,
@@ -490,7 +493,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                           ),
                           const SizedBox(height: 4),
                           Text(
-                            'Questions',
+                            l10n.questions,
                             style: TextStyle(
                               fontSize: 13,
                               fontWeight: FontWeight.w600,
@@ -607,16 +610,16 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     );
   }
 
-  String greetingByTime(String firstName) {
+  String _greetingByTime(String firstName, AppLocalizations l10n) {
     final hour = DateTime.now().hour;
 
     String greeting;
     if (hour >= 5 && hour < 12) {
-      greeting = 'Good Morning';
+      greeting = l10n.goodMorning;
     } else if (hour >= 12 && hour < 17) {
-      greeting = 'Good Afternoon';
+      greeting = l10n.goodAfternoon;
     } else {
-      greeting = 'Good Evening';
+      greeting = l10n.goodEvening;
     }
 
     return firstName.isNotEmpty

@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:islamicquiz/core/localization/app_localizations.dart';
+import 'package:islamicquiz/core/localization/locale_provider.dart';
 import 'package:islamicquiz/core/theme_data.dart';
 import 'package:islamicquiz/data/providers/shared_prefs_provider.dart';
 import 'package:islamicquiz/firebase_options.dart';
@@ -31,6 +34,7 @@ class _MyAppState extends ConsumerState<MyApp> {
   Widget build(BuildContext context) {
     final themeNotifier = ref.watch(themeProvider);
     final currentTheme = themeNotifier.currentTheme;
+    final locale = ref.watch(localeProvider);
 
     // Update system overlay style based on current theme
     SystemChrome.setSystemUIOverlayStyle(
@@ -43,6 +47,14 @@ class _MyAppState extends ConsumerState<MyApp> {
       theme: ThemeProvider.lightTheme,
       darkTheme: ThemeProvider.darkTheme,
       themeMode: currentTheme,
+      locale: locale,
+      supportedLocales: AppLocalizations.supportedLocales,
+      localizationsDelegates: const [
+        AppLocalizations.delegate,
+        GlobalMaterialLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+        GlobalCupertinoLocalizations.delegate,
+      ],
       home: const SplashScreen(),
     );
   }

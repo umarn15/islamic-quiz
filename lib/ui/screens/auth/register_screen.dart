@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:islamicquiz/core/localization/app_localizations.dart';
 import 'package:islamicquiz/data/services/auth_service.dart';
 import 'package:islamicquiz/ui/screens/auth/login_screen.dart';
 import 'package:islamicquiz/ui/screens/home_screen.dart';
@@ -34,6 +35,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
 
   Future<void> _handleRegister() async {
     if (!_formKey.currentState!.validate()) return;
+    final l10n = AppLocalizations.of(context);
 
     setState(() {
       _isLoading = true;
@@ -56,7 +58,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
       }
     } catch (e) {
       setState(() {
-        _errorMessage = _getErrorMessage(e);
+        _errorMessage = _getErrorMessage(e, l10n);
       });
     } finally {
       if (mounted) {
@@ -65,19 +67,20 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
     }
   }
 
-  String _getErrorMessage(dynamic error) {
+  String _getErrorMessage(dynamic error, AppLocalizations l10n) {
     if (error.toString().contains('email-already-in-use')) {
-      return 'An account already exists with this email';
+      return l10n.emailAlreadyInUse;
     } else if (error.toString().contains('weak-password')) {
-      return 'Password is too weak';
+      return l10n.weakPassword;
     } else if (error.toString().contains('invalid-email')) {
-      return 'Invalid email address';
+      return l10n.invalidEmail;
     }
-    return 'Registration failed. Please try again.';
+    return l10n.registrationFailed;
   }
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final colorScheme = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
 
@@ -108,7 +111,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                 const SizedBox(height: 24),
 
                 Text(
-                  'Create Account',
+                  l10n.createAccount,
                   style: textTheme.headlineMedium?.copyWith(
                     fontWeight: FontWeight.bold,
                   ),
@@ -116,7 +119,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                 ),
                 const SizedBox(height: 8),
                 Text(
-                  'Start your learning journey today',
+                  l10n.startYourJourney,
                   style: textTheme.bodyMedium?.copyWith(
                     color: colorScheme.onSurfaceVariant,
                   ),
@@ -154,7 +157,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                   textInputAction: TextInputAction.next,
                   textCapitalization: TextCapitalization.words,
                   decoration: InputDecoration(
-                    labelText: 'Full Name',
+                    labelText: l10n.fullName,
                     prefixIcon: const Icon(Icons.person_outlined),
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(12),
@@ -162,10 +165,10 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                   ),
                   validator: (value) {
                     if (value == null || value.trim().isEmpty) {
-                      return 'Please enter your name';
+                      return l10n.pleaseEnterName;
                     }
                     if (value.trim().length < 2) {
-                      return 'Name must be at least 2 characters';
+                      return l10n.nameTooShort;
                     }
                     return null;
                   },
@@ -178,7 +181,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                   keyboardType: TextInputType.emailAddress,
                   textInputAction: TextInputAction.next,
                   decoration: InputDecoration(
-                    labelText: 'Email',
+                    labelText: l10n.email,
                     prefixIcon: const Icon(Icons.email_outlined),
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(12),
@@ -186,10 +189,10 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                   ),
                   validator: (value) {
                     if (value == null || value.isEmpty) {
-                      return 'Please enter your email';
+                      return l10n.pleaseEnterEmail;
                     }
                     if (!value.contains('@') || !value.contains('.')) {
-                      return 'Please enter a valid email';
+                      return l10n.pleaseEnterValidEmail;
                     }
                     return null;
                   },
@@ -202,7 +205,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                   obscureText: _obscurePassword,
                   textInputAction: TextInputAction.next,
                   decoration: InputDecoration(
-                    labelText: 'Password',
+                    labelText: l10n.password,
                     prefixIcon: const Icon(Icons.lock_outlined),
                     suffixIcon: IconButton(
                       icon: Icon(
@@ -218,10 +221,10 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                   ),
                   validator: (value) {
                     if (value == null || value.isEmpty) {
-                      return 'Please enter a password';
+                      return l10n.pleaseEnterPassword;
                     }
                     if (value.length < 6) {
-                      return 'Password must be at least 6 characters';
+                      return l10n.passwordTooShort;
                     }
                     return null;
                   },
@@ -235,7 +238,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                   textInputAction: TextInputAction.done,
                   onFieldSubmitted: (_) => _handleRegister(),
                   decoration: InputDecoration(
-                    labelText: 'Confirm Password',
+                    labelText: l10n.confirmPassword,
                     prefixIcon: const Icon(Icons.lock_outlined),
                     suffixIcon: IconButton(
                       icon: Icon(
@@ -254,10 +257,10 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                   ),
                   validator: (value) {
                     if (value == null || value.isEmpty) {
-                      return 'Please confirm your password';
+                      return l10n.pleaseConfirmPassword;
                     }
                     if (value != _passwordController.text) {
-                      return 'Passwords do not match';
+                      return l10n.passwordsDoNotMatch;
                     }
                     return null;
                   },
@@ -279,7 +282,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                           width: 20,
                           child: CircularProgressIndicator(strokeWidth: 2),
                         )
-                      : const Text('Create Account', style: TextStyle(fontSize: 16)),
+                      : Text(l10n.createAccount, style: TextStyle(fontSize: 16)),
                 ),
                 const SizedBox(height: 18),
 
@@ -288,7 +291,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     Text(
-                      'Already have an account? ',
+                      l10n.alreadyHaveAccount,
                       style: textTheme.bodyMedium,
                     ),
                     TextButton(
@@ -297,7 +300,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                           MaterialPageRoute(builder: (_) => const LoginScreen()),
                         );
                       },
-                      child: const Text('Sign In'),
+                      child: Text(l10n.signIn),
                     ),
                   ],
                 ),

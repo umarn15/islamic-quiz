@@ -3,6 +3,7 @@ import 'package:audioplayers/audioplayers.dart';
 import 'package:confetti/confetti.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:islamicquiz/core/localization/app_localizations.dart';
 import 'package:islamicquiz/data/models/question_model.dart';
 import 'package:islamicquiz/data/providers/auth_provider.dart';
 import 'package:islamicquiz/data/providers/local_stats_provider.dart';
@@ -141,9 +142,10 @@ class _QuizResultScreenState extends ConsumerState<QuizResultScreen>
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final colorScheme = Theme.of(context).colorScheme;
     final percentage = (widget.score / widget.totalScore * 100).round();
-    final resultData = _getResultData(percentage);
+    final resultData = _getResultData(percentage, l10n);
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Scaffold(
@@ -236,20 +238,20 @@ class _QuizResultScreenState extends ConsumerState<QuizResultScreen>
                           // Score Card with glassmorphism effect
                           ScaleTransition(
                             scale: _pulseAnimation,
-                            child: _buildScoreCard(colorScheme, isDark, isSmallScreen),
+                            child: _buildScoreCard(colorScheme, isDark, isSmallScreen, l10n),
                           ),
                           SizedBox(height: isSmallScreen ? 12 : 20),
 
                           // Stats Row
-                          _buildStatsRow(colorScheme, percentage, isDark, isSmallScreen),
+                          _buildStatsRow(colorScheme, percentage, isDark, isSmallScreen, l10n),
                           SizedBox(height: isSmallScreen ? 16 : 28),
 
                           // Action Buttons
-                          _buildActionButtons(context, colorScheme),
+                          _buildActionButtons(context, colorScheme, l10n),
                           SizedBox(height: isSmallScreen ? 12 : 20),
 
                           // Difficulty Badge
-                          _buildDifficultyBadge(),
+                          _buildDifficultyBadge(l10n),
                           const SizedBox(height: 12),
                         ],
                       ),
@@ -342,7 +344,7 @@ class _QuizResultScreenState extends ConsumerState<QuizResultScreen>
     );
   }
 
-  Widget _buildScoreCard(ColorScheme colorScheme, bool isDark, bool isSmallScreen) {
+  Widget _buildScoreCard(ColorScheme colorScheme, bool isDark, bool isSmallScreen, AppLocalizations l10n) {
     return Container(
       width: double.infinity,
       padding: EdgeInsets.all(isSmallScreen ? 8 : 12),
@@ -402,7 +404,7 @@ class _QuizResultScreenState extends ConsumerState<QuizResultScreen>
               ),
               const SizedBox(width: 8),
               GestureDetector(
-                onTap: () => _showScoringInfo(context),
+                onTap: () => _showScoringInfo(context, l10n),
                 child: Container(
                   padding: const EdgeInsets.all(4),
                   decoration: BoxDecoration(
@@ -426,7 +428,7 @@ class _QuizResultScreenState extends ConsumerState<QuizResultScreen>
               borderRadius: BorderRadius.circular(20),
             ),
             child: Text(
-              'POINTS EARNED',
+              l10n.pointsEarned,
               style: TextStyle(
                 fontSize: 12,
                 fontWeight: FontWeight.w700,
@@ -440,14 +442,14 @@ class _QuizResultScreenState extends ConsumerState<QuizResultScreen>
     );
   }
 
-  Widget _buildStatsRow(ColorScheme colorScheme, int percentage, bool isDark, bool isSmallScreen) {
+  Widget _buildStatsRow(ColorScheme colorScheme, int percentage, bool isDark, bool isSmallScreen, AppLocalizations l10n) {
     return Row(
       children: [
         Expanded(
           child: _buildStatCard(
             icon: Icons.check_circle_rounded,
             value: '${widget.correctAnswers}',
-            label: 'Correct',
+            label: l10n.correct,
             color: Colors.green,
             isDark: isDark,
             isSmallScreen: isSmallScreen,
@@ -458,7 +460,7 @@ class _QuizResultScreenState extends ConsumerState<QuizResultScreen>
           child: _buildStatCard(
             icon: Icons.cancel_rounded,
             value: '${widget.totalQuestions - widget.correctAnswers}',
-            label: 'Wrong',
+            label: l10n.wrong,
             color: Colors.red,
             isDark: isDark,
             isSmallScreen: isSmallScreen,
@@ -469,7 +471,7 @@ class _QuizResultScreenState extends ConsumerState<QuizResultScreen>
           child: _buildStatCard(
             icon: Icons.percent_rounded,
             value: '$percentage%',
-            label: 'Accuracy',
+            label: l10n.accuracy,
             color: Color(0xFF4ADE80),
             isDark: isDark,
             isSmallScreen: isSmallScreen,
@@ -520,7 +522,7 @@ class _QuizResultScreenState extends ConsumerState<QuizResultScreen>
     );
   }
 
-  Widget _buildActionButtons(BuildContext context, ColorScheme colorScheme) {
+  Widget _buildActionButtons(BuildContext context, ColorScheme colorScheme, AppLocalizations l10n) {
     return Row(
       children: [
         Expanded(
@@ -553,7 +555,7 @@ class _QuizResultScreenState extends ConsumerState<QuizResultScreen>
                     Icon(Icons.replay_rounded, color: Colors.grey.shade300),
                     const SizedBox(width: 8),
                     Text(
-                      'Play Again',
+                      l10n.playAgain,
                       style: TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.w600,
@@ -594,7 +596,7 @@ class _QuizResultScreenState extends ConsumerState<QuizResultScreen>
                       Icon(Icons.home_rounded, color: Colors.grey.shade300),
                       SizedBox(width: 8),
                       Text(
-                        'Home',
+                        l10n.home,
                         style: TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.w600,
@@ -612,7 +614,7 @@ class _QuizResultScreenState extends ConsumerState<QuizResultScreen>
     );
   }
 
-  Widget _buildDifficultyBadge() {
+  Widget _buildDifficultyBadge(AppLocalizations l10n) {
     final color = _getDifficultyColor(widget.difficulty);
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
@@ -632,7 +634,7 @@ class _QuizResultScreenState extends ConsumerState<QuizResultScreen>
           Icon(Icons.speed_rounded, color: color, size: 20),
           const SizedBox(width: 8),
           Text(
-            '${widget.difficulty.name.toUpperCase()} MODE',
+            '${_getDifficultyName(widget.difficulty, l10n).toUpperCase()} ${l10n.mode}',
             style: TextStyle(
               color: color,
               fontWeight: FontWeight.w700,
@@ -643,6 +645,17 @@ class _QuizResultScreenState extends ConsumerState<QuizResultScreen>
         ],
       ),
     );
+  }
+
+  String _getDifficultyName(QuestionDifficulty difficulty, AppLocalizations l10n) {
+    switch (difficulty) {
+      case QuestionDifficulty.easy:
+        return l10n.easy;
+      case QuestionDifficulty.medium:
+        return l10n.medium;
+      case QuestionDifficulty.hard:
+        return l10n.hard;
+    }
   }
 
   Color _getDifficultyColor(QuestionDifficulty difficulty) {
@@ -656,7 +669,7 @@ class _QuizResultScreenState extends ConsumerState<QuizResultScreen>
     }
   }
 
-  void _showScoringInfo(BuildContext context) {
+  void _showScoringInfo(BuildContext context, AppLocalizations l10n) {
     final lostPoints = widget.totalQuestions * 30 - widget.score;
     final colorScheme = Theme.of(context).colorScheme;
 
@@ -675,18 +688,18 @@ class _QuizResultScreenState extends ConsumerState<QuizResultScreen>
               child: Icon(Icons.info_outline_rounded, color: colorScheme.primary),
             ),
             const SizedBox(width: 12),
-            const Text('How Scoring Works', style: TextStyle(fontSize: 18)),
+            Text(l10n.howScoringWorks, style: TextStyle(fontSize: 18)),
           ],
         ),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            _buildScoringRow('⚡', 'Answer within 3 seconds', '30 points'),
+            _buildScoringRow('⚡', l10n.answerWithin3Seconds, '30 points'),
             const SizedBox(height: 8),
-            _buildScoringRow('⏱️', 'After 3 seconds', '-2 pts/sec'),
+            _buildScoringRow('⏱️', l10n.after3Seconds, '-2 pts/sec'),
             const SizedBox(height: 8),
-            _buildScoringRow('🛡️', 'Minimum per correct', '16 points'),
+            _buildScoringRow('🛡️', l10n.minimumPerCorrect, '16 points'),
             if (widget.correctAnswers == widget.totalQuestions && lostPoints > 0) ...[
               const SizedBox(height: 16),
               Container(
@@ -707,7 +720,7 @@ class _QuizResultScreenState extends ConsumerState<QuizResultScreen>
                     const SizedBox(width: 10),
                     Expanded(
                       child: Text(
-                        'Perfect answers! Lost $lostPoints pts to time.',
+                        l10n.perfectAnswersLostPoints(lostPoints),
                         style: TextStyle(fontSize: 13, color: Colors.amber[800], fontWeight: FontWeight.w500),
                       ),
                     ),
@@ -723,7 +736,7 @@ class _QuizResultScreenState extends ConsumerState<QuizResultScreen>
             style: TextButton.styleFrom(
               padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
             ),
-            child: const Text('Got it!', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
+            child: Text(l10n.gotIt, style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
           ),
         ],
       ),
@@ -741,40 +754,40 @@ class _QuizResultScreenState extends ConsumerState<QuizResultScreen>
     );
   }
 
-  _ResultData _getResultData(int percentage) {
+  _ResultData _getResultData(int percentage, AppLocalizations l10n) {
     if (percentage == 100) {
       return _ResultData(
         icon: Icons.emoji_events_rounded,
-        title: 'Perfect Score!',
-        message: 'SubhanAllah! You answered everything perfectly!',
+        title: l10n.perfectScore,
+        message: l10n.subhanAllahPerfect,
         color: Colors.amber,
       );
     } else if (percentage >= 80) {
       return _ResultData(
         icon: Icons.auto_awesome_rounded,
-        title: percentage >= 90 ? 'Almost Perfect!' : 'Excellent!',
-        message: 'MashaAllah! You did amazing!',
+        title: percentage >= 90 ? l10n.almostPerfect : l10n.excellent,
+        message: l10n.mashaAllahAmazing,
         color: Colors.deepPurple.shade400,
       );
     } else if (percentage >= 60) {
       return _ResultData(
         icon: Icons.thumb_up_rounded,
-        title: 'Good Job!',
-        message: 'Keep learning and improving!',
+        title: l10n.goodJob,
+        message: l10n.keepLearningImproving,
         color: Colors.green,
       );
     } else if (percentage >= 40) {
       return _ResultData(
         icon: Icons.sentiment_satisfied_rounded,
-        title: 'Nice Try!',
-        message: 'Practice makes perfect!',
+        title: l10n.niceTry,
+        message: l10n.practiceMakesPerfect,
         color: Colors.orange,
       );
     } else {
       return _ResultData(
         icon: Icons.school_rounded,
-        title: 'Keep Learning!',
-        message: "Don't give up, try again!",
+        title: l10n.keepLearning,
+        message: l10n.dontGiveUp,
         color: Colors.blue,
       );
     }

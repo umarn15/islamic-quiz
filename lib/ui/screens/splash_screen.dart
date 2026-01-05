@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:islamicquiz/core/localization/app_localizations.dart';
 import 'package:islamicquiz/data/providers/shared_prefs_provider.dart';
 import 'package:islamicquiz/data/services/question_seeder.dart';
 import 'package:islamicquiz/ui/screens/admin/admin_panel_screen.dart';
@@ -389,14 +390,19 @@ class _SplashScreenState extends ConsumerState<SplashScreen> with TickerProvider
                             ),
                           ],
                         ),
-                        child: const Text(
-                          'Master your knowledge',
-                          style: TextStyle(
-                            fontSize: 15,
-                            color: Colors.white,
-                            fontWeight: FontWeight.w500,
-                            letterSpacing: 1.5,
-                          ),
+                        child: Builder(
+                          builder: (context) {
+                            final l10n = AppLocalizations.of(context);
+                            return Text(
+                              l10n.masterYourKnowledge,
+                              style: const TextStyle(
+                                fontSize: 15,
+                                color: Colors.white,
+                                fontWeight: FontWeight.w500,
+                                letterSpacing: 1.5,
+                              ),
+                            );
+                          },
                         ),
                       ),
                     ],

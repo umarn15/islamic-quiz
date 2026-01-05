@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:islamicquiz/core/localization/app_localizations.dart';
 import 'package:islamicquiz/data/services/auth_service.dart';
 import 'package:islamicquiz/ui/screens/auth/register_screen.dart';
 import 'package:islamicquiz/ui/screens/home_screen.dart';
@@ -29,6 +30,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
 
   Future<void> _handleLogin() async {
     if (!_formKey.currentState!.validate()) return;
+    final l10n = AppLocalizations.of(context);
 
     setState(() {
       _isLoading = true;
@@ -50,7 +52,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
       }
     } catch (e) {
       setState(() {
-        _errorMessage = _getErrorMessage(e);
+        _errorMessage = _getErrorMessage(e, l10n);
       });
     } finally {
       if (mounted) {
@@ -59,24 +61,25 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     }
   }
 
-  String _getErrorMessage(dynamic error) {
+  String _getErrorMessage(dynamic error, AppLocalizations l10n) {
     if (error.toString().contains('user-not-found')) {
-      return 'No account found with this email';
+      return l10n.noAccountFound;
     } else if (error.toString().contains('wrong-password')) {
-      return 'Incorrect password';
+      return l10n.incorrectPassword;
     } else if (error.toString().contains('invalid-email')) {
-      return 'Invalid email address';
+      return l10n.invalidEmail;
     } else if (error.toString().contains('invalid-credential')) {
-      return 'Invalid email or password';
+      return l10n.invalidCredential;
     }
-    return 'Login failed. Please try again.';
+    return l10n.loginFailed;
   }
 
   Future<void> _handleForgotPassword() async {
+    final l10n = AppLocalizations.of(context);
     final email = _emailController.text.trim();
     if (email.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Enter your email first')),
+        SnackBar(content: Text(l10n.enterEmailFirst)),
       );
       return;
     }
@@ -85,13 +88,13 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
       await AuthService().sendPasswordResetEmail(email);
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Password reset email sent')),
+          SnackBar(content: Text(l10n.passwordResetEmailSent)),
         );
       }
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(_getErrorMessage(e))),
+          SnackBar(content: Text(_getErrorMessage(e, l10n))),
         );
       }
     }
@@ -99,6 +102,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final colorScheme = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
 
@@ -129,7 +133,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                 const SizedBox(height: 24),
                 
                 Text(
-                  'Welcome Back',
+                  l10n.welcomeBack,
                   style: textTheme.headlineMedium?.copyWith(
                     fontWeight: FontWeight.bold,
                   ),
@@ -137,7 +141,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                 ),
                 const SizedBox(height: 8),
                 Text(
-                  'Sign in to continue your journey',
+                  l10n.signInToContinue,
                   style: textTheme.bodyMedium?.copyWith(
                     color: colorScheme.onSurfaceVariant,
                   ),
@@ -175,7 +179,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                   keyboardType: TextInputType.emailAddress,
                   textInputAction: TextInputAction.next,
                   decoration: InputDecoration(
-                    labelText: 'Email',
+                    labelText: l10n.email,
                     prefixIcon: const Icon(Icons.email_outlined),
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(12),
@@ -183,10 +187,10 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                   ),
                   validator: (value) {
                     if (value == null || value.isEmpty) {
-                      return 'Please enter your email';
+                      return l10n.pleaseEnterEmail;
                     }
                     if (!value.contains('@')) {
-                      return 'Please enter a valid email';
+                      return l10n.pleaseEnterValidEmail;
                     }
                     return null;
                   },
@@ -200,7 +204,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                   textInputAction: TextInputAction.done,
                   onFieldSubmitted: (_) => _handleLogin(),
                   decoration: InputDecoration(
-                    labelText: 'Password',
+                    labelText: l10n.password,
                     prefixIcon: const Icon(Icons.lock_outlined),
                     suffixIcon: IconButton(
                       icon: Icon(
@@ -216,7 +220,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                   ),
                   validator: (value) {
                     if (value == null || value.isEmpty) {
-                      return 'Please enter your password';
+                      return l10n.pleaseEnterPassword;
                     }
                     return null;
                   },
@@ -228,7 +232,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                   alignment: Alignment.centerRight,
                   child: TextButton(
                     onPressed: _handleForgotPassword,
-                    child: const Text('Forgot Password?'),
+                    child: Text(l10n.forgotPassword),
                   ),
                 ),
                 const SizedBox(height: 24),
@@ -248,7 +252,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                           width: 20,
                           child: CircularProgressIndicator(strokeWidth: 2),
                         )
-                      : const Text('Sign In', style: TextStyle(fontSize: 16)),
+                      : Text(l10n.signIn, style: TextStyle(fontSize: 16)),
                 ),
                 const SizedBox(height: 18),
 
@@ -257,7 +261,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     Text(
-                      "Don't have an account? ",
+                      l10n.dontHaveAccount,
                       style: textTheme.bodyMedium,
                     ),
                     TextButton(
@@ -266,7 +270,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                           MaterialPageRoute(builder: (_) => const RegisterScreen()),
                         );
                       },
-                      child: const Text('Sign Up'),
+                      child: Text(l10n.signUp),
                     ),
                   ],
                 ),
