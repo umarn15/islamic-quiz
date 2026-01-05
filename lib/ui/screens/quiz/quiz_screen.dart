@@ -398,7 +398,7 @@ class _QuizScreenState extends ConsumerState<QuizScreen> with TickerProviderStat
             _buildTimerBar(colorScheme, isDarkMode),
             Expanded(
               child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 20),
+                padding: const EdgeInsets.symmetric(horizontal: 16),
                 child: Column(
                   children: [
                     const SizedBox(height: 12),
