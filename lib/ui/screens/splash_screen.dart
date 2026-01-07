@@ -353,7 +353,7 @@ class _SplashScreenState extends ConsumerState<SplashScreen> with TickerProvider
                         child: Text(
                           l10n.appTitle,
                           style: TextStyle(
-                            fontSize: 38,
+                            fontSize: 42,
                             fontWeight: FontWeight.w900,
                             color: Colors.white,
                             letterSpacing: 2.0,
