@@ -50,6 +50,18 @@ class _QuizScreenState extends ConsumerState<QuizScreen> with TickerProviderStat
   late AnimationController _optionAnimationController;
   late Animation<double> _timerAnimation;
 
+  bool _isInitialized = false;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+
+    if (!_isInitialized) {
+      _initializeQuiz();
+      _isInitialized = true;
+    }
+  }
+
   @override
   void initState() {
     super.initState();
@@ -63,8 +75,6 @@ class _QuizScreenState extends ConsumerState<QuizScreen> with TickerProviderStat
       duration: const Duration(milliseconds: 300),
       vsync: this,
     );
-
-    _initializeQuiz();
   }
 
   Future<void> _initializeQuiz() async {
