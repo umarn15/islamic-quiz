@@ -5,6 +5,10 @@ import '../local_questions.dart';
 class QuestionService {
   final FirebaseFirestore _firestore;
   static const String _collection = 'questions';
+  
+  /// Set to true to use local data only, false to use Firestore
+  /// Change this to false when you want to switch back to Firestore
+  static const bool _useLocalDataOnly = true;
 
   QuestionService({FirebaseFirestore? firestore})
       : _firestore = firestore ?? FirebaseFirestore.instance;
@@ -12,9 +16,17 @@ class QuestionService {
   CollectionReference<Map<String, dynamic>> get _questionsRef =>
       _firestore.collection(_collection);
 
-  /// Fetches all active questions from Firestore
-  /// Falls back to local questions if Firestore fails
+  /// Fetches all active questions
+  /// Currently uses local data only (set _useLocalDataOnly = false to use Firestore)
   Future<List<QuestionModel>> getActiveQuestions() async {
+    if (_useLocalDataOnly) {
+      return _getLocalQuestions();
+    }
+    return _getActiveQuestionsFromFirestore();
+  }
+
+  /// Firestore implementation - kept for future use
+  Future<List<QuestionModel>> _getActiveQuestionsFromFirestore() async {
     try {
       final snapshot = await _questionsRef
           .where('isActive', isEqualTo: true)
@@ -34,8 +46,21 @@ class QuestionService {
   }
 
   /// Fetches questions by difficulty
-  /// Firestore overrides local when online
+  /// Currently uses local data only (set _useLocalDataOnly = false to use Firestore)
   Future<List<QuestionModel>> getQuestionsByDifficulty(
+    QuestionDifficulty difficulty, {
+    bool activeOnly = true,
+  }) async {
+    if (_useLocalDataOnly) {
+      return _getLocalQuestions()
+          .where((q) => q.difficulty == difficulty && (!activeOnly || q.isActive))
+          .toList();
+    }
+    return _getQuestionsByDifficultyFromFirestore(difficulty, activeOnly: activeOnly);
+  }
+
+  /// Firestore implementation - kept for future use
+  Future<List<QuestionModel>> _getQuestionsByDifficultyFromFirestore(
     QuestionDifficulty difficulty, {
     bool activeOnly = true,
   }) async {
@@ -66,7 +91,21 @@ class QuestionService {
   }
 
   /// Fetches questions by category
+  /// Currently uses local data only (set _useLocalDataOnly = false to use Firestore)
   Future<List<QuestionModel>> getQuestionsByCategory(
+    QuestionCategory category, {
+    bool activeOnly = true,
+  }) async {
+    if (_useLocalDataOnly) {
+      return _getLocalQuestions()
+          .where((q) => q.category == category && (!activeOnly || q.isActive))
+          .toList();
+    }
+    return _getQuestionsByCategoryFromFirestore(category, activeOnly: activeOnly);
+  }
+
+  /// Firestore implementation - kept for future use
+  Future<List<QuestionModel>> _getQuestionsByCategoryFromFirestore(
     QuestionCategory category, {
     bool activeOnly = true,
   }) async {
@@ -97,7 +136,26 @@ class QuestionService {
   }
 
   /// Fetches questions by difficulty and category
+  /// Currently uses local data only (set _useLocalDataOnly = false to use Firestore)
   Future<List<QuestionModel>> getQuestionsByDifficultyAndCategory(
+    QuestionDifficulty difficulty,
+    QuestionCategory category, {
+    bool activeOnly = true,
+  }) async {
+    if (_useLocalDataOnly) {
+      return _getLocalQuestions()
+          .where((q) => 
+              q.difficulty == difficulty && 
+              q.category == category && 
+              (!activeOnly || q.isActive))
+          .toList();
+    }
+    return _getQuestionsByDifficultyAndCategoryFromFirestore(
+      difficulty, category, activeOnly: activeOnly);
+  }
+
+  /// Firestore implementation - kept for future use
+  Future<List<QuestionModel>> _getQuestionsByDifficultyAndCategoryFromFirestore(
     QuestionDifficulty difficulty,
     QuestionCategory category, {
     bool activeOnly = true,
@@ -136,35 +194,77 @@ class QuestionService {
   }
 
   /// Fetches all questions (for admin panel)
+  /// Currently uses local data only (set _useLocalDataOnly = false to use Firestore)
   Future<List<QuestionModel>> getAllQuestions() async {
+    if (_useLocalDataOnly) {
+      return _getAllLocalQuestions();
+    }
+    return _getAllQuestionsFromFirestore();
+  }
+
+  /// Firestore implementation - kept for future use
+  Future<List<QuestionModel>> _getAllQuestionsFromFirestore() async {
     final snapshot = await _questionsRef.get();
     return snapshot.docs
         .map((doc) => QuestionModel.fromJson(doc.data(), docId: doc.id))
         .toList();
   }
 
+  /// Gets all local questions (including inactive)
+  List<QuestionModel> _getAllLocalQuestions() {
+    return initialQuestions
+        .map((q) => QuestionModel.fromLocalJson(q))
+        .toList();
+  }
+
   /// Adds a new question
+  /// Note: Only works with Firestore. In local mode, this is a no-op.
   Future<void> addQuestion(QuestionModel question) async {
+    if (_useLocalDataOnly) {
+      // In local mode, we can't add questions dynamically
+      // This would require modifying the local_questions.dart file
+      return;
+    }
     await _questionsRef.doc(question.id).set(question.toJson());
   }
 
   /// Updates an existing question
+  /// Note: Only works with Firestore. In local mode, this is a no-op.
   Future<void> updateQuestion(QuestionModel question) async {
+    if (_useLocalDataOnly) {
+      // In local mode, we can't update questions dynamically
+      return;
+    }
     await _questionsRef.doc(question.id).update(question.toJson());
   }
 
   /// Toggles question active status (for admin panel)
+  /// Note: Only works with Firestore. In local mode, this is a no-op.
   Future<void> toggleQuestionStatus(String questionId, bool isActive) async {
+    if (_useLocalDataOnly) {
+      // In local mode, we can't toggle status dynamically
+      return;
+    }
     await _questionsRef.doc(questionId).update({'isActive': isActive});
   }
 
   /// Deletes a question
+  /// Note: Only works with Firestore. In local mode, this is a no-op.
   Future<void> deleteQuestion(String questionId) async {
+    if (_useLocalDataOnly) {
+      // In local mode, we can't delete questions dynamically
+      return;
+    }
     await _questionsRef.doc(questionId).delete();
   }
 
   /// Seeds Firestore with initial questions
+  /// Note: Only works with Firestore. In local mode, this is a no-op.
   Future<void> seedQuestions({bool overwrite = false}) async {
+    if (_useLocalDataOnly) {
+      // In local mode, questions are already seeded from local_questions.dart
+      return;
+    }
     final batch = _firestore.batch();
     
     for (final questionData in initialQuestions) {
@@ -181,8 +281,12 @@ class QuestionService {
     await batch.commit();
   }
 
-  /// Checks if questions exist in Firestore
+  /// Checks if questions exist
+  /// In local mode, always returns true since local questions are always available
   Future<bool> hasQuestions() async {
+    if (_useLocalDataOnly) {
+      return initialQuestions.isNotEmpty;
+    }
     final snapshot = await _questionsRef.limit(1).get();
     return snapshot.docs.isNotEmpty;
   }
