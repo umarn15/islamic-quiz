@@ -219,6 +219,7 @@ class _SplashScreenState extends ConsumerState<SplashScreen> with TickerProvider
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
     bool darkMode = Theme.of(context).brightness == Brightness.dark;
+    final l10n = AppLocalizations.of(context);
 
     return Scaffold(
       body: Container(
@@ -350,12 +351,12 @@ class _SplashScreenState extends ConsumerState<SplashScreen> with TickerProvider
                           stops: const [0.0, 0.5, 1.0],
                         ).createShader(bounds),
                         child: Text(
-                          'ISLAMIC QUIZ',
+                          l10n.appTitle,
                           style: TextStyle(
                             fontSize: 38,
                             fontWeight: FontWeight.w900,
                             color: Colors.white,
-                            letterSpacing: 5.0,
+                            letterSpacing: 2.0,
                             shadows: [
                               Shadow(
                                 blurRadius: 20,
@@ -390,19 +391,14 @@ class _SplashScreenState extends ConsumerState<SplashScreen> with TickerProvider
                             ),
                           ],
                         ),
-                        child: Builder(
-                          builder: (context) {
-                            final l10n = AppLocalizations.of(context);
-                            return Text(
-                              l10n.masterYourKnowledge,
-                              style: const TextStyle(
-                                fontSize: 15,
-                                color: Colors.white,
-                                fontWeight: FontWeight.w500,
-                                letterSpacing: 1.5,
-                              ),
-                            );
-                          },
+                        child: Text(
+                          l10n.masterYourKnowledge,
+                          style: const TextStyle(
+                            fontSize: 15,
+                            color: Colors.white,
+                            fontWeight: FontWeight.w500,
+                            letterSpacing: 0.5,
+                          ),
                         ),
                       ),
                     ],
