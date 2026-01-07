@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:islamicquiz/core/localization/app_localizations.dart';
 import 'package:islamicquiz/data/providers/shared_prefs_provider.dart';
 import 'package:islamicquiz/data/services/question_seeder.dart';
+import 'package:islamicquiz/data/services/question_service.dart';
 import 'package:islamicquiz/ui/screens/admin/admin_panel_screen.dart';
 import 'package:islamicquiz/ui/screens/home_screen.dart';
 
@@ -75,6 +76,14 @@ class _SplashScreenState extends ConsumerState<SplashScreen> with TickerProvider
   }
 
   Future<void> _initializeAndNavigate() async {
+    // Load app config (useLocalDataOnly flag) from Firestore
+    try {
+      final questionService = QuestionService();
+      await questionService.loadConfig();
+    } catch (e) {
+      debugPrint('Config loading failed: $e');
+    }
+
     // Seed questions on first launch
     try {
       final prefs = ref.read(sharedPrefsProvider);

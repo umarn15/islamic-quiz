@@ -5,16 +5,51 @@ import '../local_questions.dart';
 class QuestionService {
   final FirebaseFirestore _firestore;
   static const String _collection = 'questions';
+  static const String _configCollection = 'config';
+  static const String _configDoc = 'app_settings';
   
-  /// Set to true to use local data only, false to use Firestore
-  /// Change this to false when you want to switch back to Firestore
-  static const bool _useLocalDataOnly = true;
+  /// Cached value for useLocalDataOnly flag
+  /// Defaults to true (local data) until fetched from Firestore
+  static bool _useLocalDataOnly = true;
+  static bool _configLoaded = false;
 
   QuestionService({FirebaseFirestore? firestore})
       : _firestore = firestore ?? FirebaseFirestore.instance;
 
   CollectionReference<Map<String, dynamic>> get _questionsRef =>
       _firestore.collection(_collection);
+
+  /// Fetches the useLocalDataOnly config from Firestore
+  /// Call this once at app startup (e.g., in splash screen)
+  /// Creates the config document if it doesn't exist
+  Future<void> loadConfig() async {
+    if (_configLoaded) return;
+    
+    try {
+      final doc = await _firestore
+          .collection(_configCollection)
+          .doc(_configDoc)
+          .get();
+      
+      if (doc.exists) {
+        _useLocalDataOnly = doc.data()?['useLocalDataOnly'] ?? true;
+      } else {
+        // Create default config if it doesn't exist
+        await _firestore
+            .collection(_configCollection)
+            .doc(_configDoc)
+            .set({'useLocalDataOnly': true});
+      }
+      _configLoaded = true;
+    } catch (e) {
+      // On error, default to local data
+      _useLocalDataOnly = true;
+      _configLoaded = true;
+    }
+  }
+
+  /// Returns current useLocalDataOnly value
+  static bool get useLocalDataOnly => _useLocalDataOnly;
 
   /// Fetches all active questions
   /// Currently uses local data only (set _useLocalDataOnly = false to use Firestore)
