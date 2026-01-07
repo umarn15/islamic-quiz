@@ -604,8 +604,10 @@ class _QuizScreenState extends ConsumerState<QuizScreen> with TickerProviderStat
     final optionLabels = ['A', 'B', 'C', 'D'];
     final optionColors = [const Color(0xFF3B82F6), const Color(0xFFFF9800), const Color(0xFF9C27B0), const Color(0xFF00BCD4)];
     final localizedOptions = _questionL10n!.getOptions(question.optionsKeys, question: question);
+    // Use the minimum of all list lengths to prevent RangeError
+    final optionCount = [optionLabels.length, optionColors.length, localizedOptions.length, question.optionsKeys.length].reduce((a, b) => a < b ? a : b);
 
-    return List.generate(question.optionsKeys.length, (index) {
+    return List.generate(optionCount, (index) {
       final isSelected = _selectedOptionIndex == index;
       final isCorrect = index == question.correctOptionIndex;
       final showResult = _hasAnswered;
