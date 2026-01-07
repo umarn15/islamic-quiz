@@ -135,7 +135,7 @@ class AppLocalizations {
   String get goodJob => _translate('goodJob', 'Good Job!', 'شاباش!');
   String get niceTry => _translate('niceTry', 'Nice Try!', 'اچھی کوشش!');
   String get keepLearning => _translate('keepLearning', 'Keep Learning!', 'سیکھتے رہیں!');
-  String get subhanAllahPerfect => _translate('subhanAllahPerfect', 'SubhanAllah! You answered everything perfectly!', 'سبحان اللہ! آپ نے سب کچھ بالکل صحیح جواب دیا!');
+  String get subhanAllahPerfect => _translate('subhanAllahPerfect', 'SubhanAllah! You answered everything perfectly!', 'سبحان اللہ! آپ نے تمام سوالات کے درست جواب دیے!');
   String get mashaAllahAmazing => _translate('mashaAllahAmazing', 'MashaAllah! You did amazing!', 'ماشاءاللہ! آپ نے بہترین کارکردگی دکھائی!');
   String get keepLearningImproving => _translate('keepLearningImproving', 'Keep learning and improving!', 'سیکھتے اور بہتر ہوتے رہیں!');
   String get practiceMakesPerfect => _translate('practiceMakesPerfect', 'Practice makes perfect!', 'مشق انسان کو کامل بناتی ہے!');
