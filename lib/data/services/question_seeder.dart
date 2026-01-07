@@ -19,7 +19,13 @@ class QuestionSeeder {
   /// Seeds Firestore with initial questions if not already seeded
   /// Returns true if seeding was performed, false if already seeded
   Future<bool> seedIfNeeded() async {
+
     if (hasBeenSeeded) {
+      return false;
+    }
+
+    // Skip seeding if using local data only
+    if (QuestionService.useLocalDataOnly) {
       return false;
     }
 
