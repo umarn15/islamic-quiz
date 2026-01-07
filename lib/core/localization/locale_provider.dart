@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:islamicquiz/data/providers/shared_prefs_provider.dart';
+import 'package:islamicquiz/core/localization/question_localizations.dart';
 
 const String _localeKey = 'app_locale';
 
@@ -20,6 +21,8 @@ class LocaleNotifier extends StateNotifier<Locale> {
 
   Future<void> setLocale(Locale locale) async {
     await _prefs.setString(_localeKey, locale.languageCode);
+    // Reinitialize question localizations when locale changes
+    await QuestionLocalizations.init(locale);
     state = locale;
   }
 

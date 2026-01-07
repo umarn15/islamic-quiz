@@ -13,11 +13,16 @@ class QuestionService {
       _firestore.collection(_collection);
 
   /// Fetches all active questions from Firestore
+  /// Falls back to local questions if Firestore fails
   Future<List<QuestionModel>> getActiveQuestions() async {
     try {
       final snapshot = await _questionsRef
           .where('isActive', isEqualTo: true)
           .get();
+      
+      if (snapshot.docs.isEmpty) {
+        return _getLocalQuestions();
+      }
       
       return snapshot.docs
           .map((doc) => QuestionModel.fromJson(doc.data(), docId: doc.id))
@@ -29,6 +34,7 @@ class QuestionService {
   }
 
   /// Fetches questions by difficulty
+  /// Firestore overrides local when online
   Future<List<QuestionModel>> getQuestionsByDifficulty(
     QuestionDifficulty difficulty, {
     bool activeOnly = true,
@@ -42,6 +48,13 @@ class QuestionService {
       }
       
       final snapshot = await query.get();
+      
+      if (snapshot.docs.isEmpty) {
+        return _getLocalQuestions()
+            .where((q) => q.difficulty == difficulty && (!activeOnly || q.isActive))
+            .toList();
+      }
+      
       return snapshot.docs
           .map((doc) => QuestionModel.fromJson(doc.data(), docId: doc.id))
           .toList();
@@ -66,6 +79,13 @@ class QuestionService {
       }
       
       final snapshot = await query.get();
+      
+      if (snapshot.docs.isEmpty) {
+        return _getLocalQuestions()
+            .where((q) => q.category == category && (!activeOnly || q.isActive))
+            .toList();
+      }
+      
       return snapshot.docs
           .map((doc) => QuestionModel.fromJson(doc.data(), docId: doc.id))
           .toList();
@@ -92,6 +112,16 @@ class QuestionService {
       }
       
       final snapshot = await query.get();
+      
+      if (snapshot.docs.isEmpty) {
+        return _getLocalQuestions()
+            .where((q) => 
+                q.difficulty == difficulty && 
+                q.category == category && 
+                (!activeOnly || q.isActive))
+            .toList();
+      }
+      
       return snapshot.docs
           .map((doc) => QuestionModel.fromJson(doc.data(), docId: doc.id))
           .toList();

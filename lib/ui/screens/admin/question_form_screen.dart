@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:islamicquiz/core/localization/question_localizations.dart';
 import 'package:islamicquiz/data/models/question_model.dart';
 import 'package:islamicquiz/data/providers/question_provider.dart';
 
@@ -12,18 +13,25 @@ class QuestionFormScreen extends ConsumerStatefulWidget {
   ConsumerState<QuestionFormScreen> createState() => _QuestionFormScreenState();
 }
 
-class _QuestionFormScreenState extends ConsumerState<QuestionFormScreen> {
+class _QuestionFormScreenState extends ConsumerState<QuestionFormScreen>
+    with SingleTickerProviderStateMixin {
   final _formKey = GlobalKey<FormState>();
-  late final TextEditingController _questionTextController;
-  late final TextEditingController _explanationController;
-  late final TextEditingController _audioUrlController;
-  late final List<TextEditingController> _optionControllers;
+  late TabController _tabController;
+
+  // English fields
+  late final TextEditingController _questionTextEnController;
+  late final TextEditingController _explanationEnController;
+  late final List<TextEditingController> _optionEnControllers;
+
+  // Urdu fields
+  late final TextEditingController _questionTextUrController;
+  late final TextEditingController _explanationUrController;
+  late final List<TextEditingController> _optionUrControllers;
 
   late QuestionDifficulty _difficulty;
   late QuestionCategory _category;
   late int _correctOptionIndex;
   late bool _isActive;
-  late String _language;
 
   bool _isLoading = false;
 
@@ -32,30 +40,79 @@ class _QuestionFormScreenState extends ConsumerState<QuestionFormScreen> {
   @override
   void initState() {
     super.initState();
+    _tabController = TabController(length: 2, vsync: this);
     final q = widget.question;
+    final questionL10n = QuestionLocalizations.instance;
 
-    _questionTextController = TextEditingController(text: q?.questionText ?? '');
-    _explanationController = TextEditingController(text: q?.explanation ?? '');
-    _audioUrlController = TextEditingController(text: q?.audioUrl ?? '');
+    // Initialize English fields
+    String enQuestion = '';
+    String enExplanation = '';
+    List<String> enOptions = List.filled(4, '');
 
-    _optionControllers = List.generate(
+    // Initialize Urdu fields
+    String urQuestion = '';
+    String urExplanation = '';
+    List<String> urOptions = List.filled(4, '');
+
+    if (q != null) {
+      if (q.hasInlineTranslations) {
+        // Custom question with inline translations
+        final enTrans = q.getTranslation('en');
+        final urTrans = q.getTranslation('ur');
+
+        if (enTrans != null) {
+          enQuestion = enTrans.questionText;
+          enExplanation = enTrans.explanation ?? '';
+          enOptions = List.from(enTrans.options);
+          while (enOptions.length < 4) enOptions.add('');
+        }
+
+        if (urTrans != null) {
+          urQuestion = urTrans.questionText;
+          urExplanation = urTrans.explanation ?? '';
+          urOptions = List.from(urTrans.options);
+          while (urOptions.length < 4) urOptions.add('');
+        }
+      } else if (questionL10n != null) {
+        // Seeded question - load from JSON files (read-only display)
+        enQuestion = questionL10n.t(q.questionKey);
+        enExplanation = q.explanationKey != null ? questionL10n.t(q.explanationKey!) : '';
+        enOptions = q.optionsKeys.map((k) => questionL10n.t(k)).toList();
+        while (enOptions.length < 4) enOptions.add('');
+      }
+    }
+
+    _questionTextEnController = TextEditingController(text: enQuestion);
+    _explanationEnController = TextEditingController(text: enExplanation);
+    _optionEnControllers = List.generate(
       4,
-      (i) => TextEditingController(text: q != null && i < q.options.length ? q.options[i] : ''),
+      (i) => TextEditingController(text: i < enOptions.length ? enOptions[i] : ''),
+    );
+
+    _questionTextUrController = TextEditingController(text: urQuestion);
+    _explanationUrController = TextEditingController(text: urExplanation);
+    _optionUrControllers = List.generate(
+      4,
+      (i) => TextEditingController(text: i < urOptions.length ? urOptions[i] : ''),
     );
 
     _difficulty = q?.difficulty ?? QuestionDifficulty.easy;
     _category = q?.category ?? QuestionCategory.beliefs;
     _correctOptionIndex = q?.correctOptionIndex ?? 0;
     _isActive = q?.isActive ?? true;
-    _language = q?.language ?? 'en';
   }
 
   @override
   void dispose() {
-    _questionTextController.dispose();
-    _explanationController.dispose();
-    _audioUrlController.dispose();
-    for (final c in _optionControllers) {
+    _tabController.dispose();
+    _questionTextEnController.dispose();
+    _explanationEnController.dispose();
+    for (final c in _optionEnControllers) {
+      c.dispose();
+    }
+    _questionTextUrController.dispose();
+    _explanationUrController.dispose();
+    for (final c in _optionUrControllers) {
       c.dispose();
     }
     super.dispose();
@@ -64,6 +121,7 @@ class _QuestionFormScreenState extends ConsumerState<QuestionFormScreen> {
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
+    final isSeededQuestion = isEditing && !widget.question!.hasInlineTranslations;
 
     return Scaffold(
       appBar: AppBar(
@@ -76,128 +134,134 @@ class _QuestionFormScreenState extends ConsumerState<QuestionFormScreen> {
               tooltip: 'Delete',
             ),
         ],
+        bottom: TabBar(
+          controller: _tabController,
+          tabs: const [
+            Tab(text: 'English', icon: Icon(Icons.language)),
+            Tab(text: 'اردو', icon: Icon(Icons.translate)),
+          ],
+        ),
       ),
       body: Form(
         key: _formKey,
-        child: ListView(
-          padding: const EdgeInsets.all(16),
+        child: Column(
           children: [
-            _buildSectionHeader('Question Details', Icons.quiz),
-            const SizedBox(height: 12),
-            _buildQuestionTextField(),
-            const SizedBox(height: 16),
-            _buildDropdownRow(),
-            const SizedBox(height: 24),
-            _buildSectionHeader('Answer Options', Icons.list),
-            const SizedBox(height: 12),
-            ..._buildOptionFields(),
-            const SizedBox(height: 24),
-            _buildSectionHeader('Additional Info', Icons.info_outline),
-            const SizedBox(height: 12),
-            _buildExplanationField(),
-            const SizedBox(height: 16),
-            _buildAudioUrlField(),
-            const SizedBox(height: 16),
-            _buildLanguageAndStatusRow(colorScheme),
-            const SizedBox(height: 32),
-            _buildSubmitButton(colorScheme),
-            const SizedBox(height: 16),
+            if (isSeededQuestion)
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.all(12),
+                color: Colors.amber.withValues(alpha: 0.2),
+                child: Row(
+                  children: [
+                    const Icon(Icons.info_outline, color: Colors.amber),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Text(
+                        'This is a seeded question. Translations are stored in JSON files. '
+                        'Editing will convert it to a custom question with inline translations.',
+                        style: TextStyle(color: Colors.amber[800], fontSize: 12),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            Expanded(
+              child: TabBarView(
+                controller: _tabController,
+                children: [
+                  _buildLanguageForm(
+                    questionController: _questionTextEnController,
+                    explanationController: _explanationEnController,
+                    optionControllers: _optionEnControllers,
+                    languageLabel: 'English',
+                    colorScheme: colorScheme,
+                  ),
+                  _buildLanguageForm(
+                    questionController: _questionTextUrController,
+                    explanationController: _explanationUrController,
+                    optionControllers: _optionUrControllers,
+                    languageLabel: 'Urdu',
+                    colorScheme: colorScheme,
+                    isRtl: true,
+                  ),
+                ],
+              ),
+            ),
+            _buildBottomBar(colorScheme),
           ],
         ),
       ),
     );
   }
 
-  Widget _buildSectionHeader(String title, IconData icon) {
-    return Row(
-      children: [
-        Icon(icon, size: 20, color: Theme.of(context).colorScheme.primary),
-        const SizedBox(width: 8),
-        Text(
-          title,
-          style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildQuestionTextField() {
-    return TextFormField(
-      controller: _questionTextController,
-      decoration: const InputDecoration(
-        labelText: 'Question Text *',
-        hintText: 'Enter the question...',
-        border: OutlineInputBorder(),
-        alignLabelWithHint: true,
+  Widget _buildLanguageForm({
+    required TextEditingController questionController,
+    required TextEditingController explanationController,
+    required List<TextEditingController> optionControllers,
+    required String languageLabel,
+    required ColorScheme colorScheme,
+    bool isRtl = false,
+  }) {
+    return Directionality(
+      textDirection: isRtl ? TextDirection.rtl : TextDirection.ltr,
+      child: ListView(
+        padding: const EdgeInsets.all(16),
+        children: [
+          _buildSectionHeader('Question ($languageLabel)', Icons.quiz),
+          const SizedBox(height: 12),
+          TextFormField(
+            controller: questionController,
+            decoration: InputDecoration(
+              labelText: 'Question Text *',
+              hintText: 'Enter the question...',
+              border: const OutlineInputBorder(),
+              alignLabelWithHint: true,
+            ),
+            maxLines: 3,
+            textCapitalization: TextCapitalization.sentences,
+            textDirection: isRtl ? TextDirection.rtl : TextDirection.ltr,
+            validator: languageLabel == 'English'
+                ? (value) {
+                    if (value == null || value.trim().isEmpty) {
+                      return 'English question text is required';
+                    }
+                    if (value.trim().length < 10) {
+                      return 'Question must be at least 10 characters';
+                    }
+                    return null;
+                  }
+                : null,
+          ),
+          const SizedBox(height: 24),
+          _buildSectionHeader('Answer Options ($languageLabel)', Icons.list),
+          const SizedBox(height: 12),
+          ..._buildOptionFields(optionControllers, languageLabel, isRtl),
+          const SizedBox(height: 24),
+          _buildSectionHeader('Explanation ($languageLabel)', Icons.info_outline),
+          const SizedBox(height: 12),
+          TextFormField(
+            controller: explanationController,
+            decoration: InputDecoration(
+              labelText: 'Explanation (Optional)',
+              hintText: 'Kid-friendly explanation of the correct answer...',
+              border: const OutlineInputBorder(),
+              alignLabelWithHint: true,
+            ),
+            maxLines: 2,
+            textCapitalization: TextCapitalization.sentences,
+            textDirection: isRtl ? TextDirection.rtl : TextDirection.ltr,
+          ),
+          const SizedBox(height: 80),
+        ],
       ),
-      maxLines: 3,
-      textCapitalization: TextCapitalization.sentences,
-      validator: (value) {
-        if (value == null || value.trim().isEmpty) {
-          return 'Question text is required';
-        }
-        if (value.trim().length < 10) {
-          return 'Question must be at least 10 characters';
-        }
-        return null;
-      },
     );
   }
 
-  Widget _buildDropdownRow() {
-    return Row(
-      children: [
-        Expanded(
-          child: DropdownButtonFormField<QuestionDifficulty>(
-            initialValue: _difficulty,
-            decoration: const InputDecoration(
-              labelText: 'Difficulty *',
-              border: OutlineInputBorder(),
-            ),
-            items: QuestionDifficulty.values.map((d) {
-              return DropdownMenuItem(
-                value: d,
-                child: Row(
-                  children: [
-                    Container(
-                      width: 12,
-                      height: 12,
-                      decoration: BoxDecoration(
-                        color: _getDifficultyColor(d),
-                        shape: BoxShape.circle,
-                      ),
-                    ),
-                    const SizedBox(width: 8),
-                    Text(d.name.toUpperCase()),
-                  ],
-                ),
-              );
-            }).toList(),
-            onChanged: (val) => setState(() => _difficulty = val!),
-          ),
-        ),
-        const SizedBox(width: 16),
-        Expanded(
-          child: DropdownButtonFormField<QuestionCategory>(
-            initialValue: _category,
-            decoration: const InputDecoration(
-              labelText: 'Category *',
-              border: OutlineInputBorder(),
-            ),
-            items: QuestionCategory.values.map((c) {
-              return DropdownMenuItem(
-                value: c,
-                child: Text(c.name),
-              );
-            }).toList(),
-            onChanged: (val) => setState(() => _category = val!),
-          ),
-        ),
-      ],
-    );
-  }
-
-  List<Widget> _buildOptionFields() {
+  List<Widget> _buildOptionFields(
+    List<TextEditingController> controllers,
+    String languageLabel,
+    bool isRtl,
+  ) {
     return List.generate(4, (index) {
       final isCorrect = _correctOptionIndex == index;
       return Padding(
@@ -212,7 +276,7 @@ class _QuestionFormScreenState extends ConsumerState<QuestionFormScreen> {
             ),
             Expanded(
               child: TextFormField(
-                controller: _optionControllers[index],
+                controller: controllers[index],
                 decoration: InputDecoration(
                   labelText: 'Option ${index + 1} *',
                   hintText: 'Enter option ${index + 1}...',
@@ -238,12 +302,15 @@ class _QuestionFormScreenState extends ConsumerState<QuestionFormScreen> {
                       ? const Icon(Icons.check_circle, color: Colors.green)
                       : null,
                 ),
-                validator: (value) {
-                  if (value == null || value.trim().isEmpty) {
-                    return 'Option ${index + 1} is required';
-                  }
-                  return null;
-                },
+                textDirection: isRtl ? TextDirection.rtl : TextDirection.ltr,
+                validator: languageLabel == 'English'
+                    ? (value) {
+                        if (value == null || value.trim().isEmpty) {
+                          return 'Option ${index + 1} is required';
+                        }
+                        return null;
+                      }
+                    : null,
               ),
             ),
           ],
@@ -252,109 +319,144 @@ class _QuestionFormScreenState extends ConsumerState<QuestionFormScreen> {
     });
   }
 
-  Widget _buildExplanationField() {
-    return TextFormField(
-      controller: _explanationController,
-      decoration: const InputDecoration(
-        labelText: 'Explanation (Optional)',
-        hintText: 'Kid-friendly explanation of the correct answer...',
-        border: OutlineInputBorder(),
-        alignLabelWithHint: true,
-      ),
-      maxLines: 2,
-      textCapitalization: TextCapitalization.sentences,
-    );
-  }
-
-  Widget _buildAudioUrlField() {
-    return TextFormField(
-      controller: _audioUrlController,
-      decoration: const InputDecoration(
-        labelText: 'Audio URL (Optional)',
-        hintText: 'Firebase Storage URL for audio...',
-        border: OutlineInputBorder(),
-        prefixIcon: Icon(Icons.audiotrack),
-      ),
-      keyboardType: TextInputType.url,
-    );
-  }
-
-  Widget _buildLanguageAndStatusRow(ColorScheme colorScheme) {
+  Widget _buildSectionHeader(String title, IconData icon) {
     return Row(
       children: [
-        Expanded(
-          child: DropdownButtonFormField<String>(
-            initialValue: _language,
-            decoration: const InputDecoration(
-              labelText: 'Language',
-              border: OutlineInputBorder(),
-            ),
-            items: const [
-              DropdownMenuItem(value: 'en', child: Text('English')),
-              DropdownMenuItem(value: 'ar', child: Text('Arabic')),
-              DropdownMenuItem(value: 'ur', child: Text('Urdu')),
-            ],
-            onChanged: (val) => setState(() => _language = val!),
-          ),
-        ),
-        const SizedBox(width: 16),
-        Expanded(
-          child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-            decoration: BoxDecoration(
-              border: Border.all(color: Colors.grey.shade400),
-              borderRadius: BorderRadius.circular(4),
-            ),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const Text('Active Status', style: TextStyle(fontSize: 12, color: Colors.grey)),
-                    Text(
-                      _isActive ? 'Active' : 'Inactive',
-                      style: TextStyle(
-                        fontWeight: FontWeight.w500,
-                        color: _isActive ? Colors.green : Colors.red,
-                      ),
-                    ),
-                  ],
-                ),
-                Switch(
-                  value: _isActive,
-                  onChanged: (val) => setState(() => _isActive = val),
-                  activeTrackColor: Colors.green.withValues(alpha: 0.5),
-                  activeThumbColor: Colors.green,
-                ),
-              ],
-            ),
-          ),
+        Icon(icon, size: 20, color: Theme.of(context).colorScheme.primary),
+        const SizedBox(width: 8),
+        Text(
+          title,
+          style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
         ),
       ],
     );
   }
 
-  Widget _buildSubmitButton(ColorScheme colorScheme) {
-    return SizedBox(
-      height: 50,
-      child: ElevatedButton(
-        onPressed: _isLoading ? null : _submitForm,
-        style: ElevatedButton.styleFrom(
-          backgroundColor: colorScheme.primary,
-          foregroundColor: colorScheme.onPrimary,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-        ),
-        child: _isLoading
-            ? const SizedBox(
-                width: 24,
-                height: 24,
-                child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
-              )
-            : Text(
-                isEditing ? 'Update Question' : 'Add Question',
-                style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+  Widget _buildBottomBar(ColorScheme colorScheme) {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: colorScheme.surface,
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.1),
+            blurRadius: 8,
+            offset: const Offset(0, -2),
+          ),
+        ],
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Row(
+            children: [
+              Expanded(
+                child: DropdownButtonFormField<QuestionDifficulty>(
+                  initialValue: _difficulty,
+                  decoration: const InputDecoration(
+                    labelText: 'Difficulty',
+                    border: OutlineInputBorder(),
+                    contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                  ),
+                  items: QuestionDifficulty.values.map((d) {
+                    return DropdownMenuItem(
+                      value: d,
+                      child: Row(
+                        children: [
+                          Container(
+                            width: 12,
+                            height: 12,
+                            decoration: BoxDecoration(
+                              color: _getDifficultyColor(d),
+                              shape: BoxShape.circle,
+                            ),
+                          ),
+                          const SizedBox(width: 8),
+                          Text(d.name.toUpperCase()),
+                        ],
+                      ),
+                    );
+                  }).toList(),
+                  onChanged: (val) => setState(() => _difficulty = val!),
+                ),
               ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: DropdownButtonFormField<QuestionCategory>(
+                  initialValue: _category,
+                  decoration: const InputDecoration(
+                    labelText: 'Category',
+                    border: OutlineInputBorder(),
+                    contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                  ),
+                  items: QuestionCategory.values.map((c) {
+                    return DropdownMenuItem(
+                      value: c,
+                      child: Text(c.name),
+                    );
+                  }).toList(),
+                  onChanged: (val) => setState(() => _category = val!),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          Row(
+            children: [
+              Expanded(
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                  decoration: BoxDecoration(
+                    border: Border.all(color: Colors.grey.shade400),
+                    borderRadius: BorderRadius.circular(4),
+                  ),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        _isActive ? 'Active' : 'Inactive',
+                        style: TextStyle(
+                          fontWeight: FontWeight.w500,
+                          color: _isActive ? Colors.green : Colors.red,
+                        ),
+                      ),
+                      Switch(
+                        value: _isActive,
+                        onChanged: (val) => setState(() => _isActive = val),
+                        activeTrackColor: Colors.green.withValues(alpha: 0.5),
+                        activeThumbColor: Colors.green,
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: SizedBox(
+                  height: 50,
+                  child: ElevatedButton(
+                    onPressed: _isLoading ? null : _submitForm,
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: colorScheme.primary,
+                      foregroundColor: colorScheme.onPrimary,
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                    ),
+                    child: _isLoading
+                        ? const SizedBox(
+                            width: 24,
+                            height: 24,
+                            child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
+                          )
+                        : Text(
+                            isEditing ? 'Update' : 'Add Question',
+                            style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                          ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ],
       ),
     );
   }
@@ -375,12 +477,12 @@ class _QuestionFormScreenState extends ConsumerState<QuestionFormScreen> {
       return;
     }
 
-    // Validate options are unique
-    final options = _optionControllers.map((c) => c.text.trim()).toList();
-    final uniqueOptions = options.toSet();
-    if (uniqueOptions.length != 4) {
+    // Validate English options are unique
+    final enOptions = _optionEnControllers.map((c) => c.text.trim()).toList();
+    final uniqueEnOptions = enOptions.where((o) => o.isNotEmpty).toSet();
+    if (uniqueEnOptions.length != 4) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('All options must be unique')),
+        const SnackBar(content: Text('All English options must be unique and filled')),
       );
       return;
     }
@@ -390,24 +492,51 @@ class _QuestionFormScreenState extends ConsumerState<QuestionFormScreen> {
     try {
       final notifier = ref.read(questionNotifierProvider.notifier);
       final now = DateTime.now();
+      final id = widget.question?.id ?? _generateId();
 
+      // Build translations map
+      final Map<String, QuestionTranslation> translations = {};
+
+      // English translation (required)
+      translations['en'] = QuestionTranslation(
+        questionText: _questionTextEnController.text.trim(),
+        options: enOptions,
+        explanation: _explanationEnController.text.trim().isEmpty
+            ? null
+            : _explanationEnController.text.trim(),
+      );
+
+      // Urdu translation (optional but include if any field is filled)
+      final urQuestion = _questionTextUrController.text.trim();
+      final urOptions = _optionUrControllers.map((c) => c.text.trim()).toList();
+      final urExplanation = _explanationUrController.text.trim();
+
+      if (urQuestion.isNotEmpty || urOptions.any((o) => o.isNotEmpty)) {
+        // Fill empty Urdu options with English fallback
+        final filledUrOptions = List.generate(4, (i) {
+          return urOptions[i].isNotEmpty ? urOptions[i] : enOptions[i];
+        });
+
+        translations['ur'] = QuestionTranslation(
+          questionText: urQuestion.isNotEmpty ? urQuestion : _questionTextEnController.text.trim(),
+          options: filledUrOptions,
+          explanation: urExplanation.isNotEmpty ? urExplanation : translations['en']!.explanation,
+        );
+      }
+
+      // Create question with inline translations
       final question = QuestionModel(
-        id: widget.question?.id ?? _generateId(),
-        questionText: _questionTextController.text.trim(),
+        id: id,
+        questionKey: 'custom_$id', // Key for custom questions
         difficulty: _difficulty,
         category: _category,
-        options: options,
+        optionsKeys: List.generate(4, (i) => 'custom_${id}_option_$i'),
         correctOptionIndex: _correctOptionIndex,
-        explanation: _explanationController.text.trim().isEmpty
-            ? null
-            : _explanationController.text.trim(),
+        explanationKey: 'custom_${id}_explanation',
         isActive: _isActive,
         createdAt: widget.question?.createdAt ?? now,
         updatedAt: now,
-        audioUrl: _audioUrlController.text.trim().isEmpty
-            ? null
-            : _audioUrlController.text.trim(),
-        language: _language,
+        translations: translations,
       );
 
       if (isEditing) {

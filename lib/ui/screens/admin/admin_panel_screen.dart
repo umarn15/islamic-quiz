@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:islamicquiz/core/localization/question_localizations.dart';
 import 'package:islamicquiz/data/models/question_model.dart';
 import 'package:islamicquiz/data/providers/question_provider.dart';
 import 'question_form_screen.dart';
@@ -199,7 +200,6 @@ class _AdminPanelScreenState extends ConsumerState<AdminPanelScreen> {
   }
 
   Widget _buildDifficultySection(QuestionDifficulty difficulty, List<QuestionModel> questions) {
-    final colorScheme = Theme.of(context).colorScheme;
     final difficultyColor = _getDifficultyColor(difficulty);
 
     return ExpansionTile(
@@ -220,11 +220,16 @@ class _AdminPanelScreenState extends ConsumerState<AdminPanelScreen> {
         ),
       ),
       title: Text('${questions.length} questions'),
-      children: questions.map((q) => _buildQuestionTile(q, colorScheme)).toList(),
+      children: questions.map((q) => _buildQuestionTile(q)).toList(),
     );
   }
 
-  Widget _buildQuestionTile(QuestionModel question, ColorScheme colorScheme) {
+  Widget _buildQuestionTile(QuestionModel question) {
+    final questionL10n = QuestionLocalizations.instance;
+    // Get display text - use inline translation for custom questions, or key lookup for seeded ones
+    final displayText = questionL10n?.getDisplayText(question.questionKey, question: question) 
+        ?? question.questionKey;
+    
     return Card(
       margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
       child: ListTile(
@@ -237,7 +242,7 @@ class _AdminPanelScreenState extends ConsumerState<AdminPanelScreen> {
           ),
         ),
         title: Text(
-          question.questionText,
+          displayText,
           maxLines: 2,
           overflow: TextOverflow.ellipsis,
         ),
@@ -249,6 +254,10 @@ class _AdminPanelScreenState extends ConsumerState<AdminPanelScreen> {
               question.isActive ? 'Active' : 'Inactive',
               question.isActive ? Colors.green : Colors.red,
             ),
+            if (question.hasInlineTranslations) ...[
+              const SizedBox(width: 8),
+              _buildTag('Custom', Colors.purple),
+            ],
           ],
         ),
         trailing: PopupMenuButton<String>(
@@ -285,13 +294,17 @@ class _AdminPanelScreenState extends ConsumerState<AdminPanelScreen> {
   }
 
   List<QuestionModel> _filterQuestions(List<QuestionModel> questions) {
+    final questionL10n = QuestionLocalizations.instance;
+    
     return questions.where((q) {
       if (_selectedDifficulty != null && q.difficulty != _selectedDifficulty) return false;
       if (_selectedCategory != null && q.category != _selectedCategory) return false;
       if (_selectedActiveStatus != null && q.isActive != _selectedActiveStatus) return false;
-      if (_searchQuery.isNotEmpty &&
-          !q.questionText.toLowerCase().contains(_searchQuery.toLowerCase())) {
-        return false;
+      if (_searchQuery.isNotEmpty) {
+        final displayText = questionL10n?.getDisplayText(q.questionKey, question: q) ?? q.questionKey;
+        if (!displayText.toLowerCase().contains(_searchQuery.toLowerCase())) {
+          return false;
+        }
       }
       return true;
     }).toList();

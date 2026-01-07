@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_tts/flutter_tts.dart';
 import 'package:islamicquiz/core/localization/app_localizations.dart';
+import 'package:islamicquiz/core/localization/question_localizations.dart';
 import 'package:islamicquiz/data/models/question_model.dart';
 import 'package:islamicquiz/data/providers/question_provider.dart';
 import 'quiz_result_screen.dart';
@@ -32,6 +33,7 @@ class _QuizScreenState extends ConsumerState<QuizScreen> with TickerProviderStat
   bool _hasAnswered = false;
   int? _selectedOptionIndex;
   final AudioPlayer _audioPlayer = AudioPlayer();
+  QuestionLocalizations? _questionL10n;
 
   // Timer
   static const int _timerDuration = 10;
@@ -66,11 +68,16 @@ class _QuizScreenState extends ConsumerState<QuizScreen> with TickerProviderStat
   }
 
   Future<void> _initializeQuiz() async {
-    // Initialize TTS and load questions in parallel
     await Future.wait([
       _initTts(),
+      _initLocalization(),
       _loadQuestions(),
     ]);
+  }
+
+  Future<void> _initLocalization() async {
+    final locale = Localizations.localeOf(context);
+    _questionL10n = await QuestionLocalizations.init(locale);
   }
 
   Future<void> _initTts() async {
@@ -79,29 +86,22 @@ class _QuizScreenState extends ConsumerState<QuizScreen> with TickerProviderStat
     await _flutterTts.setSpeechRate(0.5);
     await _flutterTts.setVolume(4.0);
     await _flutterTts.setPitch(1.0);
-    
     _ttsReady = true;
   }
 
   Future<void> _speakQuestion(QuestionModel question) async {
-    if (_isMuted) return;
-    
-    // Wait for TTS to be ready if it's not yet
-    if (!_ttsReady) {
-      await _initTts();
-    }
+    if (_isMuted || _questionL10n == null) return;
+    if (!_ttsReady) await _initTts();
     await _flutterTts.stop();
-    await _flutterTts.speak(question.questionText);
+    final questionText = _questionL10n!.getQuestionText(question.questionKey, question: question);
+    await _flutterTts.speak(questionText);
   }
 
   void _toggleMute() {
-    setState(() {
-      _isMuted = !_isMuted;
-    });
+    setState(() => _isMuted = !_isMuted);
     if (_isMuted) {
       _flutterTts.stop();
     } else {
-      // Speak current question when unmuting
       _speakQuestion(_questions[_currentIndex]);
     }
   }
@@ -121,7 +121,6 @@ class _QuizScreenState extends ConsumerState<QuizScreen> with TickerProviderStat
         return;
       }
 
-      // Shuffle and take up to the requested number of questions
       final shuffled = List<QuestionModel>.from(questions)..shuffle(Random());
       
       setState(() {
@@ -130,7 +129,6 @@ class _QuizScreenState extends ConsumerState<QuizScreen> with TickerProviderStat
       });
       
       _startTimer();
-      // TTS is guaranteed ready now since we awaited both in parallel
       _speakQuestion(_questions[_currentIndex]);
     } catch (e) {
       if (mounted) {
@@ -163,7 +161,7 @@ class _QuizScreenState extends ConsumerState<QuizScreen> with TickerProviderStat
     if (!_hasAnswered) {
       setState(() {
         _hasAnswered = true;
-        _selectedOptionIndex = -1; // No selection
+        _selectedOptionIndex = -1;
       });
       _showFeedbackAndProceed(false);
     }
@@ -191,16 +189,9 @@ class _QuizScreenState extends ConsumerState<QuizScreen> with TickerProviderStat
   }
 
   int _calculateScore() {
-    // Full marks (30 points) if answered within first 3 seconds (7+ seconds left)
-    // Then -2 points per second: 6->28, 5->26, 4->24, 3->22, 2->20, 1->18, 0->16
     const int fullMarkThreshold = 7;
     const int maxScore = 30;
-
-    if (_timeLeft >= fullMarkThreshold) {
-      return maxScore;
-    }
-    
-    // Deduct 2 points per second after reading time
+    if (_timeLeft >= fullMarkThreshold) return maxScore;
     return maxScore - ((fullMarkThreshold - _timeLeft) * 2);
   }
 
@@ -223,8 +214,10 @@ class _QuizScreenState extends ConsumerState<QuizScreen> with TickerProviderStat
   }
 
   Future<void> _playAnswerSound(bool isCorrect) async {
-    await _audioPlayer.play(AssetSource(isCorrect? 'sounds/correct.wav' : 'sounds/wrong.mp3'),
-    volume: isCorrect? null : 0.4);
+    await _audioPlayer.play(
+      AssetSource(isCorrect ? 'sounds/correct.wav' : 'sounds/wrong.mp3'),
+      volume: isCorrect ? null : 0.4,
+    );
   }
 
   void _finishQuiz() {
@@ -259,7 +252,7 @@ class _QuizScreenState extends ConsumerState<QuizScreen> with TickerProviderStat
     final colorScheme = Theme.of(context).colorScheme;
     final isDarkMode = Theme.of(context).brightness == Brightness.dark;
 
-    if (_isLoading) {
+    if (_isLoading || _questionL10n == null) {
       return Scaffold(
         backgroundColor: isDarkMode ? null : const Color(0xFFF5F7FF),
         body: Container(
@@ -268,21 +261,14 @@ class _QuizScreenState extends ConsumerState<QuizScreen> with TickerProviderStat
               begin: Alignment.topCenter,
               end: Alignment.bottomCenter,
               colors: isDarkMode
-                  ? [
-                      const Color(0xFF6B4CE6).withValues(alpha: 0.15),
-                      colorScheme.surface,
-                    ]
-                  : [
-                      const Color(0xFFEDE9FE),
-                      const Color(0xFFF5F7FF),
-                    ],
+                  ? [const Color(0xFF6B4CE6).withValues(alpha: 0.15), colorScheme.surface]
+                  : [const Color(0xFFEDE9FE), const Color(0xFFF5F7FF)],
             ),
           ),
           child: Center(
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                // Animated quiz icon with bouncing effect
                 TweenAnimationBuilder<double>(
                   tween: Tween(begin: 0.0, end: 1.0),
                   duration: const Duration(milliseconds: 1200),
@@ -307,57 +293,41 @@ class _QuizScreenState extends ConsumerState<QuizScreen> with TickerProviderStat
                           ],
                         ),
                         child: const Center(
-                          child: Icon(
-                            Icons.quiz_rounded,
-                            size: 60,
-                            color: Colors.white,
-                          ),
+                          child: Icon(Icons.quiz_rounded, size: 60, color: Colors.white),
                         ),
                       ),
                     );
                   },
                 ),
                 const SizedBox(height: 32),
-                // Loading text with dots animation
                 _LoadingText(difficulty: widget.difficulty),
                 const SizedBox(height: 24),
-                // Progress indicator
                 SizedBox(
                   width: 200,
                   child: ClipRRect(
                     borderRadius: BorderRadius.circular(12),
                     child: LinearProgressIndicator(
-                      backgroundColor: isDarkMode
-                          ? Colors.white.withValues(alpha: 0.1)
-                          : const Color(0xFFE9D5FF),
+                      backgroundColor: isDarkMode ? Colors.white.withValues(alpha: 0.1) : const Color(0xFFE9D5FF),
                       valueColor: const AlwaysStoppedAnimation<Color>(Color(0xFF6B4CE6)),
                       minHeight: 8,
                     ),
                   ),
                 ),
                 const SizedBox(height: 40),
-                // Fun tip
                 Container(
                   margin: EdgeInsets.symmetric(horizontal: MediaQuery.sizeOf(context).width * 0.14),
                   padding: const EdgeInsets.all(20),
                   decoration: BoxDecoration(
-                    color: isDarkMode
-                        ? const Color(0xFFFCD34D).withValues(alpha: 0.15)
-                        : const Color(0xFFFEF3C7),
+                    color: isDarkMode ? const Color(0xFFFCD34D).withValues(alpha: 0.15) : const Color(0xFFFEF3C7),
                     borderRadius: BorderRadius.circular(20),
-                    border: Border.all(
-                      color: const Color(0xFFFCD34D).withValues(alpha: 0.4),
-                      width: 2,
-                    ),
+                    border: Border.all(color: const Color(0xFFFCD34D).withValues(alpha: 0.4), width: 2),
                   ),
                   child: Row(
                     children: [
                       Container(
                         padding: const EdgeInsets.all(8),
                         decoration: BoxDecoration(
-                          color: isDarkMode
-                              ? const Color(0xFFFCD34D).withValues(alpha: 0.2)
-                              : const Color(0xFFFEF3C7),
+                          color: isDarkMode ? const Color(0xFFFCD34D).withValues(alpha: 0.2) : const Color(0xFFFEF3C7),
                           borderRadius: BorderRadius.circular(12),
                         ),
                         child: Icon(
@@ -402,10 +372,7 @@ class _QuizScreenState extends ConsumerState<QuizScreen> with TickerProviderStat
                 child: Column(
                   children: [
                     const SizedBox(height: 12),
-                    Flexible(
-                      flex: 2,
-                      child: _buildQuestionCard(question, colorScheme, isDarkMode),
-                    ),
+                    Flexible(flex: 2, child: _buildQuestionCard(question, colorScheme, isDarkMode)),
                     const SizedBox(height: 16),
                     Expanded(
                       flex: 3,
@@ -430,27 +397,16 @@ class _QuizScreenState extends ConsumerState<QuizScreen> with TickerProviderStat
       decoration: BoxDecoration(
         color: isDarkMode ? colorScheme.surface : Colors.white,
         borderRadius: const BorderRadius.vertical(bottom: Radius.circular(24)),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.08),
-            blurRadius: 12,
-            offset: const Offset(0, 4),
-          ),
-        ],
+        boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.08), blurRadius: 12, offset: const Offset(0, 4))],
       ),
       child: Row(
         children: [
           Container(
             decoration: BoxDecoration(
-              color: isDarkMode
-                  ? Colors.white.withValues(alpha: 0.1)
-                  : const Color(0xFFF3F4F6),
+              color: isDarkMode ? Colors.white.withValues(alpha: 0.1) : const Color(0xFFF3F4F6),
               shape: BoxShape.circle,
             ),
-            child: IconButton(
-              icon: const Icon(Icons.close_rounded, size: 24),
-              onPressed: () => _showExitDialog(),
-            ),
+            child: IconButton(icon: const Icon(Icons.close_rounded, size: 24), onPressed: () => _showExitDialog()),
           ),
           const SizedBox(width: 12),
           Expanded(
@@ -462,25 +418,15 @@ class _QuizScreenState extends ConsumerState<QuizScreen> with TickerProviderStat
                     Container(
                       padding: const EdgeInsets.all(6),
                       decoration: BoxDecoration(
-                        gradient: const LinearGradient(
-                          colors: [Color(0xFF6B4CE6), Color(0xFF8B6EF7)],
-                        ),
+                        gradient: const LinearGradient(colors: [Color(0xFF6B4CE6), Color(0xFF8B6EF7)]),
                         borderRadius: BorderRadius.circular(10),
                       ),
-                      child: const Icon(
-                        Icons.track_changes_rounded,
-                        size: 18,
-                        color: Colors.white,
-                      ),
+                      child: const Icon(Icons.track_changes_rounded, size: 18, color: Colors.white),
                     ),
                     const SizedBox(width: 6),
                     Text(
                       'Question ${_currentIndex + 1}/${_questions.length}',
-                      style: const TextStyle(
-                        fontWeight: FontWeight.w800,
-                        fontSize: 16,
-                        letterSpacing: 0.3,
-                      ),
+                      style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 16, letterSpacing: 0.3),
                     ),
                   ],
                 ),
@@ -489,9 +435,7 @@ class _QuizScreenState extends ConsumerState<QuizScreen> with TickerProviderStat
                   borderRadius: BorderRadius.circular(12),
                   child: LinearProgressIndicator(
                     value: (_currentIndex + 1) / _questions.length,
-                    backgroundColor: isDarkMode
-                        ? Colors.white.withValues(alpha: 0.1)
-                        : const Color(0xFFE9D5FF),
+                    backgroundColor: isDarkMode ? Colors.white.withValues(alpha: 0.1) : const Color(0xFFE9D5FF),
                     valueColor: const AlwaysStoppedAnimation<Color>(Color(0xFF6B4CE6)),
                     minHeight: 8,
                   ),
@@ -503,34 +447,15 @@ class _QuizScreenState extends ConsumerState<QuizScreen> with TickerProviderStat
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
             decoration: BoxDecoration(
-              gradient: const LinearGradient(
-                colors: [Color(0xFFFCD34D), Color(0xFFFBBF24)],
-              ),
+              gradient: const LinearGradient(colors: [Color(0xFFFCD34D), Color(0xFFFBBF24)]),
               borderRadius: BorderRadius.circular(20),
-              boxShadow: [
-                BoxShadow(
-                  color: const Color(0xFFFCD34D).withValues(alpha: 0.4),
-                  blurRadius: 4,
-                  offset: const Offset(0, 2),
-                ),
-              ],
+              boxShadow: [BoxShadow(color: const Color(0xFFFCD34D).withValues(alpha: 0.4), blurRadius: 4, offset: const Offset(0, 2))],
             ),
             child: Row(
               children: [
-                const Icon(
-                  Icons.star_rounded,
-                  size: 16,
-                  color: Color(0xFF78350F),
-                ),
+                const Icon(Icons.star_rounded, size: 16, color: Color(0xFF78350F)),
                 const SizedBox(width: 6),
-                Text(
-                  '$_score',
-                  style: const TextStyle(
-                    fontWeight: FontWeight.w900,
-                    color: Color(0xFF78350F),
-                    fontSize: 16,
-                  ),
-                ),
+                Text('$_score', style: const TextStyle(fontWeight: FontWeight.w900, color: Color(0xFF78350F), fontSize: 16)),
               ],
             ),
           ),
@@ -540,12 +465,8 @@ class _QuizScreenState extends ConsumerState<QuizScreen> with TickerProviderStat
   }
 
   Widget _buildTimerBar(ColorScheme colorScheme, bool isDarkMode) {
-    final timerColor = _timeLeft <= 3 
-        ? const Color(0xFFF44336) 
-        : (_timeLeft <= 5 ? const Color(0xFFFF9800) : const Color(0xFF4CAF50));
-    final timerIcon = _timeLeft <= 3 
-        ? Icons.sentiment_very_dissatisfied_rounded 
-        : (_timeLeft <= 5 ? Icons.sentiment_neutral_rounded : Icons.sentiment_satisfied_alt_rounded);
+    final timerColor = _timeLeft <= 3 ? const Color(0xFFF44336) : (_timeLeft <= 5 ? const Color(0xFFFF9800) : const Color(0xFF4CAF50));
+    final timerIcon = _timeLeft <= 3 ? Icons.sentiment_very_dissatisfied_rounded : (_timeLeft <= 5 ? Icons.sentiment_neutral_rounded : Icons.sentiment_satisfied_alt_rounded);
     
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
@@ -553,15 +474,8 @@ class _QuizScreenState extends ConsumerState<QuizScreen> with TickerProviderStat
         children: [
           Container(
             padding: const EdgeInsets.all(8),
-            decoration: BoxDecoration(
-              color: timerColor.withValues(alpha: 0.15),
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: Icon(
-              timerIcon,
-              size: 20,
-              color: timerColor,
-            ),
+            decoration: BoxDecoration(color: timerColor.withValues(alpha: 0.15), borderRadius: BorderRadius.circular(12)),
+            child: Icon(timerIcon, size: 20, color: timerColor),
           ),
           const SizedBox(width: 12),
           Expanded(
@@ -572,9 +486,7 @@ class _QuizScreenState extends ConsumerState<QuizScreen> with TickerProviderStat
                   borderRadius: BorderRadius.circular(12),
                   child: LinearProgressIndicator(
                     value: _timeLeft / _timerDuration,
-                    backgroundColor: isDarkMode
-                        ? Colors.white.withValues(alpha: 0.1)
-                        : timerColor.withValues(alpha: 0.15),
+                    backgroundColor: isDarkMode ? Colors.white.withValues(alpha: 0.1) : timerColor.withValues(alpha: 0.15),
                     valueColor: AlwaysStoppedAnimation<Color>(timerColor),
                     minHeight: 12,
                   ),
@@ -589,20 +501,10 @@ class _QuizScreenState extends ConsumerState<QuizScreen> with TickerProviderStat
             decoration: BoxDecoration(
               color: timerColor.withValues(alpha: 0.15),
               borderRadius: BorderRadius.circular(16),
-              border: Border.all(
-                color: timerColor.withValues(alpha: 0.3),
-                width: 2,
-              ),
+              border: Border.all(color: timerColor.withValues(alpha: 0.3), width: 2),
             ),
             alignment: Alignment.center,
-            child: Text(
-              '$_timeLeft',
-              style: TextStyle(
-                fontSize: 22,
-                fontWeight: FontWeight.w900,
-                color: timerColor,
-              ),
-            ),
+            child: Text('$_timeLeft', style: TextStyle(fontSize: 22, fontWeight: FontWeight.w900, color: timerColor)),
           ),
         ],
       ),
@@ -610,35 +512,22 @@ class _QuizScreenState extends ConsumerState<QuizScreen> with TickerProviderStat
   }
 
   Widget _buildQuestionCard(QuestionModel question, ColorScheme colorScheme, bool isDarkMode) {
+    final questionText = _questionL10n!.getQuestionText(question.questionKey, question: question);
+    
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
       decoration: BoxDecoration(
         gradient: LinearGradient(
           colors: isDarkMode
-              ? [
-                  const Color(0xFF6B4CE6).withValues(alpha: 0.2),
-                  const Color(0xFF8B6EF7).withValues(alpha: 0.1),
-                ]
-              : [
-                  const Color(0xFFEDE9FE),
-                  const Color(0xFFF5F3FF),
-                ],
+              ? [const Color(0xFF6B4CE6).withValues(alpha: 0.2), const Color(0xFF8B6EF7).withValues(alpha: 0.1)]
+              : [const Color(0xFFEDE9FE), const Color(0xFFF5F3FF)],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
         borderRadius: BorderRadius.circular(24),
-        border: Border.all(
-          color: const Color(0xFF6B4CE6).withValues(alpha: 0.3),
-          width: 2,
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: const Color(0xFF6B4CE6).withValues(alpha: 0.15),
-            blurRadius: 12,
-            offset: const Offset(0, 4),
-          ),
-        ],
+        border: Border.all(color: const Color(0xFF6B4CE6).withValues(alpha: 0.3), width: 2),
+        boxShadow: [BoxShadow(color: const Color(0xFF6B4CE6).withValues(alpha: 0.15), blurRadius: 12, offset: const Offset(0, 4))],
       ),
       child: Column(
         mainAxisSize: MainAxisSize.min,
@@ -651,44 +540,25 @@ class _QuizScreenState extends ConsumerState<QuizScreen> with TickerProviderStat
                 decoration: BoxDecoration(
                   color: _getDifficultyColor(question.difficulty).withValues(alpha: 0.2),
                   borderRadius: BorderRadius.circular(16),
-                  border: Border.all(
-                    color: _getDifficultyColor(question.difficulty).withValues(alpha: 0.4),
-                    width: 1.5,
-                  ),
+                  border: Border.all(color: _getDifficultyColor(question.difficulty).withValues(alpha: 0.4), width: 1.5),
                 ),
                 child: Row(
                   children: [
-                    Icon(
-                      _getDifficultyIcon(question.difficulty),
-                      size: 14,
-                      color: _getDifficultyColor(question.difficulty),
-                    ),
+                    Icon(_getDifficultyIcon(question.difficulty), size: 14, color: _getDifficultyColor(question.difficulty)),
                     const SizedBox(width: 4),
                     Text(
                       question.difficulty.name.toUpperCase(),
-                      style: TextStyle(
-                        color: _getDifficultyColor(question.difficulty),
-                        fontWeight: FontWeight.w900,
-                        fontSize: 11,
-                        letterSpacing: 0.5,
-                      ),
+                      style: TextStyle(color: _getDifficultyColor(question.difficulty), fontWeight: FontWeight.w900, fontSize: 11, letterSpacing: 0.5),
                     ),
                   ],
                 ),
               ),
               const SizedBox(width: 8),
               Container(
-                decoration: BoxDecoration(
-                  color: const Color(0xFF6B4CE6).withValues(alpha: 0.15),
-                  shape: BoxShape.circle,
-                ),
+                decoration: BoxDecoration(color: const Color(0xFF6B4CE6).withValues(alpha: 0.15), shape: BoxShape.circle),
                 child: IconButton(
                   onPressed: _toggleMute,
-                  icon: Icon(
-                    _isMuted ? Icons.volume_off_rounded : Icons.volume_up_rounded,
-                    size: 20,
-                    color: _isMuted ? Colors.grey : const Color(0xFF6B4CE6),
-                  ),
+                  icon: Icon(_isMuted ? Icons.volume_off_rounded : Icons.volume_up_rounded, size: 20, color: _isMuted ? Colors.grey : const Color(0xFF6B4CE6)),
                   tooltip: _isMuted ? AppLocalizations.of(context).unmute : AppLocalizations.of(context).mute,
                   padding: const EdgeInsets.all(8),
                   constraints: const BoxConstraints(),
@@ -699,14 +569,8 @@ class _QuizScreenState extends ConsumerState<QuizScreen> with TickerProviderStat
           const SizedBox(height: 12),
           Flexible(
             child: Text(
-              question.questionText,
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.w700,
-                height: 1.4,
-                color: isDarkMode ? Colors.white : const Color(0xFF2D3748),
-                letterSpacing: 0.2,
-              ),
+              questionText,
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.w700, height: 1.4, color: isDarkMode ? Colors.white : const Color(0xFF2D3748), letterSpacing: 0.2),
               textAlign: TextAlign.center,
             ),
           ),
@@ -728,14 +592,10 @@ class _QuizScreenState extends ConsumerState<QuizScreen> with TickerProviderStat
 
   List<Widget> _buildOptions(QuestionModel question, ColorScheme colorScheme, bool isDarkMode) {
     final optionLabels = ['A', 'B', 'C', 'D'];
-    final optionColors = [
-      const Color(0xFF3B82F6), // Blue
-      const Color(0xFFFF9800), // Orange
-      const Color(0xFF9C27B0), // Purple
-      const Color(0xFF00BCD4), // Cyan
-    ];
+    final optionColors = [const Color(0xFF3B82F6), const Color(0xFFFF9800), const Color(0xFF9C27B0), const Color(0xFF00BCD4)];
+    final localizedOptions = _questionL10n!.getOptions(question.optionsKeys, question: question);
 
-    return List.generate(question.options.length, (index) {
+    return List.generate(question.optionsKeys.length, (index) {
       final isSelected = _selectedOptionIndex == index;
       final isCorrect = index == question.correctOptionIndex;
       final showResult = _hasAnswered;
@@ -757,19 +617,13 @@ class _QuizScreenState extends ConsumerState<QuizScreen> with TickerProviderStat
           textColor = isDarkMode ? const Color(0xFFE57373) : const Color(0xFFC62828);
           resultIcon = Icons.cancel_rounded;
         } else {
-          backgroundColor = isDarkMode
-              ? Colors.white.withValues(alpha: 0.05)
-              : const Color(0xFFF3F4F6);
-          borderColor = isDarkMode
-              ? Colors.white.withValues(alpha: 0.1)
-              : const Color(0xFFE5E7EB);
+          backgroundColor = isDarkMode ? Colors.white.withValues(alpha: 0.05) : const Color(0xFFF3F4F6);
+          borderColor = isDarkMode ? Colors.white.withValues(alpha: 0.1) : const Color(0xFFE5E7EB);
           textColor = isDarkMode ? Colors.white54 : const Color(0xFF9CA3AF);
           resultIcon = null;
         }
       } else {
-        backgroundColor = isDarkMode
-            ? optionColors[index].withValues(alpha: 0.15)
-            : optionColors[index].withValues(alpha: 0.1);
+        backgroundColor = isDarkMode ? optionColors[index].withValues(alpha: 0.15) : optionColors[index].withValues(alpha: 0.1);
         borderColor = optionColors[index].withValues(alpha: isDarkMode ? 0.4 : 0.3);
         textColor = isDarkMode ? Colors.white : const Color(0xFF2D3748);
         resultIcon = null;
@@ -789,15 +643,7 @@ class _QuizScreenState extends ConsumerState<QuizScreen> with TickerProviderStat
                 color: backgroundColor,
                 borderRadius: BorderRadius.circular(16),
                 border: Border.all(color: borderColor, width: 2),
-                boxShadow: isSelected && showResult
-                    ? [
-                        BoxShadow(
-                          color: borderColor.withValues(alpha: 0.3),
-                          blurRadius: 8,
-                          offset: const Offset(0, 2),
-                        ),
-                      ]
-                    : null,
+                boxShadow: isSelected && showResult ? [BoxShadow(color: borderColor.withValues(alpha: 0.3), blurRadius: 8, offset: const Offset(0, 2))] : null,
               ),
               child: Row(
                 children: [
@@ -806,10 +652,7 @@ class _QuizScreenState extends ConsumerState<QuizScreen> with TickerProviderStat
                     height: 40,
                     decoration: BoxDecoration(
                       color: showResult
-                          ? (isCorrect
-                              ? const Color(0xFF4CAF50)
-                              : (isSelected ? const Color(0xFFF44336) : Colors.grey))
-                                  .withValues(alpha: 0.2)
+                          ? (isCorrect ? const Color(0xFF4CAF50) : (isSelected ? const Color(0xFFF44336) : Colors.grey)).withValues(alpha: 0.2)
                           : optionColors[index].withValues(alpha: 0.2),
                       borderRadius: BorderRadius.circular(12),
                     ),
@@ -819,33 +662,14 @@ class _QuizScreenState extends ConsumerState<QuizScreen> with TickerProviderStat
                         style: TextStyle(
                           fontSize: 20,
                           fontWeight: FontWeight.w900,
-                          color: showResult
-                              ? (isCorrect
-                                  ? const Color(0xFF4CAF50)
-                                  : (isSelected ? const Color(0xFFF44336) : Colors.grey))
-                              : optionColors[index],
+                          color: showResult ? (isCorrect ? const Color(0xFF4CAF50) : (isSelected ? const Color(0xFFF44336) : Colors.grey)) : optionColors[index],
                         ),
                       ),
                     ),
                   ),
                   const SizedBox(width: 12),
-                  Expanded(
-                    child: Text(
-                      question.options[index],
-                      style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w600,
-                        color: textColor,
-                        height: 1.3,
-                      ),
-                    ),
-                  ),
-                  if (resultIcon != null)
-                    Icon(
-                      resultIcon,
-                      size: 26,
-                      color: isCorrect ? const Color(0xFF4CAF50) : const Color(0xFFF44336),
-                    ),
+                  Expanded(child: Text(localizedOptions[index], style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: textColor, height: 1.3))),
+                  if (resultIcon != null) Icon(resultIcon, size: 26, color: isCorrect ? const Color(0xFF4CAF50) : const Color(0xFFF44336)),
                 ],
               ),
             ),
@@ -876,51 +700,27 @@ class _QuizScreenState extends ConsumerState<QuizScreen> with TickerProviderStat
           children: [
             Container(
               padding: const EdgeInsets.all(8),
-              decoration: BoxDecoration(
-                color: const Color(0xFFFF9800).withValues(alpha: 0.2),
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: Container(
-                padding: const EdgeInsets.all(8),
-                decoration: BoxDecoration(
-                  color: const Color(0xFFFF9800).withValues(alpha: 0.2),
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: const Icon(
-                  Icons.warning_amber_rounded,
-                  size: 24,
-                  color: Color(0xFFFF9800),
-                ),
-              ),
+              decoration: BoxDecoration(color: const Color(0xFFFF9800).withValues(alpha: 0.2), borderRadius: BorderRadius.circular(12)),
+              child: const Icon(Icons.warning_amber_rounded, size: 24, color: Color(0xFFFF9800)),
             ),
             const SizedBox(width: 12),
-            Text(l10n.leaveQuiz, style: TextStyle(fontWeight: FontWeight.w800)),
+            Text(l10n.leaveQuiz, style: const TextStyle(fontWeight: FontWeight.w800)),
           ],
         ),
-        content: Text(
-          l10n.leaveQuizMessage,
-          style: TextStyle(fontSize: 15, height: 1.4),
-        ),
+        content: Text(l10n.leaveQuizMessage, style: const TextStyle(fontSize: 15, height: 1.4)),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            style: TextButton.styleFrom(
-              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-            ),
-            child: Text(l10n.stay, style: TextStyle(fontWeight: FontWeight.w700)),
+            style: TextButton.styleFrom(padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16))),
+            child: Text(l10n.stay, style: const TextStyle(fontWeight: FontWeight.w700)),
           ),
           ElevatedButton(
             onPressed: () {
               Navigator.pop(context);
               Navigator.pop(context);
             },
-            style: ElevatedButton.styleFrom(
-              backgroundColor: const Color(0xFFF44336),
-              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-            ),
-            child: Text(l10n.leave, style: TextStyle(color: Colors.white, fontWeight: FontWeight.w700)),
+            style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFFF44336), padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16))),
+            child: Text(l10n.leave, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w700)),
           ),
         ],
       ),
@@ -929,20 +729,13 @@ class _QuizScreenState extends ConsumerState<QuizScreen> with TickerProviderStat
 
   String _getRandomTip() {
     final l10n = AppLocalizations.of(context);
-    final tips = [
-      l10n.tipAnswerQuickly,
-      l10n.tipTenSeconds,
-      l10n.tipStayCalm,
-      l10n.tipLearningIsFun,
-    ];
+    final tips = [l10n.tipAnswerQuickly, l10n.tipTenSeconds, l10n.tipStayCalm, l10n.tipLearningIsFun];
     return tips[Random().nextInt(tips.length)];
   }
 }
 
-// Animated loading text widget
 class _LoadingText extends StatefulWidget {
   final QuestionDifficulty difficulty;
-  
   const _LoadingText({required this.difficulty});
 
   @override
@@ -956,14 +749,10 @@ class _LoadingTextState extends State<_LoadingText> with SingleTickerProviderSta
   @override
   void initState() {
     super.initState();
-    _controller = AnimationController(
-      duration: const Duration(milliseconds: 500),
-      vsync: this,
-    )..addStatusListener((status) {
+    _controller = AnimationController(duration: const Duration(milliseconds: 500), vsync: this)
+      ..addStatusListener((status) {
         if (status == AnimationStatus.completed) {
-          setState(() {
-            _dotCount = (_dotCount + 1) % 4;
-          });
+          setState(() => _dotCount = (_dotCount + 1) % 4);
           _controller.reset();
           _controller.forward();
         }
@@ -994,21 +783,9 @@ class _LoadingTextState extends State<_LoadingText> with SingleTickerProviderSta
     final dots = '.' * _dotCount;
     return Column(
       children: [
-        Text(
-          '${l10n.preparingQuiz(_getDifficultyLabel(l10n))}$dots',
-          style: const TextStyle(
-            fontSize: 18,
-            fontWeight: FontWeight.w600,
-          ),
-        ),
+        Text('${l10n.preparingQuiz(_getDifficultyLabel(l10n))}$dots', style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w600)),
         const SizedBox(height: 8),
-        Text(
-          l10n.getReadyToTest,
-          style: TextStyle(
-            fontSize: 14,
-            color: Colors.grey[600],
-          ),
-        ),
+        Text(l10n.getReadyToTest, style: TextStyle(fontSize: 14, color: Colors.grey[600])),
       ],
     );
   }

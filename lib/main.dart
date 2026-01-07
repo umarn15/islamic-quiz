@@ -4,6 +4,7 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:islamicquiz/core/localization/app_localizations.dart';
 import 'package:islamicquiz/core/localization/locale_provider.dart';
+import 'package:islamicquiz/core/localization/question_localizations.dart';
 import 'package:islamicquiz/core/theme_data.dart';
 import 'package:islamicquiz/data/providers/shared_prefs_provider.dart';
 import 'package:islamicquiz/firebase_options.dart';
@@ -17,6 +18,10 @@ void main() async {
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
 
   final prefs = await SharedPreferences.getInstance();
+  
+  // Initialize question localizations with default locale
+  final savedLocale = prefs.getString('app_locale') ?? 'en';
+  await QuestionLocalizations.init(Locale(savedLocale));
 
   runApp(ProviderScope(child: const MyApp(),
   overrides: [sharedPrefsProvider.overrideWithValue(prefs)],));
