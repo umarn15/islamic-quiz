@@ -34,7 +34,7 @@ class AppLocalizations {
   String get masterYourKnowledge => _translate('masterYourKnowledge', 'Master your knowledge', 'اپنے علم کو مضبوط کریں');
 
   // ============ Home Screen ============
-  String get letsLearnAndHaveFun => _translate('letsLearnAndHaveFun', "Let's learn and have fun!", 'آئیں سیکھیں اور مزے کریں!');
+  String get letsLearnAndHaveFun => _translate('letsLearnAndHaveFun', "Let's learn and have fun!", 'آئیں سیکھیں اور لطف اٹھائیں!');
   String get points => _translate('points', 'Points', 'پوائنٹس');
   String get pickYourChallenge => _translate('pickYourChallenge', 'Pick Your Challenge!', 'اپنا چیلنج منتخب کریں!');
   String get easy => _translate('easy', 'Easy', 'آسان');
@@ -120,7 +120,7 @@ class AppLocalizations {
   String get tipAnswerQuickly => _translate('tipAnswerQuickly', 'Answer quickly for more points!', 'زیادہ پوائنٹس کے لیے جلدی جواب دیں!');
   String get tipTenSeconds => _translate('tipTenSeconds', 'You have 10 seconds per question', 'آپ کے پاس ہر سوال کے لیے 10 سیکنڈ ہیں');
   String get tipStayCalm => _translate('tipStayCalm', 'Stay calm and do your best!', 'پرسکون رہیں اور اپنی پوری کوشش کریں!');
-  String get tipLearningIsFun => _translate('tipLearningIsFun', 'Learning is fun!', 'سیکھنا مزے کی بات ہے!');
+  String get tipLearningIsFun => _translate('tipLearningIsFun', 'Learning is fun!', 'سیکھنا لطف کی بات ہے!');
   String get getReadyToTest => _translate('getReadyToTest', 'Get ready to test your knowledge!', 'اپنے علم کو جانچنے کے لیے تیار ہو جائیں!');
 
   // ============ Quiz Difficulty Labels ============
