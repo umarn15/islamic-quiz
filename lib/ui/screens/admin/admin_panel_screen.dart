@@ -254,10 +254,10 @@ class _AdminPanelScreenState extends ConsumerState<AdminPanelScreen> {
               question.isActive ? 'Active' : 'Inactive',
               question.isActive ? Colors.green : Colors.red,
             ),
-            if (question.hasInlineTranslations) ...[
-              const SizedBox(width: 8),
-              _buildTag('Custom', Colors.purple),
-            ],
+            // if (question.hasInlineTranslations) ...[
+            //   const SizedBox(width: 8),
+            //   _buildTag('Custom', Colors.purple),
+            // ],
           ],
         ),
         trailing: PopupMenuButton<String>(
