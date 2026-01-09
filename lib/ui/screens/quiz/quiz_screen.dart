@@ -94,7 +94,7 @@ class _QuizScreenState extends ConsumerState<QuizScreen> with TickerProviderStat
     _flutterTts = FlutterTts();
     await _flutterTts.setLanguage('ur-PK');
     await _flutterTts.setSpeechRate(0.5);
-    await _flutterTts.setVolume(4.0);
+    await _flutterTts.setVolume(1.0);
     await _flutterTts.setPitch(1.0);
     _ttsReady = true;
   }
