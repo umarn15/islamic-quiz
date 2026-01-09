@@ -1,10 +1,18 @@
+import 'dart:convert';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/services.dart';
 import '../models/question_model.dart';
 import '../local_questions.dart';
 
 class QuestionService {
   final FirebaseFirestore _firestore;
-  static const String _collection = 'questions';
+  
+  /// Collection for question metadata (keys only) - backup/reference
+  static const String _metadataCollection = 'questions_metadata';
+  
+  /// Collection for full questions with inline translations - primary source
+  static const String _fullQuestionsCollection = 'questions';
+  
   static const String _configCollection = 'config';
   static const String _configDoc = 'app_settings';
   
@@ -17,7 +25,10 @@ class QuestionService {
       : _firestore = firestore ?? FirebaseFirestore.instance;
 
   CollectionReference<Map<String, dynamic>> get _questionsRef =>
-      _firestore.collection(_collection);
+      _firestore.collection(_fullQuestionsCollection);
+  
+  CollectionReference<Map<String, dynamic>> get _metadataRef =>
+      _firestore.collection(_metadataCollection);
 
   /// Fetches the useLocalDataOnly config from Firestore
   /// Call this once at app startup (e.g., in splash screen)
@@ -300,11 +311,21 @@ class QuestionService {
       // In local mode, questions are already seeded from local_questions.dart
       return;
     }
+    
+    // Seed metadata collection (keys only - for backup/reference)
+    await _seedMetadataCollection(overwrite: overwrite);
+    
+    // Seed full questions collection (with translations)
+    await _seedFullQuestionsCollection(overwrite: overwrite);
+  }
+  
+  /// Seeds the metadata collection with question keys only
+  Future<void> _seedMetadataCollection({bool overwrite = false}) async {
     final batch = _firestore.batch();
     
     for (final questionData in initialQuestions) {
       final question = QuestionModel.fromLocalJson(questionData);
-      final docRef = _questionsRef.doc(question.id);
+      final docRef = _metadataRef.doc(question.id);
       
       if (overwrite) {
         batch.set(docRef, question.toJson());
@@ -314,6 +335,128 @@ class QuestionService {
     }
     
     await batch.commit();
+  }
+  
+  /// Seeds the full questions collection with inline translations
+  /// Reads translations from l10n files and combines with metadata
+  Future<void> _seedFullQuestionsCollection({bool overwrite = false}) async {
+    // Load translation files
+    final Map<String, dynamic> enTranslations = await _loadTranslations('en');
+    final Map<String, dynamic> urTranslations = await _loadTranslations('ur');
+    
+    // Process in batches (Firestore limit is 500 operations per batch)
+    const batchSize = 400;
+    List<Map<String, dynamic>> questionsList = List.from(initialQuestions);
+    
+    for (int i = 0; i < questionsList.length; i += batchSize) {
+      final batch = _firestore.batch();
+      final end = (i + batchSize < questionsList.length) ? i + batchSize : questionsList.length;
+      
+      for (int j = i; j < end; j++) {
+        final questionData = questionsList[j];
+        final question = QuestionModel.fromLocalJson(questionData);
+        
+        // Build translations map
+        final translations = <String, QuestionTranslation>{};
+        
+        // Add English translation
+        final enTranslation = _buildTranslation(question, enTranslations);
+        if (enTranslation != null) {
+          translations['en'] = enTranslation;
+        }
+        
+        // Add Urdu translation
+        final urTranslation = _buildTranslation(question, urTranslations);
+        if (urTranslation != null) {
+          translations['ur'] = urTranslation;
+        }
+        
+        // Create full question with translations
+        final fullQuestion = question.copyWith(translations: translations);
+        final docRef = _questionsRef.doc(fullQuestion.id);
+        
+        if (overwrite) {
+          batch.set(docRef, fullQuestion.toJson());
+        } else {
+          batch.set(docRef, fullQuestion.toJson(), SetOptions(merge: true));
+        }
+      }
+      
+      await batch.commit();
+    }
+  }
+  
+  /// Loads translations from l10n JSON file
+  Future<Map<String, dynamic>> _loadTranslations(String locale) async {
+    try {
+      final String jsonString = await rootBundle.loadString('assets/l10n/$locale.json');
+      return json.decode(jsonString) as Map<String, dynamic>;
+    } catch (e) {
+      return {};
+    }
+  }
+  
+  /// Builds a QuestionTranslation from question metadata and translations map
+  QuestionTranslation? _buildTranslation(
+    QuestionModel question,
+    Map<String, dynamic> translations,
+  ) {
+    final questionText = translations[question.questionKey] as String?;
+    if (questionText == null) return null;
+    
+    final options = <String>[];
+    for (final optionKey in question.optionsKeys) {
+      final optionText = translations[optionKey] as String?;
+      if (optionText != null) {
+        options.add(optionText);
+      }
+    }
+    
+    // If we don't have all options, return null
+    if (options.length != question.optionsKeys.length) return null;
+    
+    final explanation = question.explanationKey != null
+        ? translations[question.explanationKey] as String?
+        : null;
+    
+    return QuestionTranslation(
+      questionText: questionText,
+      options: options,
+      explanation: explanation,
+    );
+  }
+  
+  /// Seeds only the full questions collection (for admin use)
+  /// Call this to populate Firestore with full question data
+  Future<void> seedFullQuestionsOnly({bool overwrite = false}) async {
+    await _seedFullQuestionsCollection(overwrite: overwrite);
+  }
+  
+  /// Seeds only the metadata collection (for backup)
+  Future<void> seedMetadataOnly({bool overwrite = false}) async {
+    await _seedMetadataCollection(overwrite: overwrite);
+  }
+  
+  /// Adds a new question with translations to Firestore
+  /// Used by admin panel to add new questions
+  Future<void> addQuestionWithTranslations(
+    QuestionModel question,
+    Map<String, QuestionTranslation> translations,
+  ) async {
+    final fullQuestion = question.copyWith(translations: translations);
+    await _questionsRef.doc(fullQuestion.id).set(fullQuestion.toJson());
+  }
+  
+  /// Updates translations for an existing question
+  Future<void> updateQuestionTranslations(
+    String questionId,
+    Map<String, QuestionTranslation> translations,
+  ) async {
+    await _questionsRef.doc(questionId).update({
+      'translations': translations.map(
+        (key, value) => MapEntry(key, value.toJson()),
+      ),
+    });
   }
 
   /// Checks if questions exist
