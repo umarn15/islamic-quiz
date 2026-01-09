@@ -103,8 +103,8 @@ class _QuizScreenState extends ConsumerState<QuizScreen> with TickerProviderStat
     if (_isMuted || _questionL10n == null) return;
     if (!_ttsReady) await _initTts();
     await _flutterTts.stop();
-    final questionText = _questionL10n!.getQuestionText(question.questionKey, question: question);
-    await _flutterTts.speak(questionText);
+    final questionText = _questionL10n?.getQuestionText(question.questionKey, question: question);
+    await _flutterTts.speak(questionText ?? '');
   }
 
   void _toggleMute() {
