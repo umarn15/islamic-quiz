@@ -492,7 +492,7 @@ class _QuestionFormScreenState extends ConsumerState<QuestionFormScreen>
     try {
       final notifier = ref.read(questionNotifierProvider.notifier);
       final now = DateTime.now();
-      final id = widget.question?.id ?? _generateId();
+      final id = widget.question?.id ?? await _generateId();
 
       // Build translations map
       final Map<String, QuestionTranslation> translations = {};
@@ -527,12 +527,12 @@ class _QuestionFormScreenState extends ConsumerState<QuestionFormScreen>
       // Create question with inline translations
       final question = QuestionModel(
         id: id,
-        questionKey: 'custom_$id', // Key for custom questions
+        questionKey: '${id}_question',
         difficulty: _difficulty,
         category: _category,
-        optionsKeys: List.generate(4, (i) => 'custom_${id}_option_$i'),
+        optionsKeys: List.generate(4, (i) => '${id}_option_$i'),
         correctOptionIndex: _correctOptionIndex,
-        explanationKey: 'custom_${id}_explanation',
+        explanationKey: '${id}_explanation',
         isActive: _isActive,
         createdAt: widget.question?.createdAt ?? now,
         updatedAt: now,
@@ -611,9 +611,30 @@ class _QuestionFormScreenState extends ConsumerState<QuestionFormScreen>
     }
   }
 
-  String _generateId() {
-    final prefix = _difficulty.name.substring(0, 1);
-    final timestamp = DateTime.now().millisecondsSinceEpoch;
-    return '${prefix}_custom_$timestamp';
+  Future<String> _generateId() async {
+    // Get all questions from Firestore to find the next number for this difficulty
+    final questions = await ref.read(questionServiceProvider).getAllQuestionsForAdmin();
+    
+    // Filter questions by selected difficulty and extract their numbers
+    final difficultyPrefix = _difficulty.name;
+    final existingNumbers = questions
+        .where((q) => q.id.startsWith('${difficultyPrefix}_'))
+        .map((q) {
+          // Extract number from id like "easy_001" -> 1
+          final parts = q.id.split('_');
+          if (parts.length >= 2) {
+            return int.tryParse(parts[1]) ?? 0;
+          }
+          return 0;
+        })
+        .toList();
+    
+    // Find the next available number
+    final nextNumber = existingNumbers.isEmpty ? 1 : (existingNumbers.reduce((a, b) => a > b ? a : b) + 1);
+    
+    // Format with leading zeros (e.g., 001, 052, 123)
+    final formattedNumber = nextNumber.toString().padLeft(3, '0');
+    
+    return '${difficultyPrefix}_$formattedNumber';
   }
 }
