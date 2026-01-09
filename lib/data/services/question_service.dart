@@ -8,8 +8,8 @@ class QuestionService {
   final FirebaseFirestore _firestore;
   
   /// Collection for question metadata (keys only) - backup/reference
-  static const String _metadataCollection = 'questions_metadata';
-  
+  // static const String _metadataCollection = 'questions_metadata';
+
   /// Collection for full questions with inline translations - primary source
   static const String _fullQuestionsCollection = 'questions';
   
@@ -27,8 +27,8 @@ class QuestionService {
   CollectionReference<Map<String, dynamic>> get _questionsRef =>
       _firestore.collection(_fullQuestionsCollection);
   
-  CollectionReference<Map<String, dynamic>> get _metadataRef =>
-      _firestore.collection(_metadataCollection);
+  // CollectionReference<Map<String, dynamic>> get _metadataRef =>
+  //     _firestore.collection(_metadataCollection);
 
   /// Fetches the useLocalDataOnly config from Firestore
   /// Call this once at app startup (e.g., in splash screen)
@@ -313,29 +313,29 @@ class QuestionService {
     }
     
     // Seed metadata collection (keys only - for backup/reference)
-    await _seedMetadataCollection(overwrite: overwrite);
+    // await _seedMetadataCollection(overwrite: overwrite);
     
     // Seed full questions collection (with translations)
     await _seedFullQuestionsCollection(overwrite: overwrite);
   }
   
   /// Seeds the metadata collection with question keys only
-  Future<void> _seedMetadataCollection({bool overwrite = false}) async {
-    final batch = _firestore.batch();
-    
-    for (final questionData in initialQuestions) {
-      final question = QuestionModel.fromLocalJson(questionData);
-      final docRef = _metadataRef.doc(question.id);
-      
-      if (overwrite) {
-        batch.set(docRef, question.toJson());
-      } else {
-        batch.set(docRef, question.toJson(), SetOptions(merge: true));
-      }
-    }
-    
-    await batch.commit();
-  }
+  // Future<void> _seedMetadataCollection({bool overwrite = false}) async {
+  //   final batch = _firestore.batch();
+  //
+  //   for (final questionData in initialQuestions) {
+  //     final question = QuestionModel.fromLocalJson(questionData);
+  //     final docRef = _metadataRef.doc(question.id);
+  //
+  //     if (overwrite) {
+  //       batch.set(docRef, question.toJson());
+  //     } else {
+  //       batch.set(docRef, question.toJson(), SetOptions(merge: true));
+  //     }
+  //   }
+  //
+  //   await batch.commit();
+  // }
   
   /// Seeds the full questions collection with inline translations
   /// Reads translations from l10n files and combines with metadata
@@ -433,9 +433,9 @@ class QuestionService {
   }
   
   /// Seeds only the metadata collection (for backup)
-  Future<void> seedMetadataOnly({bool overwrite = false}) async {
-    await _seedMetadataCollection(overwrite: overwrite);
-  }
+  // Future<void> seedMetadataOnly({bool overwrite = false}) async {
+  //   await _seedMetadataCollection(overwrite: overwrite);
+  // }
   
   /// Adds a new question with translations to Firestore
   /// Used by admin panel to add new questions
@@ -524,7 +524,6 @@ class QuestionService {
   /// Seeds Firestore with questions (for admin panel)
   /// Always writes to Firestore, ignoring useLocalDataOnly flag
   Future<void> seedQuestionsForAdmin({bool overwrite = false}) async {
-    await _seedMetadataCollection(overwrite: overwrite);
     await _seedFullQuestionsCollection(overwrite: overwrite);
   }
 }
