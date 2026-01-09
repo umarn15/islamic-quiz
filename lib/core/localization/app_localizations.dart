@@ -150,9 +150,9 @@ class AppLocalizations {
 
   // ============ Scoring Info ============
   String get howScoringWorks => _translate('howScoringWorks', 'How Scoring Works', 'سکورنگ کیسے کام کرتی ہے');
-  String get answerWithin3Seconds => _translate('answerWithin3Seconds', 'Answer within 3 seconds', '3 سیکنڈ میں جواب دیں');
+  String get answerWithin3Seconds => _translate('answerWithin3Seconds', 'Answer within 3 seconds', '3 سیکنڈ میں جواب پر');
   String get after3Seconds => _translate('after3Seconds', 'After 3 seconds', '3 سیکنڈ کے بعد');
-  String get minimumPerCorrect => _translate('minimumPerCorrect', 'Minimum per correct', 'کم از کم فی صحیح');
+  String get minimumPerCorrect => _translate('minimumPerCorrect', 'Minimum per correct', 'درست جواب پر کم از کم');
   String get gotIt => _translate('gotIt', 'Got it!', 'سمجھ گیا!');
   String perfectAnswersLostPoints(int points) => _translate('perfectAnswersLostPoints', 'Perfect answers! Lost $points pts to time.', 'کامل جوابات! وقت کی وجہ سے $points پوائنٹس ضائع ہوئے۔');
 
