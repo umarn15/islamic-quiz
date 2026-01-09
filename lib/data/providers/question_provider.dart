@@ -44,7 +44,8 @@ class QuestionNotifier extends StateNotifier<AsyncValue<List<QuestionModel>>> {
   Future<void> loadQuestions() async {
     state = const AsyncValue.loading();
     try {
-      final questions = await _service.getAllQuestions();
+      // Always load from Firestore for admin panel
+      final questions = await _service.getAllQuestionsForAdmin();
       state = AsyncValue.data(questions);
     } catch (e, st) {
       state = AsyncValue.error(e, st);
@@ -53,7 +54,8 @@ class QuestionNotifier extends StateNotifier<AsyncValue<List<QuestionModel>>> {
 
   Future<void> addQuestion(QuestionModel question) async {
     try {
-      await _service.addQuestion(question);
+      // Always write to Firestore for admin panel
+      await _service.addQuestionForAdmin(question);
       await loadQuestions();
     } catch (e) {
       rethrow;
@@ -62,7 +64,8 @@ class QuestionNotifier extends StateNotifier<AsyncValue<List<QuestionModel>>> {
 
   Future<void> updateQuestion(QuestionModel question) async {
     try {
-      await _service.updateQuestion(question);
+      // Always write to Firestore for admin panel
+      await _service.updateQuestionForAdmin(question);
       await loadQuestions();
     } catch (e) {
       rethrow;
@@ -71,7 +74,8 @@ class QuestionNotifier extends StateNotifier<AsyncValue<List<QuestionModel>>> {
 
   Future<void> toggleQuestionStatus(String questionId, bool isActive) async {
     try {
-      await _service.toggleQuestionStatus(questionId, isActive);
+      // Always write to Firestore for admin panel
+      await _service.toggleQuestionStatusForAdmin(questionId, isActive);
       await loadQuestions();
     } catch (e) {
       rethrow;
@@ -80,7 +84,8 @@ class QuestionNotifier extends StateNotifier<AsyncValue<List<QuestionModel>>> {
 
   Future<void> deleteQuestion(String questionId) async {
     try {
-      await _service.deleteQuestion(questionId);
+      // Always write to Firestore for admin panel
+      await _service.deleteQuestionForAdmin(questionId);
       await loadQuestions();
     } catch (e) {
       rethrow;
@@ -89,7 +94,8 @@ class QuestionNotifier extends StateNotifier<AsyncValue<List<QuestionModel>>> {
 
   Future<void> seedQuestions({bool overwrite = false}) async {
     try {
-      await _service.seedQuestions(overwrite: overwrite);
+      // Always write to Firestore for admin panel
+      await _service.seedQuestionsForAdmin(overwrite: overwrite);
       await loadQuestions();
     } catch (e) {
       rethrow;

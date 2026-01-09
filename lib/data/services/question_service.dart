@@ -483,4 +483,48 @@ class QuestionService {
         .map((q) => QuestionModel.fromLocalJson(q))
         .toList();
   }
+
+  // ============================================================
+  // ADMIN METHODS - Always use Firestore regardless of useLocalDataOnly
+  // ============================================================
+
+  /// Gets all questions from Firestore (for admin panel)
+  /// Always reads from Firestore, ignoring useLocalDataOnly flag
+  Future<List<QuestionModel>> getAllQuestionsForAdmin() async {
+    final snapshot = await _questionsRef.get();
+    return snapshot.docs
+        .map((doc) => QuestionModel.fromJson(doc.data(), docId: doc.id))
+        .toList();
+  }
+
+  /// Adds a new question to Firestore (for admin panel)
+  /// Always writes to Firestore, ignoring useLocalDataOnly flag
+  Future<void> addQuestionForAdmin(QuestionModel question) async {
+    await _questionsRef.doc(question.id).set(question.toJson());
+  }
+
+  /// Updates an existing question in Firestore (for admin panel)
+  /// Always writes to Firestore, ignoring useLocalDataOnly flag
+  Future<void> updateQuestionForAdmin(QuestionModel question) async {
+    await _questionsRef.doc(question.id).update(question.toJson());
+  }
+
+  /// Toggles question active status in Firestore (for admin panel)
+  /// Always writes to Firestore, ignoring useLocalDataOnly flag
+  Future<void> toggleQuestionStatusForAdmin(String questionId, bool isActive) async {
+    await _questionsRef.doc(questionId).update({'isActive': isActive});
+  }
+
+  /// Deletes a question from Firestore (for admin panel)
+  /// Always writes to Firestore, ignoring useLocalDataOnly flag
+  Future<void> deleteQuestionForAdmin(String questionId) async {
+    await _questionsRef.doc(questionId).delete();
+  }
+
+  /// Seeds Firestore with questions (for admin panel)
+  /// Always writes to Firestore, ignoring useLocalDataOnly flag
+  Future<void> seedQuestionsForAdmin({bool overwrite = false}) async {
+    await _seedMetadataCollection(overwrite: overwrite);
+    await _seedFullQuestionsCollection(overwrite: overwrite);
+  }
 }
