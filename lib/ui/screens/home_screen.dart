@@ -623,7 +623,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     }
 
     return firstName.isNotEmpty
-        ? '$greeting,\n$firstName!'
+        ? '$greeting,\n$firstName'
         : '$greeting!';
   }
 }
