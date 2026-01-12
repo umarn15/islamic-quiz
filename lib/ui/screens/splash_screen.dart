@@ -94,7 +94,7 @@ class _SplashScreenState extends ConsumerState<SplashScreen> with TickerProvider
     }
 
     // Wait for animation to complete (minimum 3 seconds)
-    await Future.delayed(const Duration(seconds: 3));
+    await Future.delayed(const Duration(seconds: 2));
     
     if (mounted && !_navigationCancelled) {
       Navigator.of(context).pushReplacement(
