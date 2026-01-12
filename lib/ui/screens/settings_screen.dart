@@ -8,6 +8,8 @@ import 'package:islamicquiz/data/services/auth_service.dart';
 import 'package:islamicquiz/ui/screens/auth/login_screen.dart';
 import 'package:islamicquiz/ui/screens/home_screen.dart';
 
+import '../../main.dart';
+
 class SettingsScreen extends ConsumerWidget {
   const SettingsScreen({super.key});
 
@@ -163,7 +165,7 @@ class SettingsScreen extends ConsumerWidget {
                         context: context,
                         icon: Icons.info_outline,
                         title: l10n.appVersion,
-                        subtitle: '1.0.0',
+                        subtitle: "${pubVersionName}(${pubVersionCode})",
                         colorScheme: colorScheme,
                         textTheme: textTheme,
                       ),

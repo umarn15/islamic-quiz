@@ -11,11 +11,22 @@ import 'package:islamicquiz/firebase_options.dart';
 import 'package:islamicquiz/ui/screens/splash_screen.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:yaml/yaml.dart';
+
+late String pubVersionName;
+late int pubVersionCode;
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+
+  rootBundle.loadString('pubspec.yaml').then((value) {
+    final yaml = loadYaml(value);
+    final versions = yaml['version'].toString().split("+");
+    pubVersionName = versions[0];
+    pubVersionCode = int.parse(versions[1]);
+  });
 
   final prefs = await SharedPreferences.getInstance();
   
