@@ -55,8 +55,8 @@ class AppLocalizations {
   String get settings => _translate('settings', 'Settings', 'ترتیبات');
   String get appearance => _translate('appearance', 'Appearance', 'ظاہری شکل');
   String get darkMode => _translate('darkMode', 'Dark Mode', 'ڈارک موڈ');
-  String get darkThemeEnabled => _translate('darkThemeEnabled', 'Dark theme is enabled', 'ڈارک تھیم فعال ہے');
-  String get lightThemeEnabled => _translate('lightThemeEnabled', 'Light theme is enabled', 'لائٹ تھیم فعال ہے');
+  String get darkThemeEnabled => _translate('darkThemeEnabled', 'Dark theme is enabled', 'تاریک تھیم فعال ہے');
+  String get lightThemeEnabled => _translate('lightThemeEnabled', 'Light theme is enabled', 'روشن تھیم فعال ہے');
   String get language => _translate('language', 'Language', 'زبان');
   String get selectLanguage => _translate('selectLanguage', 'Select Language', 'زبان منتخب کریں');
   String get account => _translate('account', 'Account', 'اکاؤنٹ');
