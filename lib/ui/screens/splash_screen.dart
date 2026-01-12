@@ -297,57 +297,13 @@ class _SplashScreenState extends ConsumerState<SplashScreen> with TickerProvider
                         scale: _pulseAnimation,
                         child: GestureDetector(
                           onTap: _handleSecretTap,
-                          child: Container(
-                            width: 140,
-                            height: 140,
-                            decoration: BoxDecoration(
-                              shape: BoxShape.circle,
-                              boxShadow: [
-                                BoxShadow(
-                                  color: Colors.white.withValues(alpha: 0.3),
-                                  blurRadius: 40,
-                                  spreadRadius: 10,
-                                ),
-                                BoxShadow(
-                                  color: colorScheme.primary.withValues(alpha: 0.5),
-                                  blurRadius: 60,
-                                  spreadRadius: 20,
-                                ),
-                              ],
+                          child: Image.asset(
+                            'assets/app_logo(2).png',
+                            width: 200,
+                            height: 200,
                             ),
-                            child: Container(
-                              decoration: BoxDecoration(
-                                color: Colors.white.withValues(alpha: 0.15),
-                                shape: BoxShape.circle,
-                                border: Border.all(color: Colors.white30, width: 2),
-                              ),
-                              child: Center(
-                                child: Container(
-                                  width: 100,
-                                  height: 100,
-                                  decoration: BoxDecoration(
-                                    color: Colors.white,
-                                    shape: BoxShape.circle,
-                                    boxShadow: [
-                                      BoxShadow(
-                                        color: Colors.black.withValues(alpha: 0.2),
-                                        blurRadius: 20,
-                                        spreadRadius: 2,
-                                      ),
-                                    ],
-                                  ),
-                                  child: Icon(
-                                    Icons.auto_awesome,
-                                    size: 50,
-                                    color: colorScheme.primary,
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ),
                         ),
                       ),
-                      const SizedBox(height: 50),
 
                       // App Title with shimmer effect
                       ShaderMask(
