@@ -60,7 +60,7 @@ class AppLocalizations {
   String get language => _translate('language', 'Language', 'زبان');
   String get selectLanguage => _translate('selectLanguage', 'Select Language', 'زبان منتخب کریں');
   String get account => _translate('account', 'Account', 'اکاؤنٹ');
-  String get about => _translate('about', 'About', 'کے بارے میں');
+  String get about => _translate('about', 'About', 'ایپ کے بارے میں');
   String get appVersion => _translate('appVersion', 'App Version', 'ایپ ورژن');
   String get signIn => _translate('signIn', 'Sign In', 'سائن ان');
   String get signOut => _translate('signOut', 'Sign Out', 'سائن آؤٹ');
