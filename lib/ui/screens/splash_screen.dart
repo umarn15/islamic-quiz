@@ -93,7 +93,7 @@ class _SplashScreenState extends ConsumerState<SplashScreen> with TickerProvider
       debugPrint('Question seeding failed: $e');
     }
 
-    // Wait for animation to complete (minimum 3 seconds)
+    // Wait for animation to complete (minimum 2 seconds)
     await Future.delayed(const Duration(seconds: 2));
     
     if (mounted && !_navigationCancelled) {
