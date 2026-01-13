@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:islamicquiz/core/localization/app_localizations.dart';
@@ -73,16 +74,16 @@ class SettingsScreen extends ConsumerWidget {
                               ],
                             ),
                           ),
-                          Switch(
+                          CupertinoSwitch(
                             value: themeNotifier.isDarkMode,
                             onChanged: (value) {
                               ref.read(themeProvider.notifier).toggleTheme();
                             },
-                            activeThumbColor: colorScheme.primary,
+                            activeTrackColor: colorScheme.primary,
                           ),
                         ],
                       ),
-                      const Divider(height: 32),
+                      Divider(height: 32, color: colorScheme.onSurface.withValues(alpha: 0.2)),
                       // Language Selection
                       InkWell(
                         onTap: () => _showLanguageDialog(context, ref, currentLocale),
@@ -113,7 +114,7 @@ class SettingsScreen extends ConsumerWidget {
                               ),
                               Icon(
                                 Icons.arrow_forward_ios,
-                                size: 16,
+                                size: 18,
                                 color: colorScheme.primary.withValues(alpha: 0.5),
                               ),
                             ],
@@ -345,7 +346,7 @@ class SettingsScreen extends ConsumerWidget {
             ),
             Icon(
               Icons.arrow_forward_ios,
-              size: 16,
+              size: 18,
               color: colorScheme.primary.withValues(alpha: 0.5),
             ),
           ],
@@ -393,7 +394,7 @@ class SettingsScreen extends ConsumerWidget {
             ),
           ],
         ),
-        const Divider(height: 32),
+        Divider(height: 32, color: colorScheme.onSurface.withValues(alpha: 0.2)),
         InkWell(
           onTap: () => _showLogoutDialog(context, ref, l10n),
           borderRadius: BorderRadius.circular(8),
@@ -416,7 +417,7 @@ class SettingsScreen extends ConsumerWidget {
                 ),
                 Icon(
                   Icons.arrow_forward_ios,
-                  size: 16,
+                  size: 18,
                   color: colorScheme.error.withValues(alpha: 0.5),
                 ),
               ],
