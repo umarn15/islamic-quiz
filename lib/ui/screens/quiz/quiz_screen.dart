@@ -169,6 +169,7 @@ class _QuizScreenState extends ConsumerState<QuizScreen> with TickerProviderStat
   void _handleTimeout() {
     _timer?.cancel();
     if (!_hasAnswered) {
+      _playAnswerSound(false);
       setState(() {
         _hasAnswered = true;
         _selectedOptionIndex = -1;
