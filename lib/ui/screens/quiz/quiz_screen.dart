@@ -370,33 +370,41 @@ class _QuizScreenState extends ConsumerState<QuizScreen> with TickerProviderStat
 
     final question = _questions[_currentIndex];
 
-    return Scaffold(
-      backgroundColor: isDarkMode ? null : const Color(0xFFF5F7FF),
-      body: SafeArea(
-        child: Column(
-          children: [
-            _buildHeader(colorScheme, isDarkMode),
-            _buildTimerBar(colorScheme, isDarkMode),
-            Expanded(
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16),
-                child: Column(
-                  children: [
-                    const SizedBox(height: 12),
-                    Flexible(flex: 2, child: _buildQuestionCard(question, colorScheme, isDarkMode)),
-                    const SizedBox(height: 16),
-                    Expanded(
-                      flex: 3,
-                      child: ListView(
-                        padding: EdgeInsets.zero,
-                        children: _buildOptions(question, colorScheme, isDarkMode),
+    return PopScope(
+      canPop: false,
+      onPopInvokedWithResult: (didPop, result) {
+          if (!didPop) {
+            _showExitDialog();
+          }
+        },
+      child: Scaffold(
+        backgroundColor: isDarkMode ? null : const Color(0xFFF5F7FF),
+        body: SafeArea(
+          child: Column(
+            children: [
+              _buildHeader(colorScheme, isDarkMode),
+              _buildTimerBar(colorScheme, isDarkMode),
+              Expanded(
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  child: Column(
+                    children: [
+                      const SizedBox(height: 12),
+                      Flexible(flex: 2, child: _buildQuestionCard(question, colorScheme, isDarkMode)),
+                      const SizedBox(height: 16),
+                      Expanded(
+                        flex: 3,
+                        child: ListView(
+                          padding: EdgeInsets.zero,
+                          children: _buildOptions(question, colorScheme, isDarkMode),
+                        ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
