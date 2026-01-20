@@ -236,7 +236,7 @@ class ThemeProvider extends ChangeNotifier {
   );
 
   loadFromPrefs() {
-    isDarkMode = prefs.getBool('isDarkMode') ?? false;
+    isDarkMode = prefs.getBool('isDarkMode') ?? true;
   }
 
   Future<void> saveToPrefs() async {
