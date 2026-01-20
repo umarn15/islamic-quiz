@@ -91,6 +91,7 @@ class _QuizScreenState extends ConsumerState<QuizScreen> with TickerProviderStat
       duration: const Duration(milliseconds: 450),
       vsync: this,
     );
+    _flashController.value = 1.0;
   }
 
   Future<void> _initializeQuiz() async {
@@ -485,7 +486,7 @@ class _QuizScreenState extends ConsumerState<QuizScreen> with TickerProviderStat
                         animation: _flashController,
                         builder: (context, child) {
                           final base = _lastAnswerWasCorrect ? const Color(0xFF4CAF50) : const Color(0xFFF44336);
-                          final alpha = 0.25 * (1.0 - _flashController.value);
+                          final alpha = _flashController.isAnimating ? 0.25 * (1.0 - _flashController.value) : 0.0;
                           return Container(
                             decoration: BoxDecoration(
                               gradient: RadialGradient(
