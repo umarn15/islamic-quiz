@@ -34,7 +34,7 @@ class AppLocalizations {
   String get masterYourKnowledge => _translate('masterYourKnowledge', 'Master your knowledge', 'اپنے علم کو مضبوط کریں');
 
   // ============ Home Screen ============
-  String get letsLearnAndHaveFun => _translate('letsLearnAndHaveFun', "Let's learn and have fun!", 'آئیں سیکھیں اور لطف اٹھائیں!');
+  String get letsLearnAndHaveFun => _translate('letsLearnAndHaveFun', "Let's play and learn!", 'آئیں کھیلیں اور سیکھیں!');
   String get points => _translate('points', 'Points', 'پوائنٹس');
   String get pickYourChallenge => _translate('pickYourChallenge', 'Pick Your Challenge!', 'اپنا چیلنج منتخب کریں!');
   String get easy => _translate('easy', 'Easy', 'آسان');
