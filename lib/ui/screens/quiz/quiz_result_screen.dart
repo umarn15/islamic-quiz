@@ -402,22 +402,6 @@ class _QuizResultScreenState extends ConsumerState<QuizResultScreen>
                   color: Colors.amber.shade400,
                 ),
               ),
-              const SizedBox(width: 8),
-              GestureDetector(
-                onTap: () => _showScoringInfo(context, l10n),
-                child: Container(
-                  padding: const EdgeInsets.all(4),
-                  decoration: BoxDecoration(
-                    color: Colors.amber.withValues(alpha: 0.2),
-                    shape: BoxShape.circle,
-                  ),
-                  child: Icon(
-                    Icons.info_outline_rounded,
-                    color: Colors.amber.shade700,
-                    size: 18,
-                  ),
-                ),
-              ),
             ],
           ),
           const SizedBox(height: 4),
@@ -668,90 +652,90 @@ class _QuizResultScreenState extends ConsumerState<QuizResultScreen>
     }
   }
 
-  void _showScoringInfo(BuildContext context, AppLocalizations l10n) {
-    final lostPoints = widget.totalQuestions * 30 - widget.score;
-    final colorScheme = Theme.of(context).colorScheme;
+  // void _showScoringInfo(BuildContext context, AppLocalizations l10n) {
+  //   final lostPoints = widget.totalQuestions * 30 - widget.score;
+  //   final colorScheme = Theme.of(context).colorScheme;
+  //
+  //   showDialog(
+  //     context: context,
+  //     builder: (context) => AlertDialog(
+  //       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+  //       title: Row(
+  //         children: [
+  //           Container(
+  //             padding: const EdgeInsets.all(8),
+  //             decoration: BoxDecoration(
+  //               color: colorScheme.primary.withValues(alpha: 0.1),
+  //               shape: BoxShape.circle,
+  //             ),
+  //             child: Icon(Icons.info_outline_rounded, color: colorScheme.primary),
+  //           ),
+  //           const SizedBox(width: 12),
+  //           Text(l10n.howScoringWorks, style: TextStyle(fontSize: 18)),
+  //         ],
+  //       ),
+  //       content: Column(
+  //         mainAxisSize: MainAxisSize.min,
+  //         crossAxisAlignment: CrossAxisAlignment.start,
+  //         children: [
+  //           _buildScoringRow('⚡', l10n.answerWithin3Seconds, '30 points'),
+  //           const SizedBox(height: 8),
+  //           _buildScoringRow('⏱️', l10n.after3Seconds, '-2 pts/sec'),
+  //           const SizedBox(height: 8),
+  //           _buildScoringRow('🛡️', l10n.minimumPerCorrect, '16 points'),
+  //           if (widget.correctAnswers == widget.totalQuestions && lostPoints > 0) ...[
+  //             const SizedBox(height: 16),
+  //             Container(
+  //               padding: const EdgeInsets.all(12),
+  //               decoration: BoxDecoration(
+  //                 gradient: LinearGradient(
+  //                   colors: [
+  //                     Colors.amber.withValues(alpha: 0.2),
+  //                     Colors.orange.withValues(alpha: 0.1),
+  //                   ],
+  //                 ),
+  //                 borderRadius: BorderRadius.circular(12),
+  //                 border: Border.all(color: Colors.amber.withValues(alpha: 0.3)),
+  //               ),
+  //               child: Row(
+  //                 children: [
+  //                   const Icon(Icons.lightbulb_rounded, color: Colors.amber, size: 22),
+  //                   const SizedBox(width: 10),
+  //                   Expanded(
+  //                     child: Text(
+  //                       l10n.perfectAnswersLostPoints(lostPoints),
+  //                       style: TextStyle(fontSize: 13, color: Colors.amber[800], fontWeight: FontWeight.w500),
+  //                     ),
+  //                   ),
+  //                 ],
+  //               ),
+  //             ),
+  //           ],
+  //         ],
+  //       ),
+  //       actions: [
+  //         TextButton(
+  //           onPressed: () => Navigator.pop(context),
+  //           style: TextButton.styleFrom(
+  //             padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+  //           ),
+  //           child: Text(l10n.gotIt, style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
+  //         ),
+  //       ],
+  //     ),
+  //   );
+  // }
 
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-        title: Row(
-          children: [
-            Container(
-              padding: const EdgeInsets.all(8),
-              decoration: BoxDecoration(
-                color: colorScheme.primary.withValues(alpha: 0.1),
-                shape: BoxShape.circle,
-              ),
-              child: Icon(Icons.info_outline_rounded, color: colorScheme.primary),
-            ),
-            const SizedBox(width: 12),
-            Text(l10n.howScoringWorks, style: TextStyle(fontSize: 18)),
-          ],
-        ),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            _buildScoringRow('⚡', l10n.answerWithin3Seconds, '30 points'),
-            const SizedBox(height: 8),
-            _buildScoringRow('⏱️', l10n.after3Seconds, '-2 pts/sec'),
-            const SizedBox(height: 8),
-            _buildScoringRow('🛡️', l10n.minimumPerCorrect, '16 points'),
-            if (widget.correctAnswers == widget.totalQuestions && lostPoints > 0) ...[
-              const SizedBox(height: 16),
-              Container(
-                padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    colors: [
-                      Colors.amber.withValues(alpha: 0.2),
-                      Colors.orange.withValues(alpha: 0.1),
-                    ],
-                  ),
-                  borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: Colors.amber.withValues(alpha: 0.3)),
-                ),
-                child: Row(
-                  children: [
-                    const Icon(Icons.lightbulb_rounded, color: Colors.amber, size: 22),
-                    const SizedBox(width: 10),
-                    Expanded(
-                      child: Text(
-                        l10n.perfectAnswersLostPoints(lostPoints),
-                        style: TextStyle(fontSize: 13, color: Colors.amber[800], fontWeight: FontWeight.w500),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ],
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            style: TextButton.styleFrom(
-              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-            ),
-            child: Text(l10n.gotIt, style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildScoringRow(String emoji, String description, String points) {
-    return Row(
-      children: [
-        Text(emoji, style: const TextStyle(fontSize: 18)),
-        const SizedBox(width: 10),
-        Expanded(child: Text(description, style: const TextStyle(fontSize: 14))),
-        Text(points, style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600)),
-      ],
-    );
-  }
+  // Widget _buildScoringRow(String emoji, String description, String points) {
+  //   return Row(
+  //     children: [
+  //       Text(emoji, style: const TextStyle(fontSize: 18)),
+  //       const SizedBox(width: 10),
+  //       Expanded(child: Text(description, style: const TextStyle(fontSize: 14))),
+  //       Text(points, style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600)),
+  //     ],
+  //   );
+  // }
 
   _ResultData _getResultData(int percentage, AppLocalizations l10n) {
     if (percentage == 100) {
