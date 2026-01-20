@@ -745,21 +745,21 @@ class _QuizResultScreenState extends ConsumerState<QuizResultScreen>
         message: l10n.subhanAllahPerfect,
         color: Colors.amber,
       );
-    } else if (percentage >= 80) {
+    } else if (percentage >= 85) {
       return _ResultData(
         icon: Icons.auto_awesome_rounded,
         title: percentage >= 90 ? l10n.almostPerfect : l10n.excellent,
         message: l10n.mashaAllahAmazing,
         color: Colors.deepPurple.shade400,
       );
-    } else if (percentage >= 60) {
+    } else if (percentage >= 70) {
       return _ResultData(
         icon: Icons.thumb_up_rounded,
         title: l10n.goodJob,
         message: l10n.keepLearningImproving,
         color: Colors.green,
       );
-    } else if (percentage >= 40) {
+    } else if (percentage >= 50) {
       return _ResultData(
         icon: Icons.sentiment_satisfied_rounded,
         title: l10n.niceTry,
