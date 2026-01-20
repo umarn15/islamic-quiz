@@ -745,7 +745,7 @@ class _QuizResultScreenState extends ConsumerState<QuizResultScreen>
         message: l10n.subhanAllahPerfect,
         color: Colors.amber,
       );
-    } else if (percentage >= 85) {
+    } else if (percentage >= 80) {
       return _ResultData(
         icon: Icons.auto_awesome_rounded,
         title: percentage >= 90 ? l10n.almostPerfect : l10n.excellent,
