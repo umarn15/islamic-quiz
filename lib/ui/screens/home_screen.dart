@@ -171,7 +171,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                             const SizedBox(width: 12),
                             Expanded(
                               child: Text(
-                                _greetingByTime(firstName, l10n),
+                                _greeting(firstName, l10n),
                                 style: const TextStyle(
                                   color: Colors.white,
                                   fontSize: 22,
@@ -610,20 +610,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     );
   }
 
-  String _greetingByTime(String firstName, AppLocalizations l10n) {
-    final hour = DateTime.now().hour;
-
-    String greeting;
-    if (hour >= 5 && hour < 12) {
-      greeting = l10n.goodMorning;
-    } else if (hour >= 12 && hour < 17) {
-      greeting = l10n.goodAfternoon;
-    } else {
-      greeting = l10n.goodEvening;
-    }
-
-    return firstName.isNotEmpty
-        ? '$greeting,\n$firstName'
-        : '$greeting!';
+  String _greeting(String firstName, AppLocalizations l10n) {
+    final greeting = l10n.assalamualaikum;
+    return firstName.isNotEmpty ? '$greeting $firstName' : greeting;
   }
 }

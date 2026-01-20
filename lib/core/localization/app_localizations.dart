@@ -50,6 +50,7 @@ class AppLocalizations {
   String get goodMorning => _translate('goodMorning', 'Good Morning', 'صبح بخیر');
   String get goodAfternoon => _translate('goodAfternoon', 'Good Afternoon', 'دوپہر بخیر');
   String get goodEvening => _translate('goodEvening', 'Good Evening', 'شام بخیر');
+  String get assalamualaikum => _translate('assalamualaikum', 'Assalamualaikum', 'السلام علیکم');
 
   // ============ Settings Screen ============
   String get settings => _translate('settings', 'Settings', 'ترتیبات');
