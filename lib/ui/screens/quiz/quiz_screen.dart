@@ -36,7 +36,7 @@ class _QuizScreenState extends ConsumerState<QuizScreen> with TickerProviderStat
   QuestionLocalizations? _questionL10n;
 
   // Timer
-  static const int _timerDuration = 10;
+  static const int _timerDuration = 15;
   int _timeLeft = _timerDuration;
   Timer? _timer;
 
@@ -200,10 +200,7 @@ class _QuizScreenState extends ConsumerState<QuizScreen> with TickerProviderStat
   }
 
   int _calculateScore() {
-    const int fullMarkThreshold = 7;
-    const int maxScore = 30;
-    if (_timeLeft >= fullMarkThreshold) return maxScore;
-    return maxScore - ((fullMarkThreshold - _timeLeft) * 2);
+    return 30;
   }
 
   void _showFeedbackAndProceed(bool isCorrect) {
