@@ -2,7 +2,6 @@ import 'dart:async';
 import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:flutter_tts/flutter_tts.dart';
 import 'package:islamicquiz/core/localization/app_localizations.dart';
 import 'package:islamicquiz/core/localization/question_localizations.dart';
 import 'package:islamicquiz/data/models/question_model.dart';
@@ -42,9 +41,9 @@ class _QuizScreenState extends ConsumerState<QuizScreen> with TickerProviderStat
   Timer? _timer;
 
   // Text-to-Speech
-  late FlutterTts _flutterTts;
-  bool _ttsReady = false;
-  bool _isMuted = false;
+  // late FlutterTts _flutterTts;
+  // bool _ttsReady = false;
+  // bool _isMuted = false;
 
   // Animations
   late AnimationController _timerAnimationController;
@@ -96,7 +95,7 @@ class _QuizScreenState extends ConsumerState<QuizScreen> with TickerProviderStat
 
   Future<void> _initializeQuiz() async {
     await Future.wait([
-      _initTts(),
+      // _initTts(),
       _initLocalization(),
       _loadQuestions(),
     ]);
@@ -107,31 +106,31 @@ class _QuizScreenState extends ConsumerState<QuizScreen> with TickerProviderStat
     _questionL10n = await QuestionLocalizations.init(locale);
   }
 
-  Future<void> _initTts() async {
-    _flutterTts = FlutterTts();
-    await _flutterTts.setLanguage('ur-PK');
-    await _flutterTts.setSpeechRate(0.5);
-    await _flutterTts.setVolume(1.0);
-    await _flutterTts.setPitch(1.0);
-    _ttsReady = true;
-  }
+  // Future<void> _initTts() async {
+  //   _flutterTts = FlutterTts();
+  //   await _flutterTts.setLanguage('ur-PK');
+  //   await _flutterTts.setSpeechRate(0.5);
+  //   await _flutterTts.setVolume(1.0);
+  //   await _flutterTts.setPitch(1.0);
+  //   _ttsReady = true;
+  // }
 
-  Future<void> _speakQuestion(QuestionModel question) async {
-    if (_isMuted || _questionL10n == null) return;
-    if (!_ttsReady) await _initTts();
-    await _flutterTts.stop();
-    final questionText = _questionL10n?.getQuestionText(question.questionKey, question: question);
-    await _flutterTts.speak(questionText ?? '');
-  }
+  // Future<void> _speakQuestion(QuestionModel question) async {
+  //   if (_isMuted || _questionL10n == null) return;
+  //   if (!_ttsReady) await _initTts();
+  //   await _flutterTts.stop();
+  //   final questionText = _questionL10n?.getQuestionText(question.questionKey, question: question);
+  //   await _flutterTts.speak(questionText ?? '');
+  // }
 
-  void _toggleMute() {
-    setState(() => _isMuted = !_isMuted);
-    if (_isMuted) {
-      _flutterTts.stop();
-    } else {
-      _speakQuestion(_questions[_currentIndex]);
-    }
-  }
+  // void _toggleMute() {
+  //   setState(() => _isMuted = !_isMuted);
+  //   if (_isMuted) {
+  //     _flutterTts.stop();
+  //   } else {
+  //     _speakQuestion(_questions[_currentIndex]);
+  //   }
+  // }
 
   Future<void> _loadQuestions() async {
     try {
@@ -156,7 +155,7 @@ class _QuizScreenState extends ConsumerState<QuizScreen> with TickerProviderStat
       });
 
       _startTimer();
-      _speakQuestion(_questions[_currentIndex]);
+      // _speakQuestion(_questions[_currentIndex]);
     } catch (e) {
       if (mounted) {
         final l10n = AppLocalizations.of(context);
@@ -207,7 +206,7 @@ class _QuizScreenState extends ConsumerState<QuizScreen> with TickerProviderStat
     if (_hasAnswered) return;
 
     _timer?.cancel();
-    _flutterTts.stop();
+    // _flutterTts.stop();
     final question = _questions[_currentIndex];
     final isCorrect = index == question.correctOptionIndex;
     _playAnswerSound(isCorrect);
@@ -254,7 +253,7 @@ class _QuizScreenState extends ConsumerState<QuizScreen> with TickerProviderStat
           _selectedOptionIndex = null;
         });
         _startTimer();
-        _speakQuestion(_questions[_currentIndex]);
+        // _speakQuestion(_questions[_currentIndex]);
       } else {
         _finishQuiz();
       }
@@ -288,7 +287,7 @@ class _QuizScreenState extends ConsumerState<QuizScreen> with TickerProviderStat
   @override
   void dispose() {
     _timer?.cancel();
-    _flutterTts.stop();
+    // _flutterTts.stop();
     _audioPlayer.dispose();
     _timerAnimationController.dispose();
     _optionAnimationController.dispose();
@@ -728,17 +727,6 @@ class _QuizScreenState extends ConsumerState<QuizScreen> with TickerProviderStat
                       style: TextStyle(color: _getDifficultyColor(question.difficulty), fontWeight: FontWeight.w900, fontSize: 11, letterSpacing: 0.5),
                     ),
                   ],
-                ),
-              ),
-              const SizedBox(width: 8),
-              Container(
-                decoration: BoxDecoration(color: const Color(0xFF6B4CE6).withValues(alpha: 0.15), shape: BoxShape.circle),
-                child: IconButton(
-                  onPressed: _toggleMute,
-                  icon: Icon(_isMuted ? Icons.volume_off_rounded : Icons.volume_up_rounded, size: 20, color: _isMuted ? Colors.grey : const Color(0xFF6B4CE6)),
-                  tooltip: _isMuted ? AppLocalizations.of(context).unmute : AppLocalizations.of(context).mute,
-                  padding: const EdgeInsets.all(8),
-                  constraints: const BoxConstraints(),
                 ),
               ),
             ],
